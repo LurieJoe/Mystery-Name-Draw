@@ -81,7 +81,7 @@ function App() {
   <h3>Flexible Events</h3>
 
   <p>
-    Perfect for families, offices,
+    Perfect for families, offices, holiday parties
     clubs, classrooms, and community groups.
   </p>
 </div>
@@ -89,7 +89,7 @@ function App() {
 <div className="feature-card">
   <div className="feature-icon">📝</div>
 
-  <h3>Smart Matching</h3>
+  <h3>Thoughtful Exchanges</h3>
 
   <p>
     Supports wishlists, interests,
