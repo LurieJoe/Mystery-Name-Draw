@@ -1,0 +1,392 @@
+.create-event-page {
+    width: 100%;
+    padding: 3rem 2rem;
+    box-sizing: border-box;
+  }
+  
+  .wizard-header h1 {
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+  }
+  
+  .wizard-header p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+  }
+
+  .wizard-header h1 {
+    font-size: 2.25rem;
+  }
+  
+  .progress-bar {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  
+  .progress-fill {
+    width: 25%;
+    height: 100%;
+    background: #4f46e5;
+  }
+  
+  .wizard-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  
+  .wizard-card h2 {
+    color: #475569;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .wizard-card h3 {
+    margin-bottom: 0.25rem;
+  }
+
+  .wizard-card h3 {
+    color: #475569;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  
+  .step-description {
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+  
+  .wizard-card label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+  
+  .wizard-card input,
+  .wizard-card textarea {
+    padding: 0.9rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+  
+  .helper-text {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+  
+  .wizard-actions {
+    margin-top: 2rem;
+  }
+  
+  .primary-button {
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.9rem 1.5rem;
+    cursor: pointer;
+  }
+  
+  .primary-button:hover {
+    background: #4338ca;
+  }
+  .guest-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .signup-link {
+    flex: 1;
+    max-width: 600px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+  
+    border-radius: 10px;
+  
+    padding: 1rem;
+  
+    margin: 1rem 0;
+  
+    overflow-wrap: anywhere;
+
+  }
+
+  .link-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  
+    margin-top: 1rem;
+  }
+
+  .secondary-button {
+    background: transparent;
+  
+    border: 1px solid #cbd5e1;
+  
+    border-radius: 10px;
+  
+    padding: 0.9rem 1.5rem;
+  
+    cursor: pointer;
+  }
+  
+  .secondary-button:hover {
+    border-color: #4f46e5;
+  }
+  
+  .checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  
+    margin-top: 1rem;
+  }
+  
+  hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+  
+    margin: 2rem 0;
+  }
+
+  .participant-table-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+  
+    gap: 1rem;
+  
+    margin-top: 1rem;
+    padding-bottom: 0.75rem;
+  
+    border-bottom: 2px solid #e2e8f0;
+  
+    font-weight: 600;
+  }
+
+  .participant-note {
+    margin-top: 1rem;
+  
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .participants-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+  
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .participant-entry {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .participant-entry input {
+    max-width: 250px;
+  }
+  
+  .participants-table {
+    margin-top: 2rem;
+  }
+  
+  .participant-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+  
+    gap: 1rem;
+  
+    padding: 0.75rem 0;
+  
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .participants-right {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    height: 250px;
+  }
+  
+  .participant-logo {
+    width: 100%;
+    max-width: 320px;
+    object-fit: contain;
+  }
+  
+  .logo-helper {
+    margin-top: 1rem;
+    text-align: center;
+  }
+  
+  .signup-link {
+    max-width: 600px;
+  
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  
+    padding: 1rem;
+  
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+  }
+  
+  .checkbox-inline {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.5rem;
+
+    margin-bottom: 0.5rem;
+  }
+  
+  .invite-setting {
+    text-align: left;
+  }
+
+  .wizard-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+  
+    margin-top: 3rem;
+  }
+  
+.back-button,
+.continue-button {
+  background: #7c3aed;
+  color: white;
+
+  border: none;
+
+  padding: 1rem 2rem;
+
+  border-radius: 999px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+.wizard-card h2,
+.wizard-card h3 {
+  color: #475569;
+  font-size: 1.5rem;
+  font-weight: 600;
+
+  margin-bottom: 0.35rem;
+}
+
+.step-description,
+.participant-note,
+.helper-text {
+  margin-top: 0;
+}
+.participants-table h3,
+.shareable-link-section h3 {
+  margin-bottom: 0.35rem;
+}
+@media (prefers-color-scheme: dark) {
+
+    .wizard-card {
+      background: #1f2937;
+      border-color: #374151;
+    }
+  
+  }
+  @media (prefers-color-scheme: dark) {
+
+    .participant-entry input,
+    .signup-link {
+      background: #0f172a;
+      color: #f9fafb;
+      border: 1px solid #4b5563
+    }
+    .participant-entry input::placeholder {
+        color: #cbd5e1;
+      }
+
+  }
+  @media (prefers-color-scheme: dark) {
+
+    hr,
+    .participant-table-header {
+      border-color: #374151;
+    }
+  
+  }
+  @media (prefers-color-scheme: dark) {
+
+    .wizard-card h2,
+    .wizard-card h3 {
+      color: #f3f4f6;
+    }
+  
+    .participant-note,
+    .helper-text,
+    .step-description {
+      color: #d1d5db;
+    }
+  
+  }
+  @media (prefers-color-scheme: dark) {
+
+    .wizard-header h1 {
+      color: #f9fafb;
+    }
+  
+    .wizard-header p {
+      color: #d1d5db;
+    }
+  
+  }
+  @media (prefers-color-scheme: dark) {
+
+    .participant-table-header {
+      color: #f9fafb;
+      font-weight: 700;
+    }
+  
+  }
+  .participant-placeholder-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  
+    padding: 1.25rem 0;
+  }
+  
+  .placeholder-line {
+    height: 1px;
+    background: #475569;
+    opacity: 0.5;
+  }
+  @media (prefers-color-scheme: dark) {
+
+    .placeholder-line {
+      background: #64748b;
+    }
+  
+  }
+  .first-row {
+    margin-top: 1rem;
+  }
+  .email-header {
+    margin-left: 1.50rem;
+  }
