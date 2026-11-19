@@ -43,6 +43,7 @@
     color: #475569;
     font-size: 1.5rem;
     font-weight: 600;
+    font-family: system-ui, "Segoe UI", Roboto, sans-serif;
   }
   
   .wizard-card h3 {
@@ -53,6 +54,7 @@
     color: #475569;
     font-size: 1.5rem;
     font-weight: 600;
+    font-family: system-ui, "Segoe UI", Roboto, sans-serif;
   }
   
   
@@ -495,4 +497,15 @@
 [data-theme="light"] .add-row-button,
 [data-theme="light"] .clear-row-button {
   color: #1e293b;
+}
+.participant-table-header,
+.checkbox-inline,
+.helper-text,
+.participant-note,
+.step-description,
+.participant-row,
+.participant-entry-row,
+.signup-link,
+.wizard-card label {
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
 }

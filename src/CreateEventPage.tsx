@@ -6,7 +6,9 @@ function CreateEventPage() {
     const [participants, setParticipants] = useState<
   { name: string; email: string }[]
 >([]);
-const [theme, setTheme] = useState("dark");
+const [theme, setTheme] = useState(
+    localStorage.getItem("theme") || "dark"
+  );
 const [newName, setNewName] = useState("");
 const [newEmail, setNewEmail] = useState("");
 const addParticipant = () => {
@@ -48,6 +50,9 @@ const addParticipant = () => {
       "data-theme",
       theme
     );
+  }, [theme]);
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
   }, [theme]);
   return (
     <>
