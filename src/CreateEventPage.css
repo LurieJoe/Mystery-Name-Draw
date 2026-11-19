@@ -390,3 +390,52 @@
   .email-header {
     margin-left: 1.50rem;
   }
+  .participant-entry-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
+  
+    gap: 3rem;
+  
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .add-row-button {
+    width: 40px;
+    height: 40px;
+  
+    border: 1px solid #64748b;
+    border-radius: 999px;
+  
+    background: transparent;
+    color: inherit;
+  
+    cursor: pointer;
+  }
+  .clear-row-button {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #64748b;
+    border-radius: 999px;
+  
+    background: transparent;
+    color: inherit;
+    
+    cursor: pointer;
+  }
+  .participant-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .participant-actions button {
+    cursor: pointer;
+  }
+  [data-theme="dark"] .wizard-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  [data-theme="light"] .wizard-card {
+    background: white;
+    border-color: #e2e8f0;
+  }

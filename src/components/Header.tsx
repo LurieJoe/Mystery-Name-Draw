@@ -1,5 +1,13 @@
 import "./Header.css";
-function Header() {
+type HeaderProps = {
+    theme: string;
+    setTheme: (theme: string) => void;
+  };
+  
+  function Header({
+    theme,
+    setTheme,
+  }: HeaderProps) {
     return (
       <header className="header">
         <div className="header-brand">
@@ -16,9 +24,18 @@ function Header() {
         </nav>
   
         <div className="header-actions">
-          <button className="theme-button">
-            🌙
-          </button>
+        <button
+  className="theme-button"
+  onClick={() =>
+    setTheme(
+      theme === "dark"
+        ? "light"
+        : "dark"
+    )
+  }
+>
+  {theme === "dark" ? "☀️" : "🌙"}
+</button>
   
           <button className="signin-button">
             Sign In

@@ -1,10 +1,60 @@
+import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import "./CreateEventPage.css";
 
 function CreateEventPage() {
+    const [participants, setParticipants] = useState<
+  { name: string; email: string }[]
+>([]);
+const [theme, setTheme] = useState("dark");
+const [newName, setNewName] = useState("");
+const [newEmail, setNewEmail] = useState("");
+const addParticipant = () => {
+    if (!newName.trim() || !newEmail.trim()) {
+      return;
+    }
+  
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+    if (!emailRegex.test(newEmail.trim())) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+  
+    setParticipants([
+      ...participants,
+      {
+        name: newName.trim(),
+        email: newEmail.trim(),
+      },
+    ]);
+  
+    setNewName("");
+    setNewEmail("");
+  };
+  const editParticipant = (index: number) => {
+    const participant = participants[index];
+  
+    setNewName(participant.name);
+    setNewEmail(participant.email);
+  
+    setParticipants(
+      participants.filter((_, i) => i !== index)
+    );
+  };
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      "data-theme",
+      theme
+    );
+  }, [theme]);
   return (
     <>
-      <Header />
+      <Header
+  theme={theme}
+  setTheme={setTheme}
+/>
 
       <div className="create-event-page">
         <div className="wizard-header">
@@ -25,41 +75,15 @@ function CreateEventPage() {
   <h2>Invite Participants</h2>
 
   <p className="step-description">
-    Add people you'd like to invite to your gift exchange.
+    Every participant added here is entered into the gift exchange upon registration.
+
   </p>
 
   <div className="participants-layout">
 
     <div className="participants-left">
 
-      <div className="participant-entry">
-
-        <input
-          type="text"
-          placeholder="Participant Name"
-        />
-
-        <input
-          type="email"
-          placeholder="Email Address"
-        />
-
-        <button
-          type="button"
-          className="secondary-button"
-        >
-          + Add Participant
-        </button>
-
-      </div>
-
       <div className="participants-table">
-
-      <h3>Participants</h3>
-
-<p className="participant-note">
-  Every participant added here is entered into the gift exchange.
-</p>
 
 <div className="participant-table-header">
   <span>Name</span>
@@ -68,15 +92,80 @@ function CreateEventPage() {
   </span>
   <span></span>
 </div>
-<div className="participant-placeholder-row">
-  <div className="placeholder-line"></div>
-  <div className="placeholder-line"></div>
-</div>
+<div className="participant-entry-row">
 
-<div className="participant-placeholder-row">
-  <div className="placeholder-line"></div>
-  <div className="placeholder-line"></div>
+<input
+  type="text"
+  placeholder="Participant Name"
+  value={newName}
+  onChange={(e) => setNewName(e.target.value)}
+/>
+
+<input
+  type="email"
+  placeholder="Email Address"
+  value={newEmail}
+  onChange={(e) => setNewEmail(e.target.value)}
+/>
+
+<button
+  type="button"
+  className="clear-row-button"
+  title="Clear entry"
+  onClick={() => {
+    setNewName("");
+    setNewEmail("");
+  }}
+>
+  x
+</button>
+
+<button
+  type="button"
+  className="add-row-button"
+  title="Add participant"
+  onClick={addParticipant}
+>
+  +
+</button>
+
+
 </div>
+{participants.map((participant, index) => (
+  <div
+    key={index}
+    className="participant-row"
+  >
+    <span>{participant.name}</span>
+
+    <span>{participant.email}</span>
+
+    <div className="participant-actions">
+
+      <button
+        type="button"
+        title="Edit participant's name or email address"
+        onClick={() => editParticipant(index)}
+      >
+        ✏️
+      </button>
+
+      <button
+        type="button"
+        title="Remove participant"
+        onClick={() =>
+          setParticipants(
+            participants.filter((_, i) => i !== index)
+          )
+        }
+      >
+        ×
+      </button>
+
+    </div>
+
+  </div>
+))}
 
 <div className="participant-placeholder-row">
   <div className="placeholder-line"></div>
