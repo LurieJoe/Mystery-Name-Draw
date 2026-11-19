@@ -11,6 +11,7 @@ const [theme, setTheme] = useState(
   );
 const [newName, setNewName] = useState("");
 const [newEmail, setNewEmail] = useState("");
+const [copied, setCopied] = useState(false);
 const addParticipant = () => {
     if (!newName.trim() || !newEmail.trim()) {
       return;
@@ -44,6 +45,17 @@ const addParticipant = () => {
     setParticipants(
       participants.filter((_, i) => i !== index)
     );
+  };
+  const copyLink = async () => {
+    await navigator.clipboard.writeText(
+      "https://mysterynamedraw.com/join/example"
+    );
+  
+    setCopied(true);
+  
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
   useEffect(() => {
     document.documentElement.setAttribute(
@@ -208,11 +220,12 @@ const addParticipant = () => {
   </div>
 
   <button
-    type="button"
-    className="secondary-button"
-  >
-    Copy Link
-  </button>
+  type="button"
+  className="secondary-button"
+  onClick={copyLink}
+>
+  {copied ? "✓ Copied!" : "Copy Link"}
+</button>
 
   </div>
 
