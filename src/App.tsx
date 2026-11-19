@@ -5,8 +5,3 @@ function App() {
 }
 
 export default App;
-const [theme, setTheme] = useState("dark");
-document.documentElement.setAttribute(
-  "data-theme",
-  theme
-);
