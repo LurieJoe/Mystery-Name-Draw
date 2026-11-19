@@ -46,26 +46,30 @@
   background: white;
   cursor: pointer;
 }
-@media (prefers-color-scheme: dark) {
+[data-theme="dark"] .header {
+  background: #111827;
+  border-bottom-color: #374151;
+}
 
-  .header {
-    background: #111827;
-    border-bottom-color: #374151;
-  }
+[data-theme="dark"] .nav a {
+  color: #d1d5db;
+}
 
-  .nav a {
-    color: #d1d5db;
-  }
+[data-theme="dark"] .nav a:hover {
+  color: #8b5cf6;
+}
 
-  .nav a:hover {
-    color: #8b5cf6;
-  }
-
-  .theme-button,
-  .signin-button {
-    background: #1f2937;
-    border-color: #374151;
-    color: #f9fafb;
-  }
-
+[data-theme="dark"] .theme-button,
+[data-theme="dark"] .signin-button {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+[data-theme="light"] .signin-button {
+  color: #1e293b;
+  background: white;
+}
+[data-theme="light"] .signin-button {
+  background: white;
+  color: #1e293b;
 }
