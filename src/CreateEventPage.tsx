@@ -12,6 +12,7 @@ const [theme, setTheme] = useState(
 const [newName, setNewName] = useState("");
 const [newEmail, setNewEmail] = useState("");
 const [copied, setCopied] = useState(false);
+const [currentStep, setCurrentStep] = useState(1);
 const addParticipant = () => {
     if (!newName.trim() || !newEmail.trim()) {
       return;
@@ -74,6 +75,8 @@ const addParticipant = () => {
 />
 
       <div className="create-event-page">
+      {currentStep === 1 && (
+        <>
         <div className="wizard-header">
           <h1>Start a Gift Exchange</h1>
 
@@ -256,8 +259,112 @@ const addParticipant = () => {
     </button>
 
     <button
+  type="button"
+  className="continue-button"
+  onClick={() => setCurrentStep(2)}
+>
+  Continue →
+</button>
+
+  </div>
+
+</div>
+</>
+)}
+{currentStep === 2 && (
+
+<div className="wizard-card">
+
+  <h2>Exchange Settings</h2>
+
+  <p className="step-description">
+    Configure important details for your gift exchange.
+  </p>
+
+  <label>
+    Registration Deadline
+    <input type="date" />
+  </label>
+
+  <label>
+    Name Draw Date
+    <input type="date" />
+  </label>
+
+  <label>
+    Suggested Gift Budget
+    <input
+      type="number"
+      placeholder="25"
+    />
+  </label>
+
+  <label className="checkbox-inline">
+    <input type="checkbox" />
+    No Gift Limit
+  </label>
+
+  <hr />
+
+  <label className="checkbox-inline">
+    <input
+      type="checkbox"
+      defaultChecked
+    />
+    I am participating in this exchange
+  </label>
+
+  <hr />
+
+  <h3>Reminders</h3>
+
+  <label className="radio-option">
+    <input
+      type="radio"
+      name="reminders"
+      defaultChecked
+    />
+    Send both reminders (Recommended)
+  </label>
+
+  <label className="radio-option">
+    <input
+      type="radio"
+      name="reminders"
+    />
+    Registration deadline only
+  </label>
+
+  <label className="radio-option">
+    <input
+      type="radio"
+      name="reminders"
+    />
+    Name draw date only
+  </label>
+
+  <label className="radio-option">
+    <input
+      type="radio"
+      name="reminders"
+    />
+    Do not send reminders
+  </label>
+
+  <div className="wizard-navigation">
+
+    <button
+      type="button"
+      className="back-button"
+      onClick={() => setCurrentStep(1)}
+    >
+      ← Back
+    </button>
+
+    <button
       type="button"
       className="continue-button"
+      onClick={() => setCurrentStep(3)}
     >
       Continue →
     </button>
@@ -265,6 +372,53 @@ const addParticipant = () => {
   </div>
 
 </div>
+
+)}
+
+{currentStep === 3 && (
+
+<div className="wizard-card">
+
+  <h2>Review & Create</h2>
+
+  <p className="step-description">
+    Review your exchange before creating it.
+  </p>
+
+  <p>
+    Participants: {participants.length}
+  </p>
+
+  <p>
+    Registration Deadline: Not set
+  </p>
+
+  <p>
+    Name Draw Date: Not set
+  </p>
+
+  <div className="wizard-navigation">
+
+    <button
+      type="button"
+      className="back-button"
+      onClick={() => setCurrentStep(2)}
+    >
+      ← Back
+    </button>
+
+    <button
+      type="button"
+      className="continue-button"
+    >
+      Create Gift Exchange
+    </button>
+
+  </div>
+
+</div>
+
+)}
 
       </div>
     </>

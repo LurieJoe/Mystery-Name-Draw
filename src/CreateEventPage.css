@@ -509,3 +509,11 @@
 .wizard-card label {
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
 }
+.radio-option {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem;
+
+  margin-top: 0.75rem;
+}
