@@ -239,44 +239,6 @@ const addParticipant = () => {
 
   <hr />
 
-  <h3>Shareable Sign-Up Link</h3>
-
-  <p className="helper-text">
-    Share this link with anyone else you'd like to invite to join your gift exchange via messaging or social media.
-  </p>
-
-  <div className="link-row">
-  <div className="signup-link">
-    https://mysterynamedraw.com/join/example
-  </div>
-
-  <button
-  type="button"
-  className="secondary-button"
-  onClick={copyLink}
->
-  {copied ? "✓ Copied!" : "Copy Link"}
-</button>
-
-  </div>
-
-  <hr />
-  <div className="invite-setting">
-  <label className="checkbox-inline">
-    <input
-      type="checkbox"
-      defaultChecked
-    />
-    <span>Allow participants to invite others</span>
-  </label>
-
-  <p className="helper-text">
-    Participants may share the sign-up link and invite
-    additional people to join the exchange.
-  </p>
-</div>
-
-
   <div className="wizard-navigation">
 
     <button
@@ -590,38 +552,6 @@ const addParticipant = () => {
 </div>
 
 </div>
-<div className="tips-panel">
-
-  <h3>Tips for a Successful Gift Exchange</h3>
-
-  <div className="tips-grid">
-
-  <div className="tip-item">
-    🎁 Stay within the agreed exchange budget.
-  </div>
-
-  <div className="tip-item">
-    📝 Complete wishlists before the draw.
-  </div>
-
-  <div className="tip-item">
-    🎯 Use interests and preferences to choose thoughtful gifts.
-  </div>
-
-  <div className="tip-item">
-    🎲 Decide whether this is a traditional exchange or a Yankee Swap event.
-  </div>
-
-  <div className="tip-item">
-    ⏳ Give participants enough shopping time after the draw date.
-  </div>
-
-  <div className="tip-item">
-    🎉 Most importantly... have fun!
-  </div>
-
-</div>
-</div>
 
   <div className="wizard-navigation">
 
@@ -659,93 +589,6 @@ const addParticipant = () => {
     Your gift exchange is ready. Share the registration link below and invite participants.
   </p>
 
-  <div className="review-layout">
-
-    <div className="review-grid">
-
-      <div className="review-card">
-        <div className="review-label">
-          Participants
-        </div>
-
-        <div className="review-value">
-          {participants.length}
-        </div>
-      </div>
-
-      <div className="review-card">
-        <div className="review-label">
-          Draw Date
-        </div>
-
-        <div className="review-value">
-          {formatDate(drawDate)}
-        </div>
-      </div>
-
-      <div className="review-card">
-        <div className="review-label">
-          Registration Deadline
-        </div>
-
-        <div className="review-value">
-          {formatDate(registrationDeadline)}
-        </div>
-      </div>
-
-      <div className="review-card">
-        <div className="review-label">
-          Currency
-        </div>
-
-        <div className="review-value">
-          {currency}
-        </div>
-      </div>
-
-      <div className="review-card">
-        <div className="review-label">
-          Budget
-        </div>
-
-        <div className="review-value">
-          {noGiftLimit
-            ? "No Limit"
-            : `$${giftBudget}`}
-        </div>
-      </div>
-
-      <div className="review-card">
-        <div className="review-label">
-          Reminders
-        </div>
-
-        <div className="review-value">
-          {
-            reminderPreference === "both"
-              ? "Registration & Draw Date"
-              : reminderPreference === "registration"
-              ? "Registration Only"
-              : reminderPreference === "draw"
-              ? "Draw Date Only"
-              : "None"
-          }
-        </div>
-      </div>
-
-    </div>
-
-    <div className="review-logo">
-
-      <img
-        src="/images/logo-primary-v1.png"
-        alt="Mystery Name Draw"
-        className="participant-logo"
-      />
-
-    </div>
-
-  </div>
 
   <hr />
 
@@ -756,7 +599,6 @@ const addParticipant = () => {
     <div className="signup-link">
       https://mysterynamedraw.com/join/example
     </div>
-
     <button
       type="button"
       className="secondary-button"
@@ -764,6 +606,54 @@ const addParticipant = () => {
     >
       {copied ? "✓ Copied!" : "Copy Link"}
     </button>
+    <div className="invite-setting">
+
+    <label className="checkbox-inline">
+  <input
+    type="checkbox"
+    defaultChecked
+  />
+  Allow participants to invite others
+</label>
+
+<p className="helper-text">
+  Participants may share the registration link and invite additional people to join the exchange.
+</p>
+</div>
+</div>
+<hr />
+<div className="tips-panel">
+
+<h3>Tips for a Successful Gift Exchange</h3>
+
+<div className="tips-grid">
+
+<div className="tip-item">
+🎁 Stay within the agreed exchange budget.
+</div>
+
+<div className="tip-item">
+📝 Complete wishlists before the draw.
+</div>
+
+<div className="tip-item">
+🎯 Use interests and preferences to choose thoughtful gifts.
+</div>
+
+<div className="tip-item">
+🎲 Decide whether this is a traditional exchange or a Yankee Swap event.
+</div>
+
+<div className="tip-item">
+⏳ Give participants enough shopping time after the draw date.
+</div>
+
+<div className="tip-item">
+🎉 Most importantly... have fun!
+</div>
+
+</div>
+  
 
   </div>
 
