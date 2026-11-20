@@ -13,7 +13,11 @@ const [newName, setNewName] = useState("");
 const [newEmail, setNewEmail] = useState("");
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
+const [exchangeCreated, setExchangeCreated] = useState(false);
 const [currency, setCurrency] = useState("USD");
+const [registrationDateTouched,
+  setRegistrationDateTouched] =
+  useState(false);
 const [registrationDeadline, setRegistrationDeadline] =
   useState("");
 
@@ -25,9 +29,6 @@ const [giftBudget, setGiftBudget] =
 
 const [noGiftLimit, setNoGiftLimit] =
   useState(false);
-
-const [organizerParticipates, setOrganizerParticipates] =
-  useState(true);
 
 const [reminderPreference, setReminderPreference] =
   useState("both");
@@ -76,6 +77,11 @@ const addParticipant = () => {
       setCopied(false);
     }, 2000);
   };
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Not set";
+  
+    return new Date(dateString).toLocaleDateString();
+  };
   useEffect(() => {
     document.documentElement.setAttribute(
       "data-theme",
@@ -85,6 +91,10 @@ const addParticipant = () => {
   useEffect(() => {
     localStorage.setItem("theme", theme);
   }, [theme]);
+  const registrationDateValid =
+  !registrationDeadline ||
+  !drawDate ||
+  registrationDeadline <= drawDate;
   return (
     <>
       <Header
@@ -293,33 +303,75 @@ const addParticipant = () => {
 
 <div className="wizard-card">
 
-  <h2>Exchange Settings</h2>
+  <h2>Gift Exchange Settings</h2>
 
   <p className="step-description">
     Configure important details for your gift exchange.
   </p>
+  <div className="settings-layout">
 
-  <label>
-    Registration Deadline
-    <input
-  type="date"
-  value={registrationDeadline}
-  onChange={(e) =>
-    setRegistrationDeadline(e.target.value)
-  }
-/>
+  <div className="settings-left">
+
+<div className="date-row">
+
+  <div className="date-field">
+
+<label>
+  Name Draw Date
+  <input
+    type="date"
+    value={drawDate}
+    onChange={(e) => {
+      const draw = e.target.value;
+
+      setDrawDate(draw);
+
+      if (!registrationDateTouched && draw) {
+        const drawDateObj = new Date(draw);
+
+        drawDateObj.setDate(
+          drawDateObj.getDate() - 5
+        );
+
+        const registrationDate =
+          drawDateObj
+            .toISOString()
+            .split("T")[0];
+
+        setRegistrationDeadline(
+          registrationDate
+        );
+      }
+    }}
+  />
+</label>
+</div>
+
+<div className="date-field">
+
+<label>
+  Registration Deadline
+
+  <input
+    type="date"
+    value={registrationDeadline}
+    onChange={(e) => {
+      setRegistrationDeadline(e.target.value);
+      setRegistrationDateTouched(true);
+    }}
+  />
   </label>
 
-  <label>
-    Name Draw Date
-    <input
-  type="date"
-  value={drawDate}
-  onChange={(e) =>
-    setDrawDate(e.target.value)
-  }
-/>
-  </label>
+  {!registrationDateValid && (
+    <p className="validation-error">
+      Registration deadline must occur or before the draw date.
+    </p>
+  )}
+
+</div>
+
+
+</div>
 
   <h3>Gift Budget</h3>
 
@@ -363,18 +415,6 @@ const addParticipant = () => {
 
 </div>
 
-  <hr />
-
-  <label className="checkbox-inline">
-  <input
-    type="checkbox"
-    checked={organizerParticipates}
-    onChange={(e) =>
-      setOrganizerParticipates(e.target.checked)
-    }
-  />
-  I am participating in this exchange
-</label>
 
   <hr />
 
@@ -423,6 +463,8 @@ const addParticipant = () => {
 
   <div className="wizard-navigation">
 
+
+
     <button
       type="button"
       className="back-button"
@@ -432,16 +474,28 @@ const addParticipant = () => {
     </button>
 
     <button
-      type="button"
-      className="continue-button"
-      onClick={() => setCurrentStep(3)}
-    >
-      Continue →
-    </button>
-
+  type="button"
+  className="continue-button"
+  onClick={() => setCurrentStep(3)}
+  disabled={!registrationDateValid}
+>
+  Continue →
+</button>
+</div>
   </div>
 
+<div className="settings-right">
+
+  <img
+    src="/images/logo-primary-v1.png"
+    alt="Mystery Name Draw"
+    className="settings-logo"
+  />
+
 </div>
+
+</div>
+ </div> 
 
 )}
 
@@ -451,21 +505,123 @@ const addParticipant = () => {
 
   <h2>Review & Create</h2>
 
-  <p className="step-description">
-    Review your exchange before creating it.
-  </p>
+  <div className="review-layout">
 
-  <p>
-    Participants: {participants.length}
-  </p>
+<div className="review-grid">
 
-  <p>
-    Registration Deadline: Not set
-  </p>
+  <div className="review-card">
+    <div className="review-label">
+      Participants
+    </div>
 
-  <p>
-    Name Draw Date: Not set
-  </p>
+    <div className="review-value">
+      {participants.length}
+    </div>
+  </div>
+
+  <div className="review-card">
+    <div className="review-label">
+      Draw Date
+    </div>
+
+    <div className="review-value">
+      {formatDate(drawDate)}
+    </div>
+  </div>
+
+  <div className="review-card">
+    <div className="review-label">
+      Registration Deadline
+    </div>
+
+    <div className="review-value">
+      {formatDate(registrationDeadline)}
+    </div>
+  </div>
+
+  <div className="review-card">
+    <div className="review-label">
+      Currency
+    </div>
+
+    <div className="review-value">
+      {currency}
+    </div>
+  </div>
+
+  <div className="review-card">
+    <div className="review-label">
+      Budget
+    </div>
+
+    <div className="review-value">
+      {noGiftLimit
+        ? "No Limit"
+        : `$${giftBudget}`}
+    </div>
+  </div>
+
+  <div className="review-card">
+    <div className="review-label">
+      Send Reminders
+    </div>
+
+    <div className="review-value">
+    {
+  reminderPreference === "both"
+    ? "Registration Deadline & Draw Date"
+    : reminderPreference === "registration"
+    ? "Registration Deadline"
+    : reminderPreference === "draw"
+    ? "Draw Date"
+    : "Do not send reminders"
+}
+    </div>
+  </div>
+
+</div>
+
+<div className="review-logo">
+  <img
+    src="/images/logo-primary-v1.png"
+    alt="Mystery Name Draw"
+    className="participant-logo"
+  />
+</div>
+
+</div>
+<div className="tips-panel">
+
+  <h3>Tips for a Successful Gift Exchange</h3>
+
+  <div className="tips-grid">
+
+  <div className="tip-item">
+    🎁 Stay within the agreed exchange budget.
+  </div>
+
+  <div className="tip-item">
+    📝 Complete wishlists before the draw.
+  </div>
+
+  <div className="tip-item">
+    🎯 Use interests and preferences to choose thoughtful gifts.
+  </div>
+
+  <div className="tip-item">
+    🎲 Decide whether this is a traditional exchange or a Yankee Swap event.
+  </div>
+
+  <div className="tip-item">
+    ⏳ Give participants enough shopping time after the draw date.
+  </div>
+
+  <div className="tip-item">
+    🎉 Most importantly... have fun!
+  </div>
+
+</div>
+</div>
 
   <div className="wizard-navigation">
 
@@ -474,14 +630,161 @@ const addParticipant = () => {
       className="back-button"
       onClick={() => setCurrentStep(2)}
     >
-      ← Back
+      ← Edit Gift Exchange Details
+    </button>
+
+    <button
+  type="button"
+  className="continue-button"
+  onClick={() => {
+    setExchangeCreated(true);
+    setCurrentStep(4);
+  }}
+>
+  Create Gift Exchange
+</button>
+
+  </div>
+
+</div>
+
+)}
+{currentStep === 4 && (
+
+<div className="wizard-card">
+
+  <h2>✅ Gift Exchange Created</h2>
+
+  <p className="step-description">
+    Your gift exchange is ready. Share the registration link below and invite participants.
+  </p>
+
+  <div className="review-layout">
+
+    <div className="review-grid">
+
+      <div className="review-card">
+        <div className="review-label">
+          Participants
+        </div>
+
+        <div className="review-value">
+          {participants.length}
+        </div>
+      </div>
+
+      <div className="review-card">
+        <div className="review-label">
+          Draw Date
+        </div>
+
+        <div className="review-value">
+          {formatDate(drawDate)}
+        </div>
+      </div>
+
+      <div className="review-card">
+        <div className="review-label">
+          Registration Deadline
+        </div>
+
+        <div className="review-value">
+          {formatDate(registrationDeadline)}
+        </div>
+      </div>
+
+      <div className="review-card">
+        <div className="review-label">
+          Currency
+        </div>
+
+        <div className="review-value">
+          {currency}
+        </div>
+      </div>
+
+      <div className="review-card">
+        <div className="review-label">
+          Budget
+        </div>
+
+        <div className="review-value">
+          {noGiftLimit
+            ? "No Limit"
+            : `$${giftBudget}`}
+        </div>
+      </div>
+
+      <div className="review-card">
+        <div className="review-label">
+          Reminders
+        </div>
+
+        <div className="review-value">
+          {
+            reminderPreference === "both"
+              ? "Registration & Draw Date"
+              : reminderPreference === "registration"
+              ? "Registration Only"
+              : reminderPreference === "draw"
+              ? "Draw Date Only"
+              : "None"
+          }
+        </div>
+      </div>
+
+    </div>
+
+    <div className="review-logo">
+
+      <img
+        src="/images/logo-primary-v1.png"
+        alt="Mystery Name Draw"
+        className="participant-logo"
+      />
+
+    </div>
+
+  </div>
+
+  <hr />
+
+  <h3>Registration Link</h3>
+
+  <div className="link-row">
+
+    <div className="signup-link">
+      https://mysterynamedraw.com/join/example
+    </div>
+
+    <button
+      type="button"
+      className="secondary-button"
+      onClick={copyLink}
+    >
+      {copied ? "✓ Copied!" : "Copy Link"}
+    </button>
+
+  </div>
+
+  <div className="wizard-navigation">
+
+    <button
+      type="button"
+      className="back-button"
+      onClick={() => {
+        setExchangeCreated(false);
+        setCurrentStep(3);
+      }}
+    >
+      ← Edit Exchange
     </button>
 
     <button
       type="button"
       className="continue-button"
     >
-      Create Gift Exchange
+      Send Invitations →
     </button>
 
   </div>
