@@ -517,3 +517,18 @@
 
   margin-top: 0.75rem;
 }
+.budget-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.budget-row select {
+  width: 140px;
+}
+
+.budget-row input[type="number"] {
+  width: 120px;
+}

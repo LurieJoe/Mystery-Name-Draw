@@ -13,6 +13,24 @@ const [newName, setNewName] = useState("");
 const [newEmail, setNewEmail] = useState("");
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
+const [currency, setCurrency] = useState("USD");
+const [registrationDeadline, setRegistrationDeadline] =
+  useState("");
+
+const [drawDate, setDrawDate] =
+  useState("");
+
+const [giftBudget, setGiftBudget] =
+  useState("");
+
+const [noGiftLimit, setNoGiftLimit] =
+  useState(false);
+
+const [organizerParticipates, setOrganizerParticipates] =
+  useState(true);
+
+const [reminderPreference, setReminderPreference] =
+  useState("both");
 const addParticipant = () => {
     if (!newName.trim() || !newEmail.trim()) {
       return;
@@ -283,71 +301,123 @@ const addParticipant = () => {
 
   <label>
     Registration Deadline
-    <input type="date" />
+    <input
+  type="date"
+  value={registrationDeadline}
+  onChange={(e) =>
+    setRegistrationDeadline(e.target.value)
+  }
+/>
   </label>
 
   <label>
     Name Draw Date
-    <input type="date" />
-  </label>
-
-  <label>
-    Suggested Gift Budget
     <input
-      type="number"
-      placeholder="25"
-    />
+  type="date"
+  value={drawDate}
+  onChange={(e) =>
+    setDrawDate(e.target.value)
+  }
+/>
   </label>
 
-  <label className="checkbox-inline">
-    <input type="checkbox" />
-    No Gift Limit
-  </label>
+  <h3>Gift Budget</h3>
 
-  <hr />
+<div className="budget-row">
+
+<select
+  value={currency}
+  onChange={(e) =>
+    setCurrency(e.target.value)
+  }
+  disabled={noGiftLimit}
+>
+
+    <option value="USD">USD ($)</option>
+    <option value="CAD">CAD ($)</option>
+    <option value="GBP">GBP (£)</option>
+    <option value="EUR">EUR (€)</option>
+    <option value="AUD">AUD ($)</option>
+  </select>
+
+  <input
+    type="number"
+    placeholder="25"
+    value={giftBudget}
+    onChange={(e) =>
+      setGiftBudget(e.target.value)
+    }
+    disabled={noGiftLimit}
+  />
 
   <label className="checkbox-inline">
     <input
       type="checkbox"
-      defaultChecked
+      checked={noGiftLimit}
+      onChange={(e) =>
+        setNoGiftLimit(e.target.checked)
+      }
     />
-    I am participating in this exchange
+    No Gift Limit
   </label>
+
+</div>
+
+  <hr />
+
+  <label className="checkbox-inline">
+  <input
+    type="checkbox"
+    checked={organizerParticipates}
+    onChange={(e) =>
+      setOrganizerParticipates(e.target.checked)
+    }
+  />
+  I am participating in this exchange
+</label>
 
   <hr />
 
   <h3>Reminders</h3>
 
   <label className="radio-option">
-    <input
-      type="radio"
-      name="reminders"
-      defaultChecked
-    />
+  <input
+  type="radio"
+  name="reminders"
+  checked={reminderPreference === "both"}
+  onChange={() => setReminderPreference("both")}
+/>
     Send both reminders (Recommended)
   </label>
 
   <label className="radio-option">
-    <input
-      type="radio"
-      name="reminders"
-    />
+  <input
+  type="radio"
+  name="reminders"
+  checked={reminderPreference === "registration"}
+  onChange={() => setReminderPreference("registration")}
+/>
     Registration deadline only
   </label>
 
   <label className="radio-option">
-    <input
-      type="radio"
-      name="reminders"
-    />
+  <input
+  type="radio"
+  name="reminders"
+  checked={reminderPreference === "draw"}
+  onChange={() => setReminderPreference("draw")}
+/>
     Name draw date only
   </label>
 
   <label className="radio-option">
-    <input
-      type="radio"
-      name="reminders"
-    />
+  <input
+  type="radio"
+  name="reminders"
+  checked={reminderPreference === "none"}
+  onChange={() => setReminderPreference("none")}
+/>
+
     Do not send reminders
   </label>
 
