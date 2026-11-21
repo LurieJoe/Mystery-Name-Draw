@@ -217,9 +217,14 @@
   
     padding: 0.75rem 0;
   
+    // border-bottom: 1px solid #e2e8f0;
+  }
+
+  .participant-row span {
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid #e2e8f0;
   }
-  
+
   .participants-right {
     display: flex;
     align-items: flex-start;
@@ -358,37 +363,17 @@
     }
   
   }
-  .participant-placeholder-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-  
-    padding: 1.25rem 0;
-  }
-  
-  .placeholder-line {
-    height: 1px;
-    background: #475569;
-    opacity: 0.5;
-  }
-  @media (prefers-color-scheme: dark) {
-
-    .placeholder-line {
-      background: #64748b;
-    }
-  
-  }
   .first-row {
     margin-top: 1rem;
   }
   .email-header {
-    margin-left: 1.50rem;
+    margin-left: 0rem;
   }
   .participant-entry-row {
     display: grid;
     grid-template-columns: 1fr 1fr auto auto;
   
-    gap: 3rem;
+    gap: 2rem;
   
     margin-top: 1.5rem;
     margin-bottom: 1rem;
@@ -777,4 +762,23 @@
 .created-participants li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #cbd5e1;
+}
+[data-theme="dark"] .participant-row,
+[data-theme="dark"] .participant-row span {
+  color: #f3f4f6;
+}
+.participant-entry-row input[type="email"] {
+  margin-left: 50px;
+}
+
+.participant-row span:nth-child(2) {
+  margin-left: 30px;
+}
+
+.participant-placeholder-row .placeholder-line:nth-child(2) {
+  margin-left: 0px;
+}
+[data-theme="light"] .participant-table-header,
+[data-theme="light"] .participant-table-header span {
+  color: #475569;
 }

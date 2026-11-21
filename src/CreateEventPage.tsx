@@ -15,6 +15,8 @@ const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
 const [exchangeCreated, setExchangeCreated] = useState(false);
 const [currency, setCurrency] = useState("USD");
+const [editingIndex, setEditingIndex] =
+  useState<number | null>(null);
 const [registrationDateTouched,
   setRegistrationDateTouched] =
   useState(false);
@@ -45,13 +47,26 @@ const addParticipant = () => {
       return;
     }
   
-    setParticipants([
-      ...participants,
-      {
-        name: newName.trim(),
-        email: newEmail.trim(),
-      },
-    ]);
+    const updatedParticipant = {
+      name: newName.trim(),
+      email: newEmail.trim(),
+    };
+    
+    if (editingIndex !== null) {
+      const updatedParticipants = [...participants];
+    
+      updatedParticipants[editingIndex] =
+        updatedParticipant;
+    
+      setParticipants(updatedParticipants);
+    
+      setEditingIndex(null);
+    } else {
+      setParticipants([
+        ...participants,
+        updatedParticipant,
+      ]);
+    }
   
     setNewName("");
     setNewEmail("");
@@ -62,9 +77,7 @@ const addParticipant = () => {
     setNewName(participant.name);
     setNewEmail(participant.email);
   
-    setParticipants(
-      participants.filter((_, i) => i !== index)
-    );
+    setEditingIndex(index);
   };
   const copyLink = async () => {
     await navigator.clipboard.writeText(
@@ -214,6 +227,7 @@ const addParticipant = () => {
 
   </div>
 ))}
+
 
 <div className="participant-placeholder-row">
   <div className="placeholder-line"></div>
