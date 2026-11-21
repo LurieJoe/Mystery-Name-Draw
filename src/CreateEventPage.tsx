@@ -18,6 +18,8 @@ const [exchangeCreated, setExchangeCreated] = useState(false);
 const [currency, setCurrency] = useState("USD");
 const [eventCode, setEventCode] = useState("");
 const [registrationOpen, setRegistrationOpen] = useState(true);
+const [emailBody, setEmailBody] = useState("");
+const [emailSubject, setEmailSubject] = useState("");
 const [editingIndex, setEditingIndex] =
   useState<number | null>(null);
 const [registrationDateTouched,
@@ -84,7 +86,7 @@ const addParticipant = () => {
   };
   const copyLink = async () => {
     await navigator.clipboard.writeText(
-      "https://mysterynamedraw.com/event/${eventCode}"
+      `https://mysterynamedraw.com/event/${eventCode}`
     );
   
     setCopied(true);
@@ -96,7 +98,14 @@ const addParticipant = () => {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Not set";
   
-    return new Date(dateString).toLocaleDateString();
+    const [year, month, day] =
+      dateString.split("-").map(Number);
+  
+    return new Date(
+      year,
+      month - 1,
+      day
+    ).toLocaleDateString();
   };
   useEffect(() => {
     document.documentElement.setAttribute(
@@ -125,27 +134,62 @@ const addParticipant = () => {
   
     return code;
   };
+  const resetExchange = () => {
+    setEventName("");
+    setDrawDate("");
+    setRegistrationDeadline("");
+    setGiftBudget("");
+    setCurrency("USD");
+  
+    setNoGiftLimit(false);
+    setReminderPreference("both");
+  
+    setEventCode("");
+    setExchangeCreated(false);
+    setCopied(false);
+  
+    setRegistrationOpen(true);
+  
+    setCurrentStep(1);
+  };
   return (
     <>
       <Header
   theme={theme}
   setTheme={setTheme}
+  onStartExchange={() => {
+
+    const hasExchangeData =
+      eventName.trim() ||
+      drawDate ||
+      registrationDeadline ||
+      giftBudget ||
+      eventCode;
+
+    if (hasExchangeData) {
+
+      const confirmed = window.confirm(
+        "Start a new gift exchange?\n\n" +
+        "This will clear the current gift exchange and all unsaved changes."
+      );
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    resetExchange();
+  }}
 />
 
       <div className="create-event-page">
+      {/*
       {currentStep === 1 && (
         <>
         <div className="wizard-header">
           <h1>Start a Gift Exchange</h1>
 
           <p>Step 1 of 3</p>
-        </div>
-
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: "33.33%" }}
-          ></div>
         </div>
 
         <div className="wizard-card">
@@ -292,9 +336,16 @@ const addParticipant = () => {
 </div>
 </>
 )}
-{currentStep === 2 && (
+*/}
+{currentStep === 1 && (
+<>
+  <div className="wizard-header">
+    <h1>Start a Gift Exchange</h1>
+    <p>Step 1 of 3</p>
+  </div>
 
-<div className="wizard-card">
+  <div className="wizard-card">
+
 
   <h2>Gift Exchange Settings</h2>
 
@@ -486,7 +537,7 @@ const addParticipant = () => {
     <button
   type="button"
   className="continue-button"
-  onClick={() => setCurrentStep(3)}
+  onClick={() => setCurrentStep(2)}
   disabled={!registrationDateValid}
 >
   Continue →
@@ -505,11 +556,11 @@ const addParticipant = () => {
 </div>
 
 </div>
- </div> 
-
+</div>
+</>
 )}
 
-{currentStep === 3 && (
+{currentStep === 2 && (
 
 <div className="wizard-card">
 
@@ -519,15 +570,15 @@ const addParticipant = () => {
 
 <div className="review-grid">
 
-  <div className="review-card">
-    <div className="review-label">
-      Participants
-    </div>
-
-    <div className="review-value">
-      {participants.length}
-    </div>
+<div className="review-card review-name-card">
+  <div className="review-label">
+    Gift Exchange Name
   </div>
+
+  <div className="review-value">
+    {eventName || "Not Set"}
+  </div>
+</div>
 
   <div className="review-card">
     <div className="review-label">
@@ -541,33 +592,23 @@ const addParticipant = () => {
 
   <div className="review-card">
     <div className="review-label">
-      Registration Deadline
-    </div>
-
-    <div className="review-value">
-      {formatDate(registrationDeadline)}
-    </div>
-  </div>
-
-  <div className="review-card">
-    <div className="review-label">
-      Currency
-    </div>
-
-    <div className="review-value">
-      {currency}
-    </div>
-  </div>
-
-  <div className="review-card">
-    <div className="review-label">
       Budget
     </div>
 
     <div className="review-value">
       {noGiftLimit
         ? "No Limit"
-        : `$${giftBudget}`}
+        : `${currency} $${giftBudget}`}
+    </div>
+  </div>
+  
+  <div className="review-card">
+    <div className="review-label">
+      Registration Deadline
+    </div>
+
+    <div className="review-value">
+      {formatDate(registrationDeadline)}
     </div>
   </div>
 
@@ -579,7 +620,7 @@ const addParticipant = () => {
     <div className="review-value">
     {
   reminderPreference === "both"
-    ? "Registration Deadline & Draw Date"
+    ? "Registration & Draw Date"
     : reminderPreference === "registration"
     ? "Registration Deadline"
     : reminderPreference === "draw"
@@ -606,9 +647,9 @@ const addParticipant = () => {
     <button
       type="button"
       className="back-button"
-      onClick={() => setCurrentStep(2)}
+      onClick={() => setCurrentStep(1)}
     >
-      ← Edit Gift Exchange Details
+      ← Edit Settings
     </button>
 
     <button
@@ -618,9 +659,14 @@ const addParticipant = () => {
     if (!eventCode) {
       setEventCode(generateEventCode());
     }
-  
+
+    if (!emailSubject.trim()) {
+      setEmailSubject(
+        `You're Invited to Join ${eventName || "This Gift Exchange"}`
+      );
+    }
     setExchangeCreated(true);
-    setCurrentStep(4);
+    setCurrentStep(3);
   }}
 >
   Create Gift Exchange
@@ -631,18 +677,26 @@ const addParticipant = () => {
 </div>
 
 )}
-{currentStep === 4 && (
+{currentStep === 3 && (
 
 <div className="wizard-card">
 
   <h2>✅ Gift Exchange Created</h2>
 
   <p className="step-description">
-    Your gift exchange is ready. Share the registration link below and invite participants.
-  </p>
+  Your gift exchange is ready.
+</p>
+
+<p className="step-description next-step-text">
+  Next, invite participants to register using the link below.
+</p>
 
 
   <hr />
+
+  <div className="exchange-title-section">
+  <h3>{eventName || "Unnamed Gift Exchange"}</h3>
+</div>
 
   <h3>Registration Link</h3>
 
@@ -697,7 +751,7 @@ const addParticipant = () => {
   <button
   type="button"
   className="secondary-button"
-  onClick={() => setCurrentStep(3)}
+  onClick={() => setCurrentStep(1)}
 >
   Edit Event
 </button>
@@ -787,7 +841,7 @@ const addParticipant = () => {
   className="continue-button"
   onClick={() => setCurrentStep(5)}
 >
-  Send Invitations →
+Invite Participants →
 </button>
 
   </div>
@@ -800,15 +854,14 @@ const addParticipant = () => {
 
 <div className="wizard-card">
 
-<h2>Invite & Track Participants</h2>
+<div className="exchange-title-section">
+  <h3>{eventName || "Unnamed Gift Exchange"}</h3>
+</div>
 
-<p className="step-description">
-  Share your event link and track participant registrations.
-</p>
+ <h3>Share your event link and track participant registrations.</h3>
 
-  <h3>Recipients</h3>
 
-  <h3>Participant Registration</h3>
+  <h3>Participants</h3>
 
 <label className="checkbox-inline">
   <input
@@ -832,15 +885,7 @@ const addParticipant = () => {
   </ul>
 </div>
 
-<h3>Subject</h3>
-
-<p className="preview-subject">
-  {eventName
-    ? `You're Invited to Join ${eventName}`
-    : "You're Invited to Join This Gift Exchange"}
-</p>
-
-  <h3>Event Link</h3>
+  <h3>Registration Link</h3>
 
 <div className="signup-link">
   {`https://mysterynamedraw.com/event/${eventCode}`}
@@ -877,35 +922,67 @@ const addParticipant = () => {
   </button>
 </div>
 
-  <h3>Invitation Preview</h3>
+  <h3>Preview Email</h3>
 
-  <textarea
-    rows={12}
-    readOnly
-    value={`Hello,
+  <div className="email-preview-card">
 
-You've been invited to join this gift exchange.
+  <div className="email-preview-subject">
 
-Draw Date:
-${formatDate(drawDate)}
+  <label>
+    <strong>Subject:</strong>
 
-Registration Deadline:
-${formatDate(registrationDeadline)}
+    <input
+  className="email-subject-input"
+  type="text"
+  value={emailSubject}
+  onChange={(e) =>
+    setEmailSubject(e.target.value)
+  }
 
-Register here for the gift exchange:
-https://mysterynamedraw.com/event/${eventCode}
+/>
+  </label>
 
-This gift exchange is powered by Mystery Name Draw, an application by Lurie Labs, LLC.
+</div>
 
-We hope you have fun!`}
-  />
+  <hr />
+
+  <div className="email-preview-body">
+  <p>Hello,</p>
+
+  <p>
+    You've been invited to participate in{" "}
+    {eventName || "this gift exchange"}.
+  </p>
+
+  <p>
+    <strong>Registration Deadline:</strong>
+    <br />
+    {formatDate(registrationDeadline)}
+  </p>
+
+  <p>
+    <strong>Draw Date:</strong>
+    <br />
+    {formatDate(drawDate)}
+  </p>
+
+  <p>
+    Register here for the gift exchange:
+  </p>
+
+  <p>
+  {`https://mysterynamedraw.com/event/${eventCode}`}
+</p>
+</div>
+
+</div>
 
   <div className="wizard-navigation created-event-navigation">
 
     <button
       type="button"
       className="back-button"
-      onClick={() => setCurrentStep(4)}
+      onClick={() => setCurrentStep(3)}
     >
       ← Back
     </button>

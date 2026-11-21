@@ -45,6 +45,7 @@
 
 .theme-button,
 .signin-button {
+  margin-left: 3rem;
   padding: 0.6rem 1rem;
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.4);
@@ -80,7 +81,7 @@
   color: #1e293b;
 }
 .start-exchange-button {
-  margin-right: 4rem;
+  margin-right: 0;
   padding: 0.8rem 1.6rem;
   border: none;
   border-radius: 999px;
@@ -89,6 +90,20 @@
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s ease;
+}
+.quick-draw-button {
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.5);
+  background: transparent;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-draw-button:hover {
+  background: rgba(255,255,255,0.1);
 }
 
 .start-exchange-button:hover {

@@ -1,13 +1,15 @@
 import "./Header.css";
 type HeaderProps = {
-    theme: string;
-    setTheme: (theme: string) => void;
-  };
+  theme: string;
+  setTheme: (theme: string) => void;
+  onStartExchange: () => void;
+};
   
-  function Header({
-    theme,
-    setTheme,
-  }: HeaderProps) {
+function Header({
+  theme,
+  setTheme,
+  onStartExchange,
+}: HeaderProps) {
     return (
       <header className="header">
         <div className="header-brand">
@@ -16,7 +18,6 @@ type HeaderProps = {
   
         <nav className="nav">
           <a href="#">Home</a>
-          <a href="#">Quick Draw</a>
           <a href="#">FAQ</a>
           <a href="#">Help</a>
           <a href="#">Privacy</a>
@@ -37,9 +38,16 @@ type HeaderProps = {
   {theme === "dark" ? "☀️" : "🌙"}
 </button>
 */}
- <button className="start-exchange-button">
+ <button
+  className="start-exchange-button"
+  onClick={onStartExchange}
+>
   Start a Gift Exchange
 </button>
+
+<button className="quick-draw-button">
+    Create a Quick Draw
+  </button>
 
           <button className="signin-button">
             Sign In
