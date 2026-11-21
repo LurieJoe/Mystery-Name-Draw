@@ -16,7 +16,6 @@ type HeaderProps = {
   
         <nav className="nav">
           <a href="#">Home</a>
-          <a href="#">Start a Gift Exchange</a>
           <a href="#">Quick Draw</a>
           <a href="#">FAQ</a>
           <a href="#">Help</a>
@@ -24,7 +23,8 @@ type HeaderProps = {
         </nav>
   
         <div className="header-actions">
-        <button
+        {/*
+<button
   className="theme-button"
   onClick={() =>
     setTheme(
@@ -36,7 +36,11 @@ type HeaderProps = {
 >
   {theme === "dark" ? "☀️" : "🌙"}
 </button>
-  
+*/}
+ <button className="start-exchange-button">
+  Start a Gift Exchange
+</button>
+
           <button className="signin-button">
             Sign In
           </button>

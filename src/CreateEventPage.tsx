@@ -9,12 +9,15 @@ function CreateEventPage() {
 const [theme, setTheme] = useState(
     localStorage.getItem("theme") || "dark"
   );
-const [newName, setNewName] = useState("");
+  const [eventName, setEventName] = useState("");
+  const [newName, setNewName] = useState("");
 const [newEmail, setNewEmail] = useState("");
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
 const [exchangeCreated, setExchangeCreated] = useState(false);
 const [currency, setCurrency] = useState("USD");
+const [eventCode, setEventCode] = useState("");
+const [registrationOpen, setRegistrationOpen] = useState(true);
 const [editingIndex, setEditingIndex] =
   useState<number | null>(null);
 const [registrationDateTouched,
@@ -81,7 +84,7 @@ const addParticipant = () => {
   };
   const copyLink = async () => {
     await navigator.clipboard.writeText(
-      "https://mysterynamedraw.com/join/example"
+      "https://mysterynamedraw.com/event/${eventCode}"
     );
   
     setCopied(true);
@@ -108,6 +111,20 @@ const addParticipant = () => {
   !registrationDeadline ||
   !drawDate ||
   registrationDeadline <= drawDate;
+  const generateEventCode = () => {
+    const chars =
+      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  
+    let code = "";
+  
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(
+        Math.floor(Math.random() * chars.length)
+      );
+    }
+  
+    return code;
+  };
   return (
     <>
       <Header
@@ -284,6 +301,29 @@ const addParticipant = () => {
   <p className="step-description">
     Configure important details for your gift exchange.
   </p>
+  <div className="event-name-field">
+  <label>
+      Gift Exchange Name  </label>
+
+  <div className="event-name-row">
+
+    <input
+      type="text"
+      placeholder="Name of Gift Exchange event"
+      value={eventName}
+      onChange={(e) => setEventName(e.target.value)}
+    />
+
+    <button
+      type="button"
+      className="secondary-button"
+      onClick={() => setEventName("")}
+    >
+      Clear
+    </button>
+
+  </div>
+</div>
   <div className="settings-layout">
 
   <div className="settings-left">
@@ -395,6 +435,10 @@ const addParticipant = () => {
   <hr />
 
   <h3>Reminders</h3>
+  <p className="helper-text">
+  Participants will receive reminder notifications
+  3 days before the selected date.
+</p>
 
   <label className="radio-option">
   <input
@@ -413,7 +457,7 @@ const addParticipant = () => {
   checked={reminderPreference === "registration"}
   onChange={() => setReminderPreference("registration")}
 />
-    Registration deadline only
+    Registration deadline approaching
   </label>
 
   <label className="radio-option">
@@ -423,7 +467,7 @@ const addParticipant = () => {
   checked={reminderPreference === "draw"}
   onChange={() => setReminderPreference("draw")}
 />
-    Name draw date only
+    Name draw date approaching
   </label>
 
   <label className="radio-option">
@@ -438,16 +482,6 @@ const addParticipant = () => {
   </label>
 
   <div className="wizard-navigation">
-
-
-
-    <button
-      type="button"
-      className="back-button"
-      onClick={() => setCurrentStep(1)}
-    >
-      ← Back
-    </button>
 
     <button
   type="button"
@@ -581,6 +615,10 @@ const addParticipant = () => {
   type="button"
   className="continue-button"
   onClick={() => {
+    if (!eventCode) {
+      setEventCode(generateEventCode());
+    }
+  
     setExchangeCreated(true);
     setCurrentStep(4);
   }}
@@ -611,7 +649,7 @@ const addParticipant = () => {
   <div className="link-row">
 
     <div className="signup-link">
-      https://mysterynamedraw.com/join/example
+      https://mysterynamedraw.com/event/${eventCode}
     </div>
     <button
       type="button"
@@ -635,7 +673,77 @@ const addParticipant = () => {
 </p>
 </div>
 </div>
+
 <hr />
+
+<h3>Event Management</h3>
+
+<div className="event-management">
+
+<p
+  className={`registration-status ${
+    registrationOpen ? "open" : "closed"
+  }`}
+>
+  Registration:
+  <strong>
+    {registrationOpen ? " Open" : " Closed"}
+  </strong>
+</p>
+
+<div className="event-management-actions">
+  <br /><br />
+
+  <button
+  type="button"
+  className="secondary-button"
+  onClick={() => setCurrentStep(3)}
+>
+  Edit Event
+</button>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      if (registrationOpen) {
+        const confirmed = window.confirm(
+          "Close registration?\n\nNew participants will no longer be able to join this event."
+        );
+
+        if (confirmed) {
+          setRegistrationOpen(false);
+        }
+      } else {
+        setRegistrationOpen(true);
+      }
+    }}
+  >
+    {registrationOpen
+      ? "Close Registration"
+      : "Reopen Registration"}
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      const confirmed = window.confirm(
+        "Generate a new event code?\n\nExisting invitation emails, text messages, and registration links will stop working immediately."
+      );
+
+      if (confirmed) {
+        setEventCode(generateEventCode());
+      }
+    }}
+  >
+    Generate New Code
+  </button>
+</div>
+</div>
+
+<hr />
+
 <div className="tips-panel">
 
 <h3>Tips for a Successful Gift Exchange</h3>
@@ -673,23 +781,14 @@ const addParticipant = () => {
 
   <div className="wizard-navigation">
 
-    <button
-      type="button"
-      className="back-button"
-      onClick={() => {
-        setExchangeCreated(false);
-        setCurrentStep(3);
-      }}
-    >
-      ← Edit Exchange
-    </button>
 
     <button
-      type="button"
-      className="continue-button"
-    >
-      Send Invitations →
-    </button>
+  type="button"
+  className="continue-button"
+  onClick={() => setCurrentStep(5)}
+>
+  Send Invitations →
+</button>
 
   </div>
 
@@ -697,6 +796,132 @@ const addParticipant = () => {
 
 )}
 
+{currentStep === 5 && (
+
+<div className="wizard-card">
+
+<h2>Invite & Track Participants</h2>
+
+<p className="step-description">
+  Share your event link and track participant registrations.
+</p>
+
+  <h3>Recipients</h3>
+
+  <h3>Participant Registration</h3>
+
+<label className="checkbox-inline">
+  <input
+    type="checkbox"
+    defaultChecked
+  />
+  Include me in this gift exchange
+</label>
+
+<p className="helper-text">
+  The organizer will participate in the gift exchange and may receive a recipient assignment.
+</p>
+
+<div className="created-participants">
+  <p>
+    <strong>1 Registered</strong>
+  </p>
+
+  <ul>
+    <li>✅ Organizer</li>
+  </ul>
+</div>
+
+<h3>Subject</h3>
+
+<p className="preview-subject">
+  {eventName
+    ? `You're Invited to Join ${eventName}`
+    : "You're Invited to Join This Gift Exchange"}
+</p>
+
+  <h3>Event Link</h3>
+
+<div className="signup-link">
+  {`https://mysterynamedraw.com/event/${eventCode}`}
+</div>
+
+<div className="event-management-actions">
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={copyLink}
+  >
+    Copy Link
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button"
+  >
+    Copy Invitation
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button"
+  >
+    Email Invitation
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button"
+  >
+    Text Invitation
+  </button>
+</div>
+
+  <h3>Invitation Preview</h3>
+
+  <textarea
+    rows={12}
+    readOnly
+    value={`Hello,
+
+You've been invited to join this gift exchange.
+
+Draw Date:
+${formatDate(drawDate)}
+
+Registration Deadline:
+${formatDate(registrationDeadline)}
+
+Register here for the gift exchange:
+https://mysterynamedraw.com/event/${eventCode}
+
+This gift exchange is powered by Mystery Name Draw, an application by Lurie Labs, LLC.
+
+We hope you have fun!`}
+  />
+
+  <div className="wizard-navigation created-event-navigation">
+
+    <button
+      type="button"
+      className="back-button"
+      onClick={() => setCurrentStep(4)}
+    >
+      ← Back
+    </button>
+
+    <button
+      type="button"
+      className="continue-button"
+    >
+      Continue →
+    </button>
+
+  </div>
+
+</div>
+
+)}
       </div>
     </>
   );
