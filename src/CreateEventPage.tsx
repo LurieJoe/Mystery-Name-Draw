@@ -120,13 +120,23 @@ const addParticipant = () => {
   !registrationDeadline ||
   !drawDate ||
   registrationDeadline <= drawDate;
+  
   const today = new Date()
   .toISOString()
   .split("T")[0];
 
-const registrationDeadlineInPast =
+
+  const registrationDeadlineInPast =
   !!registrationDeadline &&
   registrationDeadline < today;
+
+  const formValid =
+  eventName.trim() &&
+  drawDate &&
+  registrationDeadline &&
+  registrationDateValid &&
+  !registrationDeadlineInPast;
+ 
   const generateEventCode = () => {
     const chars =
       "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -362,7 +372,13 @@ const registrationDeadlineInPast =
   </p>
   <div className="event-name-field">
   <label>
-      Gift Exchange Name  </label>
+      Gift Exchange Name *  </label>
+
+      {!eventName.trim() && (
+  <p className="validation-error">
+    Please enter a name for your gift exchange.
+  </p>
+)}
 
   <div className="event-name-row">
 
@@ -392,7 +408,7 @@ const registrationDeadlineInPast =
   <div className="date-field">
 
 <label>
-  Name Draw Date
+  Name Draw Date *
   <input
     type="date"
     value={drawDate}
@@ -425,7 +441,7 @@ const registrationDeadlineInPast =
 <div className="date-field">
 
 <label>
-  Registration Deadline
+  Registration Deadline *
 
   <input
     type="date"
@@ -532,7 +548,7 @@ const registrationDeadlineInPast =
   type="button"
   className="continue-button"
   onClick={() => setCurrentStep(2)}
-  disabled={!registrationDateValid}
+  disabled={!formValid}
 >
   Continue →
 </button>
