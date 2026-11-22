@@ -170,6 +170,22 @@ const addParticipant = () => {
   
     setCurrentStep(1);
   };
+  const invitationMessage = `Hello,
+
+You've been invited to participate in ${eventName}.
+
+Registration Deadline:
+${formatDate(registrationDeadline)}
+
+Draw Date:
+${formatDate(drawDate)}
+
+Register here for the gift exchange:
+
+https://mysterynamedraw.com/event/${eventCode}
+
+We Hope you'll join us!
+`;
   return (
     <>
       <Header
@@ -901,25 +917,50 @@ Invite Participants →
   </button>
 
   <button
-    type="button"
-    className="secondary-button"
-  >
-    Copy Invitation
-  </button>
+  type="button"
+  className="secondary-button"
+  onClick={async () => {
+    await navigator.clipboard.writeText(
+      `Subject: ${emailSubject}\n\n${invitationMessage}`
+    );
 
-  <button
-    type="button"
-    className="secondary-button"
-  >
-    Email Invitation
+    alert("Invitation copied to clipboard.");
+  }}
+>
+  Copy Invitation
   </button>
+  <button
+  type="button"
+  className="secondary-button"
+  onClick={async () => {
+    await navigator.clipboard.writeText(
+      `Subject: ${emailSubject}\n\n${invitationMessage}`
+    );
+  
+    alert(
+      "Invitation copied to clipboard. Paste it into your email application."
+    );
+  }}
+>
+  Email Invitation
+</button>
 
-  <button
-    type="button"
-    className="secondary-button"
-  >
-    Text Invitation
-  </button>
+<button
+  type="button"
+  className="secondary-button"
+  onClick={async () => {
+    await navigator.clipboard.writeText(
+      invitationMessage
+    );
+
+    alert(
+      "Invitation copied to your clipboard. Paste it into a text message."
+    );
+  }}
+>
+  Text Invitation
+</button>
+
 </div>
 
   <h3>Preview Email</h3>
@@ -973,6 +1014,9 @@ Invite Participants →
   <p>
   {`https://mysterynamedraw.com/event/${eventCode}`}
 </p>
+<p>
+  We hope you'll join us!
+</p>
 </div>
 
 </div>
@@ -991,7 +1035,7 @@ Invite Participants →
       type="button"
       className="continue-button"
     >
-      Continue →
+      Manage Exclusions →
     </button>
 
   </div>
