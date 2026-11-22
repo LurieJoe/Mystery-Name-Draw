@@ -38,7 +38,7 @@ const [noGiftLimit, setNoGiftLimit] =
   useState(false);
 
 const [reminderPreference, setReminderPreference] =
-  useState("both");
+  useState("draw");
 const addParticipant = () => {
     if (!newName.trim() || !newEmail.trim()) {
       return;
@@ -120,6 +120,13 @@ const addParticipant = () => {
   !registrationDeadline ||
   !drawDate ||
   registrationDeadline <= drawDate;
+  const today = new Date()
+  .toISOString()
+  .split("T")[0];
+
+const registrationDeadlineInPast =
+  !!registrationDeadline &&
+  registrationDeadline < today;
   const generateEventCode = () => {
     const chars =
       "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -138,6 +145,7 @@ const addParticipant = () => {
     setEventName("");
     setDrawDate("");
     setRegistrationDeadline("");
+    setRegistrationDateTouched(false);
     setGiftBudget("");
     setCurrency("USD");
   
@@ -429,11 +437,17 @@ const addParticipant = () => {
   />
   </label>
 
-  {!registrationDateValid && (
-    <p className="validation-error">
-      Registration deadline must occur or before the draw date.
-    </p>
-  )}
+  {registrationDeadlineInPast ? (
+  <p className="validation-error">
+    This draw date is less than 5 days away.
+    The automatic registration deadline has already passed.
+    Please choose a valid registration deadline.
+  </p>
+) : !registrationDateValid ? (
+  <p className="validation-error">
+    Registration deadline must occur on or before the draw date.
+  </p>
+) : null}
 
 </div>
 
@@ -487,29 +501,9 @@ const addParticipant = () => {
 
   <h3>Reminders</h3>
   <p className="helper-text">
-  Participants will receive reminder notifications
-  3 days before the selected date.
+  Registered participants will receive a reminder
+  3 days before the draw date.
 </p>
-
-  <label className="radio-option">
-  <input
-  type="radio"
-  name="reminders"
-  checked={reminderPreference === "both"}
-  onChange={() => setReminderPreference("both")}
-/>
-    Send both reminders (Recommended)
-  </label>
-
-  <label className="radio-option">
-  <input
-  type="radio"
-  name="reminders"
-  checked={reminderPreference === "registration"}
-  onChange={() => setReminderPreference("registration")}
-/>
-    Registration deadline approaching
-  </label>
 
   <label className="radio-option">
   <input
@@ -518,7 +512,7 @@ const addParticipant = () => {
   checked={reminderPreference === "draw"}
   onChange={() => setReminderPreference("draw")}
 />
-    Name draw date approaching
+    Draw date approaching (Recommended)
   </label>
 
   <label className="radio-option">
@@ -565,20 +559,13 @@ const addParticipant = () => {
 <div className="wizard-card">
 
   <h2>Review & Create</h2>
+  <div className="exchange-title-section">
+  <h3>{eventName || "Unnamed Gift Exchange"}</h3>
+</div>
 
   <div className="review-layout">
 
 <div className="review-grid">
-
-<div className="review-card review-name-card">
-  <div className="review-label">
-    Gift Exchange Name
-  </div>
-
-  <div className="review-value">
-    {eventName || "Not Set"}
-  </div>
-</div>
 
   <div className="review-card">
     <div className="review-label">
@@ -619,11 +606,8 @@ const addParticipant = () => {
 
     <div className="review-value">
     {
-  reminderPreference === "both"
-    ? "Registration & Draw Date"
-    : reminderPreference === "registration"
-    ? "Registration Deadline"
-    : reminderPreference === "draw"
+  reminderPreference === "draw"
+
     ? "Draw Date"
     : "Do not send reminders"
 }
