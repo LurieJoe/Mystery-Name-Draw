@@ -133,6 +133,12 @@ const [inviteEmail, setInviteEmail] = useState("");
   }, [theme]);
   const [editingInviteeIndex, setEditingInviteeIndex] =
   useState<number | null>(null);
+  const [activeRestrictionIndex, setActiveRestrictionIndex] =
+  useState<number | null>(null);
+  const [selectedRestriction, setSelectedRestriction] =
+  useState("");
+  const [restrictionOwnerIndex, setRestrictionOwnerIndex] =
+  useState<number | null>(null);
   const registrationDateValid =
   !registrationDeadline ||
   !drawDate ||
@@ -965,18 +971,85 @@ return (
 </span>
 <div className="invitee-restrictions">
 
-  {invitee.restrictions.length > 0 ? (
-    invitee.restrictions.join(", ")
-  ) : (
-    <button
-      type="button"
-      className="secondary-button"
-    >
-      Add
-    </button>
-  )}
+<button
+  type="button"
+  className="secondary-button"
+  onClick={() => {
+    setActiveRestrictionIndex(index);
+    setRestrictionOwnerIndex(index);
+  }}
+>
+  Manage ({invitee.restrictions.length})
+</button>
+
+{activeRestrictionIndex === index && (
+    <div>
+
+      <select
+        value={selectedRestriction}
+        onChange={(e) =>
+          setSelectedRestriction(e.target.value)
+        }
+      >
+        <option value="">
+          Select Participant
+        </option>
+
+        {invitees
+          .filter((_, i) => i !== index)
+          .map((participant, i) => (
+            <option
+              key={i}
+              value={participant.name}
+            >
+              {participant.name}
+            </option>
+          ))}
+      </select>
+
+      <button
+        type="button"
+        className="secondary-button"
+        onClick={() => {
+          if (
+            !selectedRestriction ||
+            restrictionOwnerIndex === null
+          ) {
+            return;
+          }
+
+          const updatedInvitees = [...invitees];
+
+          const currentRestrictions =
+  updatedInvitees[
+    restrictionOwnerIndex
+  ].restrictions;
+
+if (
+  !currentRestrictions.includes(
+    selectedRestriction
+  )
+) {
+  currentRestrictions.push(
+    selectedRestriction
+  );
+}
+
+          setInvitees(updatedInvitees);
+
+          setSelectedRestriction("");
+          setActiveRestrictionIndex(null);
+          setRestrictionOwnerIndex(null);
+        }}
+      >
+        Add
+      </button>
+
+    </div>
+)}
 
 </div>
+
     </div>
   ))}
 
