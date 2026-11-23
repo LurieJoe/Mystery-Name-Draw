@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "./components/Header";
 import "./CreateEventPage.css";
 
@@ -19,6 +19,8 @@ const [currency, setCurrency] = useState("USD");
 const [eventCode, setEventCode] = useState("");
 const [registrationOpen, setRegistrationOpen] = useState(true);
 const [emailBody, setEmailBody] = useState("");
+const [includeOrganizer, setIncludeOrganizer] =
+  useState(true);
 const [emailSubject, setEmailSubject] = useState("");
 const [editingIndex, setEditingIndex] =
   useState<number | null>(null);
@@ -39,7 +41,9 @@ const [noGiftLimit, setNoGiftLimit] =
 
 const [reminderPreference, setReminderPreference] =
   useState("draw");
-const addParticipant = () => {
+  const participantNameRef =
+  useRef<HTMLInputElement>(null);
+  const addParticipant = () => {
     if (!newName.trim() || !newEmail.trim()) {
       return;
     }
@@ -107,6 +111,17 @@ const addParticipant = () => {
       day
     ).toLocaleDateString();
   };
+  const [invitees, setInvitees] = useState<
+  {
+    name: string;
+    email: string;
+    status: string;
+    restrictions: string[];
+  }[]
+>([]);
+
+const [inviteName, setInviteName] = useState("");
+const [inviteEmail, setInviteEmail] = useState("");
   useEffect(() => {
     document.documentElement.setAttribute(
       "data-theme",
@@ -116,6 +131,8 @@ const addParticipant = () => {
   useEffect(() => {
     localStorage.setItem("theme", theme);
   }, [theme]);
+  const [editingInviteeIndex, setEditingInviteeIndex] =
+  useState<number | null>(null);
   const registrationDateValid =
   !registrationDeadline ||
   !drawDate ||
@@ -186,7 +203,46 @@ https://mysterynamedraw.com/event/${eventCode}
 
 We Hope you'll join us!
 `;
-  return (
+const addInvitee = () => {
+  if (!inviteName.trim() || !inviteEmail.trim()) {
+    return;
+  }
+  const emailRegex =
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailRegex.test(inviteEmail.trim())) {
+  alert("Please enter a valid email address.");
+  return;
+}
+  const updatedInvitee = {
+    name: inviteName.trim(),
+    email: inviteEmail.trim(),
+    status: "Invite Pending",
+    restrictions: [],
+  };
+
+  if (editingInviteeIndex !== null) {
+    const updatedInvitees = [...invitees];
+
+    updatedInvitees[editingInviteeIndex] =
+      updatedInvitee;
+
+    setInvitees(updatedInvitees);
+
+    setEditingInviteeIndex(null);
+  } else {
+    setInvitees([
+      ...invitees,
+      updatedInvitee,
+    ]);
+  }
+
+  setInviteName("");
+  setInviteEmail("");
+
+  participantNameRef.current?.focus();
+};  
+return (
     <>
       <Header
   theme={theme}
@@ -718,9 +774,9 @@ We Hope you'll join us!
 
   <div className="link-row">
 
-    <div className="signup-link">
-      https://mysterynamedraw.com/event/${eventCode}
-    </div>
+  <div className="signup-link">
+  {`https://mysterynamedraw.com/event/${eventCode}`}
+</div>
     <button
       type="button"
       className="secondary-button"
@@ -745,72 +801,6 @@ We Hope you'll join us!
 </div>
 
 <hr />
-
-<h3>Event Management</h3>
-
-<div className="event-management">
-
-<p
-  className={`registration-status ${
-    registrationOpen ? "open" : "closed"
-  }`}
->
-  Registration:
-  <strong>
-    {registrationOpen ? " Open" : " Closed"}
-  </strong>
-</p>
-
-<div className="event-management-actions">
-  <br /><br />
-
-  <button
-  type="button"
-  className="secondary-button"
-  onClick={() => setCurrentStep(1)}
->
-  Edit Event
-</button>
-
-  <button
-    type="button"
-    className="secondary-button"
-    onClick={() => {
-      if (registrationOpen) {
-        const confirmed = window.confirm(
-          "Close registration?\n\nNew participants will no longer be able to join this event."
-        );
-
-        if (confirmed) {
-          setRegistrationOpen(false);
-        }
-      } else {
-        setRegistrationOpen(true);
-      }
-    }}
-  >
-    {registrationOpen
-      ? "Close Registration"
-      : "Reopen Registration"}
-  </button>
-
-  <button
-    type="button"
-    className="secondary-button"
-    onClick={() => {
-      const confirmed = window.confirm(
-        "Generate a new event code?\n\nExisting invitation emails, text messages, and registration links will stop working immediately."
-      );
-
-      if (confirmed) {
-        setEventCode(generateEventCode());
-      }
-    }}
-  >
-    Generate New Code
-  </button>
-</div>
-</div>
 
 <hr />
 
@@ -851,16 +841,23 @@ We Hope you'll join us!
 
   <div className="wizard-navigation">
 
+  <button
+    type="button"
+    className="back-button"
+    onClick={() => setCurrentStep(1)}
+  >
+    ← Edit Exchange
+  </button>
 
-    <button
-  type="button"
-  className="continue-button"
-  onClick={() => setCurrentStep(5)}
->
-Invite Participants →
-</button>
+  <button
+    type="button"
+    className="continue-button"
+    onClick={() => setCurrentStep(5)}
+  >
+    Invite Participants →
+  </button>
 
-  </div>
+</div>
 
 </div>
 
@@ -877,13 +874,123 @@ Invite Participants →
  <h3>Share your event link and track participant registrations.</h3>
 
 
+ <h3>Invitation List</h3>
+
+<div className="invitee-entry-row">
+
+  <input
+    ref={participantNameRef}
+    type="text"
+    placeholder="Participant Name"
+    value={inviteName}
+    onChange={(e) =>
+      setInviteName(e.target.value)
+    }
+  />
+
+  <input
+    type="email"
+    placeholder="Email Address"
+    value={inviteEmail}
+    onChange={(e) =>
+      setInviteEmail(e.target.value)
+    }
+  />
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={addInvitee}
+  >
+    {
+  editingInviteeIndex !== null
+    ? "Save Changes"
+    : "Add Participant"
+}
+  </button>
+
+</div>
+
+<div className="invitee-header">
+  <span>Name</span>
+  <span>Email Address</span>
+  <span>Actions</span>
+  <span>Status</span>
+  <span>Restrictions</span>
+</div>
+
+<div className="invitee-list">
+
+  {invitees.map((invitee, index) => (
+    <div
+      key={index}
+      className="invitee-row"
+    >
+      <span>{invitee.name}</span>
+      <span>{invitee.email}</span>
+
+      <div className="invitee-actions">
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      setInviteName(invitee.name);
+      setInviteEmail(invitee.email);
+      setEditingInviteeIndex(index);
+    }}
+  >
+    Edit
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button remove-button"
+    onClick={() =>
+      setInvitees(
+        invitees.filter(
+          (_, i) => i !== index
+        )
+      )
+    }
+  >
+    Remove
+  </button>
+
+</div>
+<span className="invitee-status">
+  {invitee.status === "Invited"
+    ? "📧 Invited"
+    : "⚪ Invite Pending"}
+</span>
+<div className="invitee-restrictions">
+
+  {invitee.restrictions.length > 0 ? (
+    invitee.restrictions.join(", ")
+  ) : (
+    <button
+      type="button"
+      className="secondary-button"
+    >
+      Add
+    </button>
+  )}
+
+</div>
+    </div>
+  ))}
+
+</div>
   <h3>Participants</h3>
 
 <label className="checkbox-inline">
-  <input
-    type="checkbox"
-    defaultChecked
-  />
+<input
+  type="checkbox"
+  checked={includeOrganizer}
+  onChange={(e) =>
+    setIncludeOrganizer(e.target.checked)
+  }
+/>
   Include me in this gift exchange
 </label>
 
@@ -892,13 +999,17 @@ Invite Participants →
 </p>
 
 <div className="created-participants">
-  <p>
-    <strong>1 Registered</strong>
-  </p>
+<p>
+  <strong>
+    {includeOrganizer ? "1 Registered" : "0 Registered"}
+  </strong>
+</p>
 
+{includeOrganizer && (
   <ul>
     <li>✅ Organizer</li>
   </ul>
+)}
 </div>
 
   <h3>Registration Link</h3>
@@ -1034,14 +1145,114 @@ Invite Participants →
     <button
       type="button"
       className="continue-button"
+      onClick={() => setCurrentStep(6)}
     >
-      Manage Exclusions →
+      Manage Exchange →
     </button>
 
   </div>
 
 </div>
 
+)}
+{currentStep === 6 && (
+  <div className="wizard-card">
+
+    <div className="exchange-title-section">
+      <h3>{eventName}</h3>
+    </div>
+
+    <h2>Manage Exchange</h2>
+
+    <p className="step-description">
+    Manage participant restrictions, registration settings, and draw options for this exchange.
+    </p>
+    <h3>Event Management</h3>
+
+<div className="event-management">
+
+<p
+  className={`registration-status ${
+    registrationOpen ? "open" : "closed"
+  }`}
+>
+  Registration:
+  <strong>
+    {registrationOpen ? " Open" : " Closed"}
+  </strong>
+</p>
+
+<div className="event-management-actions">
+  <br /><br />
+
+  <button
+  type="button"
+  className="secondary-button"
+  onClick={() => setCurrentStep(1)}
+>
+  Edit Exchange
+</button>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      if (registrationOpen) {
+        const confirmed = window.confirm(
+          "Close registration?\n\nNew participants will no longer be able to join this event."
+        );
+
+        if (confirmed) {
+          setRegistrationOpen(false);
+        }
+      } else {
+        setRegistrationOpen(true);
+      }
+    }}
+  >
+    {registrationOpen
+      ? "Close Registration"
+      : "Reopen Registration"}
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      const confirmed = window.confirm(
+        "Generate a new event code?\n\nExisting invitation emails, text messages, and registration links will stop working immediately."
+      );
+
+      if (confirmed) {
+        setEventCode(generateEventCode());
+      }
+    }}
+  >
+    Generate New Code
+  </button>
+</div>
+</div>
+
+    <div className="wizard-navigation">
+
+      <button
+        type="button"
+        className="back-button"
+        onClick={() => setCurrentStep(5)}
+      >
+        ← Back
+      </button>
+
+      <button
+        type="button"
+        className="continue-button"
+      >
+        Draw Validation →
+      </button>
+
+    </div>
+
+  </div>
 )}
       </div>
     </>
