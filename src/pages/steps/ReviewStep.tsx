@@ -17,6 +17,9 @@ export default function ReviewStep() {
     generateEventCode,
     giftBudgetLabel,
     reminderSummary,
+    invitees,
+    activeRestrictions,
+    formValid,
   } = useExchangeContext();
 
   return (
@@ -91,6 +94,26 @@ export default function ReviewStep() {
         </div>
       </div>
 
+      {invitees.length > 0 && (
+        <div className="review-card">
+          <div className="review-label">
+            Invitation List
+          </div>
+
+          <div className="review-value">
+            {invitees.length}{" "}
+            {invitees.length === 1 ? "person" : "people"}
+            {activeRestrictions.length > 0
+              ? `, ${activeRestrictions.length} ${
+                  activeRestrictions.length === 1
+                    ? "restriction"
+                    : "restrictions"
+                }`
+              : ""}
+          </div>
+        </div>
+      )}
+
     </div>
 
     <div className="review-logo">
@@ -102,6 +125,13 @@ export default function ReviewStep() {
     </div>
 
     </div>
+
+      {!formValid && (
+        <p className="validation-error">
+          Some required details are missing or invalid. Edit Settings to
+          continue.
+        </p>
+      )}
 
       <div className="wizard-navigation">
 
@@ -116,6 +146,7 @@ export default function ReviewStep() {
         <button
       type="button"
       className="continue-button"
+      disabled={!formValid}
       onClick={() => {
         if (!eventCode) {
           setEventCode(generateEventCode());

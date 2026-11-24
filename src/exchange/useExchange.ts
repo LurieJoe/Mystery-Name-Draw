@@ -628,8 +628,11 @@ const [inviteEmail, setInviteEmail] = useState("");
       }`
     );
 
-    // Land on the invitation page when there is a list to work with.
-    setCurrentStep(importedInvitees.length > 0 ? 4 : 1);
+    // Land on Review & Create: it shows the dates, budget, reminders
+    // and participation that came out of the file, so the organizer is
+    // looking at exactly what needs checking rather than being told to
+    // go and check it.
+    setCurrentStep(2);
 
     return {
       count: importedInvitees.length,
@@ -681,8 +684,8 @@ const [inviteEmail, setInviteEmail] = useState("");
           result.count === 1 ? "invitee" : "invitees"
         }.\n\n` +
           dateNote +
-          "Please check the draw date, registration deadline, gift budget, and reminder settings before you continue: they were all taken from the file.\n\n" +
-          "A new event code was generated, so invitation links from the original exchange will no longer work."
+          "A new event code was generated, so invitation links from the original exchange will no longer work.\n\n" +
+          "Review the draw date, registration deadline, gift budget, and reminder settings below before creating the exchange."
       );
     } catch {
       alert(
