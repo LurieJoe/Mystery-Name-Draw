@@ -479,6 +479,19 @@ const [inviteEmail, setInviteEmail] = useState("");
   const today = toIsoDate(new Date());
 
 
+  /**
+   * Restrictions open once registration has closed, so that everyone
+   * chooses against the final roster rather than a partial one, and
+   * stay open until the draw itself.
+   */
+  const restrictionsOpen =
+    !!registrationDeadline &&
+    !!drawDate &&
+    today > registrationDeadline &&
+    today <= drawDate;
+
+  const drawHasPassed = !!drawDate && today > drawDate;
+
   const registrationDeadlineInPast =
   !!registrationDeadline &&
   registrationDeadline < today;
@@ -996,6 +1009,8 @@ const addInvitee = () => {
     registrationDateValid,
     today,
     registrationDeadlineInPast,
+    restrictionsOpen,
+    drawHasPassed,
     formValid,
     organizerTouched,
     setOrganizerTouched,

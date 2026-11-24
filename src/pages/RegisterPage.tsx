@@ -26,6 +26,8 @@ export default function RegisterPage({
     registrationDeadline,
     giftBudgetLabel,
     registrationOpen,
+    restrictionsOpen,
+    drawHasPassed,
     eventCode: openExchangeCode,
     formatDate,
     participants,
@@ -106,15 +108,29 @@ export default function RegisterPage({
 
             <h2>Who you would rather not be matched with</h2>
             <p>
-              These are your choices alone. Nobody else sees them, and
-              they work in one direction: not wanting to buy for someone
-              is a different thing from not wanting them to buy for you.
+              These work in one direction: not wanting to buy for
+              someone is a different thing from not wanting them to buy
+              for you. They are your own choices and do not appear on
+              anyone else&rsquo;s list, though the organizer can see
+              them, since they are the one who has to sort it out if the
+              restrictions make a draw impossible.
             </p>
 
-            {others.length === 0 ? (
+            {drawHasPassed ? (
               <p className="register-empty">
-                You are the first to register. Come back once others
-                have joined and you can set these then.
+                The draw has happened, so restrictions are closed.
+              </p>
+            ) : !restrictionsOpen ? (
+              <p className="register-empty">
+                Restrictions open when registration closes on{" "}
+                {formatDate(registrationDeadline)}, once the list of
+                people is final. You can set and change them from then
+                until the draw on {formatDate(drawDate)}.
+              </p>
+            ) : others.length === 0 ? (
+              <p className="register-empty">
+                You are the only person registered so far, so there is
+                nobody to set a restriction against.
               </p>
             ) : (
               <div className="register-restrictions">
@@ -194,8 +210,8 @@ export default function RegisterPage({
             </ol>
 
             <p className="content-updated">
-              Changed your mind? This page stays open, and your choices
-              save as you tick them.
+              Changed your mind? Come back to this page any time before
+              the draw. Your choices save as you tick them.
             </p>
           </>
         ) : (
@@ -306,9 +322,10 @@ export default function RegisterPage({
             </button>
 
             <p className="register-after">
-              You will be able to set who you would rather not be
-              matched with once you are in and can see who else has
-              joined.
+              Once registration closes on{" "}
+              {formatDate(registrationDeadline)} you can come back and
+              say who you would rather not be matched with, right up
+              until the draw on {formatDate(drawDate)}.
             </p>
           </>
         )}

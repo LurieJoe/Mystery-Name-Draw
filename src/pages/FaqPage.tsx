@@ -10,7 +10,7 @@ const QUESTIONS = [
   },
   {
     q: "Can the organizer see who drew whom?",
-    a: "No. Each person is told their own recipient and nothing else, and the organizer sees only how many people have registered. If you are taking part yourself, you find out at the same time as everyone else.",
+    a: "Not the matches, no. Each person is told their own recipient and nothing else. The organizer does see who has registered and which restrictions each person has set, because they are the one who has to sort it out if those restrictions make a draw impossible. If the organizer is taking part, they find out who they are buying for at the same time as everyone else.",
   },
   {
     q: "What is a restriction?",
@@ -18,7 +18,11 @@ const QUESTIONS = [
   },
   {
     q: "What if the restrictions make a draw impossible?",
-    a: "You are told before the draw date, not on it. The exchange is checked against every restriction, and if no valid draw exists you are shown which people are blocking it and the smallest set of restrictions that would free it up.",
+    a: "The organizer is told before the draw date, not on it. The exchange is checked against every restriction, and if no valid draw exists the organizer is shown which people are blocking it and the smallest set of restrictions that would free it up.",
+  },
+  {
+    q: "When can I set my restrictions?",
+    a: "Once registration closes. Restrictions are choices about the other people in the exchange, so they only make sense when the list of those people is final. From the registration deadline until the draw date you can set and change them as often as you like.",
   },
   {
     q: "Can I use this for something other than gifts?",
