@@ -24,6 +24,7 @@ import {
   removalOwners,
 } from "../exchange/restrictionNotices.js";
 import { ORGANIZER_ID, type Restriction } from "../exchange/types.js";
+import { shouldScrollToTop } from "../router.js";
 import {
   csvNamesForEditing,
   flipSurnameFirst,
@@ -594,6 +595,36 @@ console.log("\n8. Reading a pasted list");
       "You and Ada each set a restriction"
     ),
     removalConfirmation(both, 2, "Ada", "Grace")
+  );
+}
+
+{
+  console.log("\n12. Landing at the top of a new page");
+
+  check(
+    "following a route link starts at the top",
+    shouldScrollToTop("/", "/quick")
+  );
+  check(
+    "including back to the landing page",
+    shouldScrollToTop("/quick", "/")
+  );
+  check(
+    "a link to a section of this page keeps its place",
+    !shouldScrollToTop("/", "how-it-works"),
+    "#how-it-works must still scroll to the section"
+  );
+  check(
+    "and leaving that section for a route still goes to the top",
+    shouldScrollToTop("how-it-works", "/quick")
+  );
+  check(
+    "clicking the link for the page you are on does nothing",
+    !shouldScrollToTop("/quick", "/quick")
+  );
+  check(
+    "a registration link starts at the top",
+    shouldScrollToTop("/", "/event/ABC123")
   );
 }
 
