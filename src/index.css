@@ -6,6 +6,14 @@
   box-sizing: border-box;
 }
 
+/* Safari on iOS enlarges text in narrow blocks when a page is wider
+   than the viewport, which turns one layout bug into an unreadable
+   page. Hold the sizes we asked for. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 :root[data-theme="light"] {
   --text: #6b6375;
   --text-h: #08060d;
@@ -23,7 +31,10 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  /* Unitless, not 145%: a percentage computes to 26px once and then
+     inherits that fixed value, so a 2rem heading got a 26px line box
+     and its lines overlapped. A ratio scales with each element. */
+  font: 18px/1.45 var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);

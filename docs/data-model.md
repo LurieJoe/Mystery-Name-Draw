@@ -73,19 +73,19 @@ and her removing it does not silently remove your safety net.
    above. The **service role** key must never go in this repo or into
    anything the browser downloads.
 
-To check the access rules on your own machine before trusting them:
+To check the rules on your own machine before trusting them:
 
 ```
-psql "$DATABASE_URL" -f supabase/migrations/0001_schema.sql \
-                     -f supabase/migrations/0002_functions.sql \
-                     -f supabase/tests/access.sql
+./supabase/run-tests.sh "postgres://localhost/mnd_test"
 ```
 
 Every check raises on failure, so a non-zero exit means a promise is
-broken. There are 25 of them, and they cover the ones that matter: that
+broken. There are 43, and they cover the claims worth doubting: that
 one participant cannot see another's choices, that an organizer-set
-restriction stays hidden from the person it is about, and that no
-organizer view contains an assignment before or after the draw.
+restriction stays hidden from the person it is about, that no organizer
+view contains an assignment before or after the draw, and that a
+receiver can hold a whole conversation with their gifter without ever
+learning who they are.
 
 ## The free plan has one sharp edge
 
@@ -106,12 +106,54 @@ It is worth knowing that this makes an unattended draw depend on a cron
 job staying green. If you would rather not carry that, the Pro plan is
 the thing that removes the failure mode rather than working around it.
 
+## Anonymous messaging
+
+Joe draws Evelyn. He wants to ask which candle scents she dislikes;
+she wants to ask her gifter for something specific. Neither question
+can be asked out loud without spoiling the draw.
+
+**A thread is an assignment.** There is exactly one conversation per
+drawn pair, and everyone is in two of them: one where they are the
+giver and know perfectly well who they are writing to, and one where
+they are the receiver and do not. The anonymity runs one way only,
+because the giver knows the receiver by definition. The app has to make
+that unambiguous on screen: "the person you drew" and "whoever drew
+you" are two different conversations.
+
+**Nothing travels by email.** A reply in an inbox carries an address,
+and an address is a name. The notification says a message is waiting
+and links back; the message itself only ever exists in the app.
+
+**The organizer sees none of it.** Not the messages, not who has a
+thread, not how many exist. A thread *is* an assignment, so anything
+revealing one reveals the draw. There is no organizer function that
+returns a message or counts one.
+
+That last point has a consequence worth facing: it removes the usual
+way to moderate. If somebody is unpleasant, the organizer cannot be
+shown who sent it without being handed a pairing. For now their only
+lever is blunt and safe: switch messaging off for the whole exchange.
+If that proves too blunt in practice, the next least-revealing option
+is a report that escalates the message text with no identity attached,
+which lets the organizer judge the content and still not learn the
+draw. That is a decision to take with a real complaint in hand rather
+than in the abstract.
+
+Rate limited to 20 messages per person per thread per day. An anonymous
+channel is the one place in this app where someone can be unpleasant at
+no cost, so it should not also be an unlimited one.
+
 ## Still missing
 
 - **The draw itself**, as an Edge Function. `src/draw/assignment.ts` was
   written with no dependencies for exactly this: the same code can run
   there unchanged. It must run on the server, because a browser that
   computes the assignments has by definition seen them.
+- **The notification email** for a waiting message. The two functions
+  it needs (`pending_message_notifications` and `mark_notified`) are
+  written and are deliberately unreachable from the browser: the job
+  sees a pairing by necessity, which is exactly why it runs as the
+  service role in an Edge Function and never in a page.
 - **Email**, via Resend. When that is wired up, the SPF record at IONOS
   must be *edited*, never added to. Two `v=spf1` records is the same as
   having none.
