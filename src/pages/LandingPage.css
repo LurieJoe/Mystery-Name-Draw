@@ -116,7 +116,10 @@
 }
 
 .landing-section-tinted > * {
-  max-width: 1120px;
+  /* The column the other sections get: their 1120px less the 2rem of
+     padding each side. Written as calc so it tracks the root font size
+     rather than assuming 16px. */
+  max-width: calc(1120px - 4rem);
   margin-left: auto;
   margin-right: auto;
 }
@@ -125,6 +128,14 @@
 .landing-closing h2 {
   margin: 0 0 2rem;
   font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+/* The shorthand above resets the auto margins, which left this heading
+   hard against the window while its own points stayed in the column.
+   Same specificity, so this has to come after it. */
+.landing-section-tinted > h2 {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .landing-steps {
@@ -176,20 +187,67 @@
 /* --- Closing --- */
 
 .landing-closing {
-  max-width: 640px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 4rem 2rem;
-  text-align: center;
+  padding: 4rem 2rem 5rem;
 }
 
-.landing-closing p {
-  margin: 0 0 2rem;
-  line-height: 1.6;
+.landing-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 2rem;
+  align-items: stretch;
+}
+
+.landing-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.1rem;
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.landing-choice h2 {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+}
+
+/* The paragraph takes the slack so both buttons sit on the same line
+   however differently the two blurbs wrap. */
+.landing-choice p {
+  flex: 1;
+  margin: 0;
+  line-height: 1.65;
   color: #475569;
 }
 
-.landing-quick-copy {
-  max-width: 44rem;
-  margin: 0 auto 1.5rem;
-  line-height: 1.65;
+/* Outlined against the filled button beside it, so the pair reads the
+   same way round as the header. */
+.landing-choice .landing-cta,
+.landing-choice-secondary {
+  min-height: 52px;
+  padding: 0 1.9rem;
+}
+
+.landing-choice-secondary {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #6d28d9;
+  border-radius: 999px;
+  color: #6d28d9;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.landing-choice-secondary:hover {
+  background: #f5f3ff;
+}
+
+.landing-choice-secondary:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 2px;
 }

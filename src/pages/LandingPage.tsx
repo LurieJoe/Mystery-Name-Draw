@@ -118,37 +118,48 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-section" id="quick-draw">
-          <h2>Need names matched right now?</h2>
+        {/* The two ways in, in the same order as the header: the
+            exchange first, Quick Draw beside it. */}
+        <section className="landing-closing" id="quick-draw">
+          <div className="landing-choices">
 
-          <p className="landing-quick-copy">
-            Quick Draw skips the invitations. Paste a list of names, say
-            what the draw is for, and get the result on the spot: a book
-            swap you forgot to assign, partners for an assignment,
-            groups of three, or who reviews whose work. Nobody registers,
-            and nothing is sent anywhere.
-          </p>
+            <div className="landing-choice">
+              <h2>Ready to draw some names?</h2>
 
-          <a className="landing-secondary" href="#/quick">
-            Create a Quick Draw
-          </a>
-        </section>
+              <p>
+                For a draw with a date on it. Invite people by link,
+                everyone sets their own restrictions, and nobody finds
+                out who they have until the day. It takes about two
+                minutes, and the people you invite never have to make an
+                account.
+              </p>
 
-        <section className="landing-closing">
-          <h2>Ready to draw some names?</h2>
+              <button
+                type="button"
+                className="landing-cta"
+                onClick={startExchange}
+              >
+                Start a Gift Exchange
+              </button>
+            </div>
 
-          <p>
-            It takes about two minutes, and the people you invite never
-            have to make an account.
-          </p>
+            <div className="landing-choice">
+              <h2>Need names matched right now?</h2>
 
-          <button
-            type="button"
-            className="landing-cta"
-            onClick={startExchange}
-          >
-            Start a Gift Exchange
-          </button>
+              <p>
+                Quick Draw skips the invitations. Paste a list of names,
+                say what the draw is for, and get the result on the
+                spot: a book swap you forgot to assign, partners for an
+                assignment, groups of three, or who reviews whose work.
+                Nobody registers, and nothing is sent anywhere.
+              </p>
+
+              <a className="landing-choice-secondary" href="#/quick">
+                Create a Quick Draw
+              </a>
+            </div>
+
+          </div>
         </section>
 
       </main>
