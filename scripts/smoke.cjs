@@ -37,6 +37,7 @@ globalThis.window = {
   location: {
     origin: "http://localhost:5173",
     pathname: "/",
+    hash: "",
     href: "http://localhost:5173/",
   },
   history: { pushState() {} },
@@ -66,7 +67,7 @@ const RegisterPage = require(`${OUT}/pages/RegisterPage.js`).default;
 const STEPS = [
   [1, "SettingsStep", ["Gift Exchange Settings", "Step 1 of 3"]],
   [2, "ReviewStep", ["Review", "Step 2 of 3"]],
-  [3, "CreatedStep", ["Registration Link", "Step 3 of 3"]],
+  [3, "CreatedStep", ["Registration Link", "Step 3 of 3", "/#/event/"]],
   [4, "InvitationStep", "Invitation List"],
   [5, "ManageStep", "Manage Exchange"],
   [6, "ValidationStep", "Not enough participants"],

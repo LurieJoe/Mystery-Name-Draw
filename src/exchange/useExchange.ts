@@ -7,6 +7,7 @@ import {
   suggestedRemovals,
   type ForbiddenPairing,
 } from "../draw/assignment";
+import { routeUrl } from "../router";
 import {
   createInviteeId,
   shiftIsoDateByYears,
@@ -667,16 +668,21 @@ const [inviteEmail, setInviteEmail] = useState("");
 
       const dateNote =
         result.yearsForward > 0
-          ? ` Dates were moved forward to ${result.drawDate.slice(
+          ? `Dates were moved forward to ${result.drawDate.slice(
               0,
               4
-            )}, so check they still suit you.`
+            )}.\n\n`
           : "";
 
+      // Everything below came out of the file rather than from the
+      // organizer, so say plainly what needs checking.
       alert(
-        `Exchange imported with ${result.count} ${
+        `Imported ${result.count} ${
           result.count === 1 ? "invitee" : "invitees"
-        }.${dateNote} A new event code was generated.`
+        }.\n\n` +
+          dateNote +
+          "Please check the draw date, registration deadline, gift budget, and reminder settings before you continue: they were all taken from the file.\n\n" +
+          "A new event code was generated, so invitation links from the original exchange will no longer work."
       );
     } catch {
       alert(
@@ -738,10 +744,7 @@ const [inviteEmail, setInviteEmail] = useState("");
       ? "Draw date"
       : "No reminders";
 
-  // Built from the running origin so /event/CODE is reachable wherever
-  // the app is served - localhost in development, the real domain in
-  // production. A hardcoded domain would make the link untestable.
-  const registrationLink = `${window.location.origin}/event/${eventCode}`;
+  const registrationLink = routeUrl(`/event/${eventCode}`);
 
   // One source for both the on-screen preview and the copy/email/text
   // versions, so the wording cannot drift apart.

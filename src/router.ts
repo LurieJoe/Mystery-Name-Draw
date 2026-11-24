@@ -3,44 +3,67 @@ import { useEffect, useState } from "react";
 /**
  * A router for a handful of routes, with no dependency.
  *
- * Uses the History API, so links are real paths rather than hashes.
- * Vite's dev server already serves index.html for unknown paths; any
- * production host needs the same SPA fallback, or /event/CODE will
- * 404 on a hard refresh.
+ * Routes live in the URL fragment ("/#/event/ABC123") rather than the
+ * path. A static host like GitHub Pages has no server-side fallback, so
+ * a real path such as /event/ABC123 returns 404 on a fresh visit - and
+ * that path is the registration link emailed to every invitee, so it is
+ * the one URL that must never break.
+ *
+ * A fragment is never sent to the server, so these links work on any
+ * host. That also makes moving hosts later a non-event: links already
+ * sent keep working.
  */
 
-const PATH_CHANGED = "app:pathchanged";
+/** The current route, e.g. "/event/ABC123". Defaults to "/". */
+function currentRoute() {
+  return window.location.hash.replace(/^#/, "") || "/";
+}
 
 export function usePath() {
-  const [path, setPath] = useState(() => window.location.pathname);
+  const [route, setRoute] = useState(currentRoute);
 
   useEffect(() => {
-    const sync = () => setPath(window.location.pathname);
+    const sync = () => setRoute(currentRoute());
 
-    window.addEventListener("popstate", sync);
-    window.addEventListener(PATH_CHANGED, sync);
+    window.addEventListener("hashchange", sync);
 
-    return () => {
-      window.removeEventListener("popstate", sync);
-      window.removeEventListener(PATH_CHANGED, sync);
-    };
+    return () => window.removeEventListener("hashchange", sync);
   }, []);
 
-  return path;
+  return route;
 }
 
 export function navigate(to: string) {
-  if (to === window.location.pathname) {
+  const target = to.startsWith("/") ? to : `/${to}`;
+
+  if (target === currentRoute()) {
     return;
   }
 
-  window.history.pushState({}, "", to);
-  window.dispatchEvent(new Event(PATH_CHANGED));
+  // Assigning the hash fires `hashchange`, which updates every usePath.
+  window.location.hash = target;
 }
 
-/** The event code in /event/CODE, or null for any other path. */
-export function matchEventCode(path: string): string | null {
-  const match = path.match(/^\/event\/([A-Za-z0-9]+)\/?$/);
+/**
+ * An absolute URL for a route, safe to paste into an email.
+ *
+ * Built from the running origin and path so it is correct wherever the
+ * app is served: localhost while developing, a custom domain in
+ * production, or a project subpath on GitHub Pages.
+ */
+export function routeUrl(route: string) {
+  const base =
+    `${window.location.origin}${window.location.pathname}`.replace(
+      /\/$/,
+      ""
+    );
+
+  return `${base}/#${route}`;
+}
+
+/** The event code in /event/CODE, or null for any other route. */
+export function matchEventCode(route: string): string | null {
+  const match = route.match(/^\/event\/([A-Za-z0-9]+)\/?$/);
 
   return match ? match[1] : null;
 }
