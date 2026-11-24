@@ -255,9 +255,11 @@ const [inviteEmail, setInviteEmail] = useState("");
     [drawPeople, forbiddenPairings]
   );
 
+  // Searching for removals runs many matchings, so only do it on the
+  // validation screen, and only when there is a problem to solve.
   const removalSuggestion = useMemo(
     () =>
-      drawCheck.ok
+      currentStep !== 6 || drawCheck.ok
         ? null
         : suggestedRemovals(
             drawPeople,
@@ -266,7 +268,7 @@ const [inviteEmail, setInviteEmail] = useState("");
             2,
             3
           ),
-    [drawCheck.ok, drawPeople, forbiddenPairings]
+    [currentStep, drawCheck.ok, drawPeople, forbiddenPairings]
   );
 
   const distinctPairingCount = useMemo(
