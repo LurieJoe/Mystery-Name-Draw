@@ -25,3 +25,6 @@ dist-ssr
 
 # Sample exchanges holding real contact details - keep local
 docs/samples/*.local.json
+
+# Compiled output from `npm run test:draw`
+.tmp-test

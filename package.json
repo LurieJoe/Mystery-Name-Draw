@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:draw": "tsc -p tsconfig.test.json && node .tmp-test/assignment.test.js"
   },
   "dependencies": {
     "react": "^19.3.1",
