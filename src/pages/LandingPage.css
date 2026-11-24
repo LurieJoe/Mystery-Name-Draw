@@ -1,0 +1,228 @@
+/* The landing page. Kept apart from CreateEventPage.css, which is the
+   organizer wizard, so the two can be worked on without colliding. */
+
+.landing {
+  color: #1e293b;
+}
+
+.landing h1,
+.landing h2,
+.landing h3 {
+  color: #2e1065;
+}
+
+/* --- Hero --- */
+
+.landing-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2.5rem;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 4rem 2rem 3.5rem;
+}
+
+.landing-hero-text {
+  flex: 999 1 420px;
+  min-width: 0;
+}
+
+.landing-hero h1 {
+  margin: 0 0 1.25rem;
+  font-size: clamp(2.1rem, 5vw, 3.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.landing-lede {
+  margin: 0 0 2rem;
+  max-width: 34rem;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.landing-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.landing-cta {
+  padding: 0.95rem 1.9rem;
+  border: none;
+  border-radius: 999px;
+  background: #6d28d9;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  /* Comfortably over the 44px minimum for a touch target. */
+  min-height: 48px;
+}
+
+.landing-cta:hover {
+  background: #5b21b6;
+}
+
+.landing-cta:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.landing-secondary {
+  color: #6d28d9;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0.5rem 0;
+}
+
+.landing-secondary:hover {
+  color: #4c1d95;
+}
+
+.landing-note {
+  margin: 1.5rem 0 0;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.landing-hero-art {
+  flex: 1 1 320px;
+  display: flex;
+  justify-content: center;
+}
+
+.landing-hero-art img {
+  width: 100%;
+  max-width: 440px;
+  height: auto;
+}
+
+/* --- Sections --- */
+
+.landing-section {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 3.5rem 2rem;
+}
+
+.landing-section-tinted {
+  max-width: none;
+  background: #f5f3ff;
+}
+
+.landing-section-tinted > * {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.landing-section h2,
+.landing-closing h2 {
+  margin: 0 0 2rem;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+}
+
+.landing-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.landing-steps li {
+  margin: 0;
+}
+
+.landing-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-bottom: 0.9rem;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-weight: 700;
+}
+
+.landing-steps h3,
+.landing-point h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.landing-steps p,
+.landing-point p {
+  margin: 0;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.landing-points {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* --- Closing --- */
+
+.landing-closing {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.landing-closing p {
+  margin: 0 0 2rem;
+  line-height: 1.6;
+  color: #475569;
+}
+
+/* --- Footer --- */
+
+.landing-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.landing-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.landing-footer a {
+  color: #64748b;
+}
+
+.landing-footer a:hover {
+  color: #6d28d9;
+}
+
+.landing-note-wip {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid #a78bfa;
+  background: #f5f3ff;
+  color: #4c1d95;
+  display: inline-block;
+}

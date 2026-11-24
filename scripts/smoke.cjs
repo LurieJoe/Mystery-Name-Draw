@@ -131,10 +131,19 @@ function Harness({ step, Component }) {
 
 console.log("\nRendering each page with empty state:");
 
+const LandingPage = require(`${OUT}/pages/LandingPage.js`).default;
+
+// "/" is the landing page now; the wizard lives at /#/create.
 check(
-  "App at /",
+  "App at / (the landing page)",
   () => renderToStaticMarkup(React.createElement(App)),
-  ["Mystery Name Draw", "Gift Exchange Settings"]
+  ["Mystery Name Draw", "Draw names without making anyone sign up"]
+);
+
+check(
+  "LandingPage on its own",
+  () => renderToStaticMarkup(React.createElement(LandingPage)),
+  ["How it works", "Start a Gift Exchange", "pigeon-messenger.png"]
 );
 
 for (const [step, name, needle, forbidden] of STEPS) {

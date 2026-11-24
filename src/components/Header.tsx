@@ -13,10 +13,12 @@ function Header({
         </div>
   
         <nav className="nav">
-          <a href="#">Home</a>
-          <a href="#">FAQ</a>
-          <a href="#">Help</a>
-          <a href="#">Privacy</a>
+          <a href="#/">Home</a>
+          {/*
+            FAQ, Help and Privacy have no pages yet. Left out rather
+            than pointed at "#", which now routes to the landing page
+            and would discard a part-built exchange.
+          */}
         </nav>
   
         <div className="header-actions">
