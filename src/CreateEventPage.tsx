@@ -64,13 +64,18 @@ const [giftBudget, setGiftBudget] =
 const [noGiftLimit, setNoGiftLimit] =
   useState(false);
 
-const [reminderPreference, setReminderPreference] =
-  useState("draw");
+const [
+  remindBeforeRegistrationDeadline,
+  setRemindBeforeRegistrationDeadline,
+] = useState(true);
+
+const [remindBeforeDrawDate, setRemindBeforeDrawDate] =
+  useState(true);
   const participantNameRef =
   useRef<HTMLInputElement>(null);
   const copyLink = async () => {
     await navigator.clipboard.writeText(
-      `https://mysterynamedraw.com/event/${eventCode}`
+      registrationLink
     );
   
     setCopied(true);
@@ -222,7 +227,8 @@ const [inviteEmail, setInviteEmail] = useState("");
     setGiftBudget("");
     setCurrency("USD");
     setNoGiftLimit(false);
-    setReminderPreference("draw");
+    setRemindBeforeRegistrationDeadline(true);
+    setRemindBeforeDrawDate(true);
 
     setEventCode("");
     setCopied(false);
@@ -240,21 +246,77 @@ const [inviteEmail, setInviteEmail] = useState("");
 
     setCurrentStep(1);
   };
+  const currencySymbols: Record<string, string> = {
+    USD: "$",
+    CAD: "$",
+    GBP: "\u00A3",
+    EUR: "\u20AC",
+    AUD: "$",
+  };
+
+  const giftBudgetLabel = noGiftLimit
+    ? "No limit"
+    : giftBudget.trim()
+    ? `${currencySymbols[currency] ?? ""}${giftBudget} ${currency}`
+    : "Not set";
+
+  const reminderSummary =
+    remindBeforeRegistrationDeadline && remindBeforeDrawDate
+      ? "Registration deadline and draw date"
+      : remindBeforeRegistrationDeadline
+      ? "Registration deadline"
+      : remindBeforeDrawDate
+      ? "Draw date"
+      : "No reminders";
+
+  const registrationLink = `https://mysterynamedraw.com/event/${eventCode}`;
+
+  // One source for both the on-screen preview and the copy/email/text
+  // versions, so the wording cannot drift apart.
+  const invitationIntro = `You've been invited to participate in ${
+    eventName || "this gift exchange"
+  }.`;
+
+  const invitationDetails = [
+    {
+      label: "Registration Deadline",
+      value: formatDate(registrationDeadline),
+    },
+    { label: "Draw Date", value: formatDate(drawDate) },
+    { label: "Gift Budget", value: giftBudgetLabel },
+  ];
+
+  const registrationNote =
+    "When you register, you can add your gift preferences and set your own name draw restrictions: anyone you would rather not give to or receive from.";
+
+  const reminderNote =
+    !remindBeforeRegistrationDeadline && !remindBeforeDrawDate
+      ? "No reminders will be sent for this exchange."
+      : `${
+          remindBeforeRegistrationDeadline && remindBeforeDrawDate
+            ? "We'll email you a reminder before the registration deadline and again before the draw date."
+            : remindBeforeRegistrationDeadline
+            ? "We'll email you a reminder before the registration deadline."
+            : "Once you've registered, we'll email you a reminder before the draw date."
+        } You can opt out of reminders at any time.`;
+
   const invitationMessage = `Hello,
 
-You've been invited to participate in ${eventName}.
+${invitationIntro}
 
-Registration Deadline:
-${formatDate(registrationDeadline)}
+${invitationDetails
+  .map((detail) => `${detail.label}:\n${detail.value}`)
+  .join("\n\n")}
 
-Draw Date:
-${formatDate(drawDate)}
+${registrationNote}
+
+${reminderNote}
 
 Register here for the gift exchange:
 
-https://mysterynamedraw.com/event/${eventCode}
+${registrationLink}
 
-We Hope you'll join us!
+We hope you'll join us!
 `;
 const addInvitee = () => {
   if (!inviteName.trim() || !inviteEmail.trim()) {
@@ -490,31 +552,36 @@ return (
   <hr />
 
   <h3>Reminders</h3>
+
   <p className="helper-text">
-  Registered participants will receive a reminder
-  3 days before the draw date.
-</p>
+    Reminder emails go out 3 days before the date you choose.
+  </p>
 
-  <label className="radio-option">
-  <input
-  type="radio"
-  name="reminders"
-  checked={reminderPreference === "draw"}
-  onChange={() => setReminderPreference("draw")}
-/>
-    Draw date approaching (Recommended)
+  <label className="checkbox-inline">
+    <input
+      type="checkbox"
+      checked={remindBeforeRegistrationDeadline}
+      onChange={(e) =>
+        setRemindBeforeRegistrationDeadline(e.target.checked)
+      }
+    />
+    Remind invitees before the registration deadline
   </label>
 
-  <label className="radio-option">
-  <input
-  type="radio"
-  name="reminders"
-  checked={reminderPreference === "none"}
-  onChange={() => setReminderPreference("none")}
-/>
-
-    Do not send reminders
+  <label className="checkbox-inline">
+    <input
+      type="checkbox"
+      checked={remindBeforeDrawDate}
+      onChange={(e) =>
+        setRemindBeforeDrawDate(e.target.checked)
+      }
+    />
+    Remind participants before the draw date
   </label>
+
+  <p className="helper-text">
+    Leave both unchecked to send no reminders.
+  </p>
 
   <div className="wizard-navigation">
 
@@ -573,9 +640,7 @@ return (
     </div>
 
     <div className="review-value">
-      {noGiftLimit
-        ? "No Limit"
-        : `${currency} $${giftBudget}`}
+      {giftBudgetLabel}
     </div>
   </div>
   
@@ -595,12 +660,7 @@ return (
     </div>
 
     <div className="review-value">
-    {
-  reminderPreference === "draw"
-
-    ? "Draw Date"
-    : "Do not send reminders"
-}
+      {reminderSummary}
     </div>
   </div>
 
@@ -676,7 +736,7 @@ return (
   <div className="link-row">
 
   <div className="signup-link">
-  {`https://mysterynamedraw.com/event/${eventCode}`}
+  {registrationLink}
 </div>
     <button
       type="button"
@@ -1102,7 +1162,7 @@ return (
   <h3>Registration Link</h3>
 
 <div className="signup-link">
-  {`https://mysterynamedraw.com/event/${eventCode}`}
+  {registrationLink}
 </div>
 
 <div className="event-management-actions">
@@ -1167,18 +1227,15 @@ return (
 
   <div className="email-preview-subject">
 
-  <label>
+  <label className="email-subject-label">
     <strong>Subject:</strong>
 
     <input
-  className="email-subject-input"
-  type="text"
-  value={emailSubject}
-  onChange={(e) =>
-    setEmailSubject(e.target.value)
-  }
-
-/>
+      className="email-subject-input"
+      type="text"
+      value={emailSubject}
+      onChange={(e) => setEmailSubject(e.target.value)}
+    />
   </label>
 
 </div>
@@ -1186,36 +1243,28 @@ return (
   <hr />
 
   <div className="email-preview-body">
-  <p>Hello,</p>
+    <p>Hello,</p>
 
-  <p>
-    You've been invited to participate in{" "}
-    {eventName || "this gift exchange"}.
-  </p>
+    <p>{invitationIntro}</p>
 
-  <p>
-    <strong>Registration Deadline:</strong>
-    <br />
-    {formatDate(registrationDeadline)}
-  </p>
+    {invitationDetails.map((detail) => (
+      <p key={detail.label}>
+        <strong>{detail.label}:</strong>
+        <br />
+        {detail.value}
+      </p>
+    ))}
 
-  <p>
-    <strong>Draw Date:</strong>
-    <br />
-    {formatDate(drawDate)}
-  </p>
+    <p>{registrationNote}</p>
 
-  <p>
-    Register here for the gift exchange:
-  </p>
+    <p>{reminderNote}</p>
 
-  <p>
-  {`https://mysterynamedraw.com/event/${eventCode}`}
-</p>
-<p>
-  We hope you'll join us!
-</p>
-</div>
+    <p>Register here for the gift exchange:</p>
+
+    <p className="email-preview-link">{registrationLink}</p>
+
+    <p>We hope you&rsquo;ll join us!</p>
+  </div>
 
 </div>
 
