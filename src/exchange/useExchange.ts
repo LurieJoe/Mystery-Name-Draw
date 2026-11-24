@@ -10,6 +10,7 @@ import {
 import { routeUrl } from "../router";
 import {
   createInviteeId,
+  isValidEmail,
   shiftIsoDateByYears,
   toIsoDate,
   INVITED,
@@ -38,6 +39,7 @@ const [eventCode, setEventCode] = useState("");
 const [registrationOpen, setRegistrationOpen] = useState(true);
 const [includeOrganizer, setIncludeOrganizer] =
   useState(true);
+const [organizerTouched, setOrganizerTouched] = useState(false);
 const [organizerName, setOrganizerName] = useState("");
 const [organizerEmail, setOrganizerEmail] = useState("");
 const [emailSubject, setEmailSubject] = useState("");
@@ -427,12 +429,31 @@ const [inviteEmail, setInviteEmail] = useState("");
   !!registrationDeadline &&
   registrationDeadline < today;
 
+  // Whether the details are wrong, and separately whether to say so
+  // yet. The form is invalid from first load; the complaint waits.
+  const organizerNameMissing =
+    includeOrganizer && !organizerName.trim();
+
+  const organizerEmailMissing =
+    includeOrganizer && !organizerEmail.trim();
+
+  const showOrganizerErrors = organizerTouched;
+
+  const organizerEmailInvalid =
+    !!organizerEmail.trim() && !isValidEmail(organizerEmail);
+
+  const organizerDetailsValid =
+    !organizerNameMissing &&
+    !organizerEmailMissing &&
+    !organizerEmailInvalid;
+
   const formValid =
   eventName.trim() &&
   drawDate &&
   registrationDeadline &&
   registrationDateValid &&
-  !registrationDeadlineInPast;
+  !registrationDeadlineInPast &&
+  organizerDetailsValid;
  
   const generateEventCode = () => {
     const chars =
@@ -718,6 +739,7 @@ const [inviteEmail, setInviteEmail] = useState("");
     setShowAllRestrictions(false);
     setOverrideNotices([]);
     setIncludeOrganizer(true);
+    setOrganizerTouched(false);
     setOrganizerName("");
     setOrganizerEmail("");
     setEmailSubject("");
@@ -801,9 +823,7 @@ const addInvitee = () => {
     return;
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (!emailRegex.test(inviteEmail.trim())) {
+  if (!isValidEmail(inviteEmail)) {
     alert("Please enter a valid email address.");
     return;
   }
@@ -920,6 +940,13 @@ const addInvitee = () => {
     today,
     registrationDeadlineInPast,
     formValid,
+    organizerTouched,
+    setOrganizerTouched,
+    organizerNameMissing,
+    organizerEmailMissing,
+    organizerEmailInvalid,
+    organizerDetailsValid,
+    showOrganizerErrors,
     generateEventCode,
     buildExchangeSnapshot,
     exportExchange,

@@ -32,6 +32,12 @@ export default function SettingsStep() {
     registrationDeadlineInPast,
     formValid,
     handleImportFile,
+    organizerNameMissing,
+    organizerEmailMissing,
+    organizerEmailInvalid,
+    organizerDetailsValid,
+    showOrganizerErrors,
+    setOrganizerTouched,
   } = useExchangeContext();
 
   return (
@@ -248,23 +254,43 @@ export default function SettingsStep() {
 
       <div className="organizer-fields">
         <label>
-          Your Name
+          Your Name {includeOrganizer ? "*" : ""}
           <input
             type="text"
             placeholder="Your name"
             value={organizerName}
-            onChange={(e) => setOrganizerName(e.target.value)}
+            onChange={(e) => {
+              setOrganizerTouched(true);
+              setOrganizerName(e.target.value);
+            }}
           />
+          {showOrganizerErrors && organizerNameMissing && (
+            <span className="validation-error">
+              Required because you are in the exchange.
+            </span>
+          )}
         </label>
 
         <label>
-          Your Email
+          Your Email {includeOrganizer ? "*" : ""}
           <input
             type="email"
             placeholder="you@example.com"
             value={organizerEmail}
-            onChange={(e) => setOrganizerEmail(e.target.value)}
+            onChange={(e) => {
+              setOrganizerTouched(true);
+              setOrganizerEmail(e.target.value);
+            }}
           />
+          {showOrganizerErrors && organizerEmailMissing ? (
+            <span className="validation-error">
+              Required: this is where your assignment is sent.
+            </span>
+          ) : showOrganizerErrors && organizerEmailInvalid ? (
+            <span className="validation-error">
+              Please enter a valid email address.
+            </span>
+          ) : null}
         </label>
       </div>
 
@@ -284,6 +310,14 @@ export default function SettingsStep() {
             : "Enter your name above to be added to the participant list."
           : "You are organizing only, and will not be assigned anyone."}
       </p>
+
+      {!formValid && (
+        <p className="validation-error">
+          {!organizerDetailsValid
+            ? "Add your name and email above, or untick \u201CInclude me in this gift exchange\u201D."
+            : "Fill in the required details above to continue."}
+        </p>
+      )}
 
       <div className="wizard-navigation">
 

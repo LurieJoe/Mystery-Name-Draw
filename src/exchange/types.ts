@@ -78,3 +78,10 @@ export const createInviteeId = () =>
     : `invitee-${Date.now()}-${Math.random()
         .toString(36)
         .slice(2, 8)}`;
+
+/**
+ * Good enough to catch a typo. Real validation is the message arriving,
+ * so this stays permissive rather than trying to encode RFC 5322.
+ */
+export const isValidEmail = (value: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());

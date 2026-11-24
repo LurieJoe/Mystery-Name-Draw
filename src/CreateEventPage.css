@@ -1236,3 +1236,11 @@ grid-template-columns: 160px  300px 200px 180px 150px;
 .override-notices li {
   margin-bottom: 0.5rem;
 }
+
+/* Field-level messages sit inside a bold label, so reset the weight. */
+.organizer-fields .validation-error {
+  font-weight: 400;
+  font-size: 0.9rem;
+  min-height: 0;
+  margin-top: 0;
+}

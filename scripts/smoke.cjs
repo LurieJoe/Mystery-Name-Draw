@@ -65,7 +65,13 @@ const App = require(`${OUT}/App.js`).default;
 const RegisterPage = require(`${OUT}/pages/RegisterPage.js`).default;
 
 const STEPS = [
-  [1, "SettingsStep", ["Gift Exchange Settings", "Step 1 of 3"]],
+  [
+    1,
+    "SettingsStep",
+    ["Gift Exchange Settings", "Step 1 of 3", "Your Name"],
+    // Required-field messages wait until the organizer has typed.
+    ["Required because you are in the exchange"],
+  ],
   [2, "ReviewStep", ["Review", "Step 2 of 3"]],
   [3, "CreatedStep", ["Registration Link", "Step 3 of 3", "/#/event/"]],
   [4, "InvitationStep", "Invitation List"],
@@ -76,7 +82,7 @@ const STEPS = [
 let passed = 0;
 let failed = 0;
 
-function check(label, render, mustContain) {
+function check(label, render, mustContain, mustNotContain) {
   try {
     const html = render();
 
@@ -87,6 +93,14 @@ function check(label, render, mustContain) {
     for (const needle of [].concat(mustContain || [])) {
       if (!html.includes(needle)) {
         throw new Error(`markup is missing ${JSON.stringify(needle)}`);
+      }
+    }
+
+    for (const needle of [].concat(mustNotContain || [])) {
+      if (html.includes(needle)) {
+        throw new Error(
+          `markup should not contain ${JSON.stringify(needle)} yet`
+        );
       }
     }
 
@@ -123,7 +137,7 @@ check(
   ["Mystery Name Draw", "Gift Exchange Settings"]
 );
 
-for (const [step, name, needle] of STEPS) {
+for (const [step, name, needle, forbidden] of STEPS) {
   const Component = require(`${OUT}/pages/steps/${name}.js`).default;
 
   check(
@@ -132,7 +146,8 @@ for (const [step, name, needle] of STEPS) {
       renderToStaticMarkup(
         React.createElement(Harness, { step, Component })
       ),
-    needle
+    needle,
+    forbidden
   );
 }
 
