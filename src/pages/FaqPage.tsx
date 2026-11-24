@@ -30,7 +30,7 @@ const QUESTIONS = [
   },
   {
     q: "What is Quick Draw?",
-    a: "The same matching, without the waiting. Paste a list of names, say what the draw is for, and the result appears straight away: everyone draws a name, each person gets someone else's work to review, partners, or groups of whatever size you choose. Nobody registers, nothing is emailed, and the draw happens in your browser rather than on our end. It suits a classroom or a room full of people, where you are the one reading the result out.",
+    a: "The same matching, without the waiting. Paste a list of names, say what the draw is for, and the result appears straight away: everyone draws a name, each person gets someone else's work to review, partners, or groups of whatever size you choose. Nobody registers, nothing is emailed, and the draw happens in your browser rather than on our end. It suits a classroom or a room full of people, where you are the one reading the result out. A list of names can be loaded from a .csv or .txt file and saved back to one, so the same class, team, or club does not have to be typed in every week. That file stays on your own computer.",
   },
   {
     q: "Can I reuse an exchange next year?",

@@ -2,7 +2,9 @@ import { useState } from "react";
 import Header from "../components/Header";
 import SiteFooter from "../components/SiteFooter";
 import { findAssignment, type DrawPerson } from "../draw/assignment";
+import { csvNamesForEditing, toCsvNames } from "../draw/csv";
 import { makeGroups, makeMutualPairs, parseNames } from "../draw/grouping";
+import { downloadFile } from "../downloadFile";
 import { navigate } from "../router";
 import "./ContentPage.css";
 import "./QuickDrawPage.css";
@@ -92,6 +94,7 @@ export default function QuickDrawPage() {
   const [names, setNames] = useState("");
   const [groupSize, setGroupSize] = useState(3);
   const [result, setResult] = useState<Result | null>(null);
+  const [notice, setNotice] = useState("");
 
   const people = parseNames(names);
 
@@ -155,9 +158,47 @@ export default function QuickDrawPage() {
     return "";
   };
 
+  const importNames = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const imported = csvNamesForEditing(await file.text());
+
+    // Clearing the input means the same file can be picked twice, which
+    // is what you want after editing it.
+    event.target.value = "";
+
+    if (imported.length === 0) {
+      setNotice("There were no names in that file.");
+      return;
+    }
+
+    setNames(imported.join("\n"));
+    setResult(null);
+    setNotice(
+      `Loaded ${imported.length} ${
+        imported.length === 1 ? "name" : "names"
+      } from ${file.name}.`
+    );
+  };
+
+  const exportNames = () => {
+    downloadFile(
+      "quick-draw-names.csv",
+      toCsvNames(people.map((person) => person.name)),
+      "text/csv"
+    );
+  };
+
   const startOver = () => {
     setPurpose(null);
     setResult(null);
+    setNotice("");
   };
 
   return (
@@ -235,6 +276,34 @@ export default function QuickDrawPage() {
                     people.length === 1 ? "name" : "names"
                   }.`}
             </p>
+
+            <div className="quick-file-row">
+              <label className="quick-file-button">
+                Import a list
+                <input
+                  type="file"
+                  accept=".csv,.txt,text/csv,text/plain"
+                  onChange={importNames}
+                />
+              </label>
+
+              <button
+                type="button"
+                className="quick-secondary"
+                onClick={exportNames}
+                disabled={people.length === 0}
+              >
+                Save this list
+              </button>
+
+              <span className="quick-file-hint">
+                A .csv or .txt file, one name per line. Saving keeps the
+                list on your own computer, so next week you can load it
+                back rather than typing it again.
+              </span>
+            </div>
+
+            {notice && <p className="quick-notice">{notice}</p>}
 
             {purpose.mechanism === "groups" && (
               <label className="quick-field quick-size">
@@ -336,8 +405,10 @@ export default function QuickDrawPage() {
         <h2>What Quick Draw does not do</h2>
         <p>
           A Quick Draw happens here, in this browser. Nothing is sent
-          anywhere, nothing is saved, and the result is gone when you
-          close the tab, so copy or print it before you go.
+          anywhere, nothing is kept on our end, and the result is gone
+          when you close the tab, so copy, print, or save the list
+          before you go. A saved list is a file on your own computer,
+          and it never leaves it.
         </p>
         <p>
           It also means <strong>you</strong> see the whole draw, which is

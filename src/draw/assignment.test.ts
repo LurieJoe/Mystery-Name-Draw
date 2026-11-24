@@ -18,6 +18,12 @@ import {
   type ForbiddenPairing,
 } from "./assignment.js";
 import {
+  csvNamesForEditing,
+  flipSurnameFirst,
+  parseCsvNames,
+  toCsvNames,
+} from "./csv.js";
+import {
   makeGroups,
   makeMutualPairs,
   parseNames,
@@ -398,6 +404,120 @@ console.log("\n8. Reading a pasted list");
   );
   check("ids are unique", new Set(dupes.map((p) => p.id)).size === 4);
   check("an empty box gives nobody", parseNames("   \n  ").length === 0);
+}
+
+{
+  console.log("\n9. Reading and writing a CSV of names");
+
+  const gradebook =
+    "Student Name,ID,Email\n" +
+    '"Lovelace, Ada",1001,ada@example.edu\n' +
+    "Grace Hopper,1002,grace@example.edu\n" +
+    "Alan Turing,1003,alan@example.edu\n";
+
+  const fromGradebook = parseCsvNames(gradebook);
+  check(
+    "the heading row is dropped and the first column wins",
+    fromGradebook.join("|") === "Lovelace, Ada|Grace Hopper|Alan Turing",
+    fromGradebook.join("|")
+  );
+
+  check(
+    "a plain text list needs no commas at all",
+    parseCsvNames("Ada\nGrace\nAlan").join("|") === "Ada|Grace|Alan"
+  );
+
+  check(
+    "a name that merely looks like a heading is kept when it is not first",
+    parseCsvNames("Ada\nName\nGrace").join("|") === "Ada|Name|Grace",
+    parseCsvNames("Ada\nName\nGrace").join("|")
+  );
+
+  check(
+    "CRLF line endings do not produce empty rows",
+    parseCsvNames("Name\r\nAda\r\nGrace\r\n").join("|") === "Ada|Grace",
+    parseCsvNames("Name\r\nAda\r\nGrace\r\n").join("|")
+  );
+
+  check(
+    "a doubled quote inside a quoted cell is one quote",
+    parseCsvNames('"Ada ""Addy"" Lovelace",1001').join("|") ===
+      'Ada "Addy" Lovelace',
+    parseCsvNames('"Ada ""Addy"" Lovelace",1001').join("|")
+  );
+
+  check(
+    "a leading byte order mark does not stick to the first name",
+    parseCsvNames("\uFEFFAda\nGrace")[0] === "Ada",
+    parseCsvNames("\uFEFFAda\nGrace")[0]
+  );
+
+  check("blank rows are skipped", parseCsvNames("Ada\n\n\nGrace").length === 2);
+  check("an empty file gives nobody", parseCsvNames("").length === 0);
+
+  const written = toCsvNames(['Lovelace, Ada', 'Ada "Addy"', "Grace"]);
+  check(
+    "a name with a comma or a quote is quoted on the way out",
+    written === 'Name\n"Lovelace, Ada"\n"Ada ""Addy"""\nGrace',
+    JSON.stringify(written)
+  );
+
+  check(
+    "what is written reads back unchanged",
+    parseCsvNames(written).join("|") === 'Lovelace, Ada|Ada "Addy"|Grace',
+    parseCsvNames(written).join("|")
+  );
+
+  const everyName = ["Ada", "Grace", "Alan"];
+  check(
+    "a round trip survives the draw's own parser too",
+    parseNames(parseCsvNames(toCsvNames(everyName)).join("\n"))
+      .map((person) => person.name)
+      .join("|") === "Ada|Grace|Alan"
+  );
+}
+
+{
+  console.log("\n10. A surname-first cell is not two students");
+
+  check(
+    "a surname-first name is flipped",
+    flipSurnameFirst("Lovelace, Ada") === "Ada Lovelace"
+  );
+  check(
+    "a suffix is left where it is",
+    flipSurnameFirst("Smith, Jr.") === "Smith, Jr."
+  );
+  check(
+    "a plain name is untouched",
+    flipSurnameFirst("Ada Lovelace") === "Ada Lovelace"
+  );
+  check(
+    "a cell with two commas is left alone rather than guessed at",
+    flipSurnameFirst("Lovelace, Ada, Ada") === "Lovelace, Ada, Ada"
+  );
+
+  const imported = csvNamesForEditing(
+    'Student Name,ID\n"Lovelace, Ada",1\n"Hopper, Grace",2\n'
+  );
+  check(
+    "a gradebook import arrives first-name-first",
+    imported.join("|") === "Ada Lovelace|Grace Hopper",
+    imported.join("|")
+  );
+
+  // The bug this exists to prevent: the paste box splits on commas, so
+  // an unflipped cell would be drawn as two people.
+  const asDrawn = parseNames(imported.join("\n"));
+  check(
+    "two students import as two people, not four",
+    asDrawn.length === 2,
+    `got ${asDrawn.length}`
+  );
+  check(
+    "and an unflipped cell really would have been four",
+    parseNames('Lovelace, Ada\nHopper, Grace').length === 4
+  );
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

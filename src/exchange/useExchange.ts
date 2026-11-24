@@ -7,6 +7,7 @@ import {
   suggestedRemovals,
   type ForbiddenPairing,
 } from "../draw/assignment";
+import { downloadFile, slugify } from "../downloadFile";
 import { routeUrl } from "../router";
 import {
   createInviteeId,
@@ -561,23 +562,11 @@ const [inviteEmail, setInviteEmail] = useState("");
   });
 
   const exportExchange = () => {
-    const slug =
-      eventName.trim().replace(/[^a-z0-9]+/gi, "-").toLowerCase() ||
-      "mystery-name-draw";
-
-    const blob = new Blob(
-      [JSON.stringify(buildExchangeSnapshot(), null, 2)],
-      { type: "application/json" }
+    downloadFile(
+      `${slugify(eventName, "mystery-name-draw")}.json`,
+      JSON.stringify(buildExchangeSnapshot(), null, 2),
+      "application/json"
     );
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = `${slug}.json`;
-    link.click();
-
-    URL.revokeObjectURL(url);
   };
 
   // Imported files are untrusted: read every field defensively rather

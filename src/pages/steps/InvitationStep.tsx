@@ -523,7 +523,7 @@ export default function InvitationStep() {
           className="continue-button"
           onClick={() => setCurrentStep(5)}
         >
-          Manage Exchange →
+          Manage Exchange / Save Template →
         </button>
 
       </div>
