@@ -79,8 +79,8 @@ export default function PrivacyPage() {
           Once there is something to remove, you will be able to ask for
           it. Until then there is nothing held about you. Either way,
           email{" "}
-          <a href="mailto:contact@brainbenchapps.com">
-            contact@brainbenchapps.com
+          <a href="mailto:contact@mysterynamedraw.com">
+            contact@mysterynamedraw.com
           </a>{" "}
           and we will sort it out.
         </p>

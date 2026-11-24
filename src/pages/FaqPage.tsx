@@ -38,7 +38,15 @@ const QUESTIONS = [
   },
   {
     q: "What happens if somebody does not register in time?",
-    a: "They are not in the draw. Only people who have registered by the deadline are matched, so nobody ends up buying for someone who never joined.",
+    a: "They are not in the draw. Only people who have registered by the deadline are matched, so nobody ends up buying for someone who never joined. If somebody misses it and you want them in after all, the organizer can reopen registration from Manage Exchange at any point before the draw, and that person can then register with the link they already have.",
+  },
+  {
+    q: "Can I close registration early?",
+    a: "Yes. Registration closes on its deadline by itself, but the organizer can close it sooner from Manage Exchange once everyone has joined, which stops anyone else registering. It reopens just as easily. Closing early does not move the date restrictions open, though: that still follows the registration deadline you set, so everyone chooses against a list that is genuinely final.",
+  },
+  {
+    q: "What if the registration link gets out?",
+    a: "Generate a new code from Manage Exchange. Every link and invitation already sent stops working the moment you do, which is the point, but it stops working for everybody: the people who have already registered use that same link to come back and set their restrictions. Send the new link to your whole list, not only to the people who have not joined yet.",
   },
   {
     q: "What does it cost?",
@@ -68,8 +76,8 @@ export default function FaqPage() {
         <h2>Something not answered here?</h2>
         <p>
           Email{" "}
-          <a href="mailto:contact@brainbenchapps.com">
-            contact@brainbenchapps.com
+          <a href="mailto:contact@mysterynamedraw.com">
+            contact@mysterynamedraw.com
           </a>
           .
         </p>

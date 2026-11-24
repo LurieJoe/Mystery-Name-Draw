@@ -176,8 +176,24 @@ for (const [step, name, needle, forbidden] of STEPS) {
 }
 
 for (const [name, needles, forbidden] of [
-  ["FaqPage", ["Questions", "Does anyone need an account?", "Brain Bench Apps"]],
-  ["PrivacyPage", ["Privacy", "no accounts and no passwords", "Brain Bench Apps"]],
+  [
+    "FaqPage",
+    [
+      "Questions",
+      "Does anyone need an account?",
+      "Can I close registration early?",
+      "What if the registration link gets out?",
+      "contact@mysterynamedraw.com",
+      "Brain Bench Apps",
+    ],
+    // The old address lived in two pages and is easy to reintroduce.
+    ["contact@brainbenchapps.com"],
+  ],
+  [
+    "PrivacyPage",
+    ["Privacy", "no accounts and no passwords", "contact@mysterynamedraw.com"],
+    ["contact@brainbenchapps.com"],
+  ],
   [
     "QuickDrawPage",
     [
