@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test:draw": "tsc -p tsconfig.test.json && node .tmp-test/assignment.test.js",
     "smoke": "tsc -p tsconfig.smoke.json && node scripts/smoke.cjs",
-    "check": "tsc -b && npm run test:draw && npm run smoke"
+    "check": "tsc -b && npm run check:css && npm run test:draw && npm run smoke",
+    "check:css": "node scripts/check-css.cjs"
   },
   "dependencies": {
     "react": "^19.3.1",
