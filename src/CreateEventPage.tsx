@@ -135,9 +135,15 @@ const [inviteEmail, setInviteEmail] = useState("");
   useState<number | null>(null);
   const [activeRestrictionIndex, setActiveRestrictionIndex] =
   useState<number | null>(null);
+  const [restrictionEditorIndex, setRestrictionEditorIndex] =
+  useState<number | null>(null);
+  const [showAllRestrictions, setShowAllRestrictions] =
+  useState(false);
   const [selectedRestriction, setSelectedRestriction] =
   useState("");
   const [restrictionOwnerIndex, setRestrictionOwnerIndex] =
+  useState<number | null>(null);
+  const [managingInviteeIndex, setManagingInviteeIndex] =
   useState<number | null>(null);
   const registrationDateValid =
   !registrationDeadline ||
@@ -881,7 +887,7 @@ return (
 
 
  <h3>Invitation List</h3>
-
+ 
 <div className="invitee-entry-row">
 
   <input
@@ -964,6 +970,7 @@ return (
   </button>
 
 </div>
+
 <span className="invitee-status">
   {invitee.status === "Invited"
     ? "📧 Invited"
@@ -975,87 +982,144 @@ return (
   type="button"
   className="secondary-button"
   onClick={() => {
-    setActiveRestrictionIndex(index);
-    setRestrictionOwnerIndex(index);
+    setRestrictionEditorIndex(index);
+
+    setTimeout(() => {
+      document
+        .getElementById("restriction-editor")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+    }, 100);
   }}
 >
   Manage ({invitee.restrictions.length})
 </button>
 
-{activeRestrictionIndex === index && (
-    <div>
-
-      <select
-        value={selectedRestriction}
-        onChange={(e) =>
-          setSelectedRestriction(e.target.value)
-        }
-      >
-        <option value="">
-          Select Participant
-        </option>
-
-        {invitees
-          .filter((_, i) => i !== index)
-          .map((participant, i) => (
-            <option
-              key={i}
-              value={participant.name}
-            >
-              {participant.name}
-            </option>
-          ))}
-      </select>
-
-      <button
-        type="button"
-        className="secondary-button"
-        onClick={() => {
-          if (
-            !selectedRestriction ||
-            restrictionOwnerIndex === null
-          ) {
-            return;
-          }
-
-          const updatedInvitees = [...invitees];
-
-          const currentRestrictions =
-  updatedInvitees[
-    restrictionOwnerIndex
-  ].restrictions;
-
-if (
-  !currentRestrictions.includes(
-    selectedRestriction
-  )
-) {
-  currentRestrictions.push(
-    selectedRestriction
-  );
-}
-
-          setInvitees(updatedInvitees);
-
-          setSelectedRestriction("");
-          setActiveRestrictionIndex(null);
-          setRestrictionOwnerIndex(null);
-        }}
-      >
-        Add
-      </button>
-
-    </div>
-)}
 
 </div>
 
     </div>
   ))}
+{restrictionEditorIndex !== null && (
+  <div
+    id="restriction-editor"
+    className="restriction-editor"
+  >
+    <h3>
+      Restrictions for{" "}
+      {invitees[restrictionEditorIndex].name}
+    </h3>
+    <button
+  type="button"
+  className="secondary-button"
+  onClick={() => setRestrictionEditorIndex(null)}
+>
+  Hide Restrictions
+</button>
+    {invitees
+  .filter(
+    (_, i) => i !== restrictionEditorIndex
+  )
+  .map((participant, i) => (
+    <label
+      key={i}
+      className="checkbox-inline"
+    >
+      <input
+        type="checkbox"
+        checked={
+          invitees[
+            restrictionEditorIndex
+          ].restrictions.includes(
+            participant.name
+          )
+        }
+        onChange={(e) => {
+          const updatedInvitees = [...invitees];
+
+          const restrictions =
+            updatedInvitees[
+              restrictionEditorIndex
+            ].restrictions;
+
+          if (e.target.checked) {
+            if (
+              !restrictions.includes(
+                participant.name
+              )
+            ) {
+              restrictions.push(
+                participant.name
+              );
+            }
+          } else {
+            updatedInvitees[
+              restrictionEditorIndex
+            ].restrictions =
+              restrictions.filter(
+                (r) =>
+                  r !== participant.name
+              );
+          }
+
+          setInvitees(updatedInvitees);
+        }}
+      />
+
+      {participant.name}
+    </label>
+  ))}  </div>
+)}
 
 </div>
-  <h3>Participants</h3>
 
+<h3>Restrictions</h3>
+
+<button
+  type="button"
+  className="secondary-button"
+  onClick={() =>
+    setShowAllRestrictions(
+      !showAllRestrictions
+    )
+  }
+>
+{showAllRestrictions
+  ? "Hide All Restrictions"
+  : "View All Restrictions"}
+</button>
+{showAllRestrictions && (
+  <div className="restriction-editor">
+
+    <h3>All Restrictions</h3>
+
+    {invitees.map((invitee, index) => (
+      <div key={index}>
+
+        <strong>{invitee.name}</strong>
+
+        {invitee.restrictions.length > 0 ? (
+          <ul>
+            {invitee.restrictions.map(
+              (restriction, i) => (
+                <li key={i}>
+                  {restriction}
+                </li>
+              )
+            )}
+          </ul>
+        ) : (
+          <p>No restrictions</p>
+        )}
+
+      </div>
+    ))}
+
+  </div>
+)}
+<h3>Participants</h3>
 <label className="checkbox-inline">
 <input
   type="checkbox"

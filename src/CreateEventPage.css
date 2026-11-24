@@ -1027,3 +1027,10 @@ grid-template-columns: 160px  300px 200px 180px 150px;
 
   border-bottom: 1px solid #e5e7eb;
 }
+.restriction-editor {
+  margin-top: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: white;
+}
