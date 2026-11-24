@@ -1,7 +1,12 @@
+/* The header wraps rather than overflowing: at narrow widths the
+   buttons used to be pushed off the right edge, where they could not be
+   reached without scrolling sideways. */
 .header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem 1.5rem;
   width: 100%;
   padding: 1rem 2rem;
   box-sizing: border-box;
@@ -11,17 +16,17 @@
 
 .header-brand {
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
-  font-size: 2.25rem;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
   font-weight: 800;
+  white-space: nowrap;
   color: #f8fafc;
 }
 
 .nav {
   display: flex;
-  gap: 1.5rem;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
   margin-left: auto;
-  margin-right: 3rem;
 }
 
 .nav a {
@@ -38,51 +43,16 @@
 
 .header-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-left: auto;
 }
 
-.theme-button,
-.signin-button {
-  margin-left: 3rem;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.4);
-  background: transparent;
-  color: white;
-  cursor: pointer;
-}
-[data-theme="dark"] .header {
-  background: #111827;
-  border-bottom-color: #374151;
-}
-
-[data-theme="dark"] .nav a {
-  color: #d1d5db;
-}
-
-[data-theme="dark"] .nav a:hover {
-  color: #8b5cf6;
-}
-
-[data-theme="dark"] .theme-button,
-[data-theme="dark"] .signin-button {
-  background: #1f2937;
-  border-color: #374151;
-  color: #f9fafb;
-}
-[data-theme="light"] .signin-button {
-  color: #1e293b;
-  background: white;
-}
-[data-theme="light"] .signin-button {
-  background: white;
-  color: #1e293b;
-}
 .start-exchange-button {
   margin-right: 0;
   padding: 0.8rem 1.6rem;
+  white-space: nowrap;
   border: none;
   border-radius: 999px;
   background: white;
@@ -93,6 +63,7 @@
 }
 .quick-draw-button {
   padding: 0.8rem 1.6rem;
+  white-space: nowrap;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.5);
   background: transparent;
@@ -108,4 +79,18 @@
 
 .start-exchange-button:hover {
   transform: translateY(-1px);
+}
+/* Once the header has wrapped onto its own rows, the auto margins only
+   serve to push the nav right while the buttons sit left. Line them all
+   up instead. */
+@media (max-width: 640px) {
+  .header {
+    padding: 1rem 1.25rem;
+  }
+
+  .nav,
+  .header-actions {
+    margin-left: 0;
+    width: 100%;
+  }
 }

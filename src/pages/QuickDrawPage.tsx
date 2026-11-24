@@ -195,6 +195,12 @@ export default function QuickDrawPage() {
     );
   };
 
+  const clearNames = () => {
+    setNames("");
+    setResult(null);
+    setNotice("");
+  };
+
   const startOver = () => {
     setPurpose(null);
     setResult(null);
@@ -294,6 +300,15 @@ export default function QuickDrawPage() {
                 disabled={people.length === 0}
               >
                 Save this list
+              </button>
+
+              <button
+                type="button"
+                className="quick-secondary"
+                onClick={clearNames}
+                disabled={names.trim() === ""}
+              >
+                Clear list
               </button>
 
               <span className="quick-file-hint">

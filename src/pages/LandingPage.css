@@ -140,7 +140,7 @@
 
 .landing-steps {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   gap: 2rem;
   margin: 0;
   padding: 0;
@@ -180,7 +180,7 @@
 
 .landing-points {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 2rem;
 }
 
@@ -194,7 +194,10 @@
 
 .landing-choices {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  /* min() so a track can never demand more than the container has:
+     20rem is 360px at this page's 18px root, wider than a 320px phone,
+     which forced the page to scroll sideways. */
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
   gap: 2rem;
   align-items: stretch;
 }

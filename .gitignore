@@ -31,3 +31,4 @@ docs/samples/*.local.json
 
 # Compiled output from `npm run smoke`
 .tmp-smoke
+.tmp-preview

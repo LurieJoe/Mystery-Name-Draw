@@ -33,10 +33,6 @@ function Header({
 >
   Create a Quick Draw
 </button>
-
-          <button className="signin-button">
-            Sign In
-          </button>
         </div>
       </header>
     );
