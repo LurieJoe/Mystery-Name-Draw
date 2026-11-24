@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "eventName": "Sample Family Exchange",
+  "drawDate": "2026-12-24",
+  "registrationDeadline": "2026-12-19",
+  "giftBudget": "25",
+  "currency": "USD",
+  "noGiftLimit": false,
+  "remindBeforeRegistrationDeadline": true,
+  "remindBeforeDrawDate": true,
+  "organizer": {
+    "name": "Avery",
+    "email": "avery@example.com",
+    "participating": true
+  },
+  "invitees": [
+    {
+      "id": "evelyn",
+      "name": "Blake",
+      "email": "blake@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "henrique",
+      "name": "Casey",
+      "email": "casey@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "filipe",
+      "name": "Dana",
+      "email": "dana@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "rachel",
+      "name": "Elliot",
+      "email": "elliot@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "alexandra",
+      "name": "Finley",
+      "email": "finley@example.com",
+      "status": "Registered"
+    }
+  ],
+  "restrictions": [
+    {
+      "ownerId": "organizer",
+      "otherId": "evelyn",
+      "direction": "give"
+    },
+    {
+      "ownerId": "organizer",
+      "otherId": "filipe",
+      "direction": "receive"
+    },
+    {
+      "ownerId": "evelyn",
+      "otherId": "rachel",
+      "direction": "give"
+    },
+    {
+      "ownerId": "evelyn",
+      "otherId": "henrique",
+      "direction": "receive"
+    },
+    {
+      "ownerId": "henrique",
+      "otherId": "organizer",
+      "direction": "give"
+    },
+    {
+      "ownerId": "henrique",
+      "otherId": "evelyn",
+      "direction": "give"
+    },
+    {
+      "ownerId": "henrique",
+      "otherId": "rachel",
+      "direction": "receive"
+    },
+    {
+      "ownerId": "henrique",
+      "otherId": "alexandra",
+      "direction": "receive"
+    },
+    {
+      "ownerId": "rachel",
+      "otherId": "alexandra",
+      "direction": "give"
+    },
+    {
+      "ownerId": "alexandra",
+      "otherId": "henrique",
+      "direction": "receive"
+    }
+  ]
+}

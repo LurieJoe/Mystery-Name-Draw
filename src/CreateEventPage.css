@@ -1088,3 +1088,54 @@ grid-template-columns: 160px  300px 200px 180px 150px;
 .email-preview-link {
   overflow-wrap: anywhere;
 }
+
+/* --- Organizer details (Step 1) --- */
+
+.organizer-fields {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.organizer-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 260px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.organizer-fields input {
+  width: 100%;
+  background: white;
+  color: #1e293b;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.organizer-fields input:focus {
+  outline: none;
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+}
+
+.exchange-io {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.file-button {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.file-button input[type="file"] {
+  display: none;
+}

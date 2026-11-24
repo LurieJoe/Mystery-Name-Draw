@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import type { ChangeEvent } from "react";
 import Header from "./components/Header";
 import "./CreateEventPage.css";
 
@@ -20,7 +21,7 @@ type RestrictionDirection = "give" | "receive";
  *   "receive" -> `otherId` must not be assigned to buy for owner
  *
  * Direction matters: an owner refusing to give to someone says nothing
- * about the reverse. Two participants can independently express the same
+ * about the reverse. Two roster can independently express the same
  * underlying constraint (Joe won't give to Evelyn; Evelyn won't receive
  * from Joe) - those stay two separate records, because they are two
  * people's choices. The draw collapses them when it builds the set of
@@ -30,6 +31,46 @@ type Restriction = {
   ownerId: string;
   otherId: string;
   direction: RestrictionDirection;
+};
+
+// The organizer is a participant like anyone else, with a fixed id so
+// restrictions naming them survive toggling "Include me" off and on.
+const ORGANIZER_ID = "organizer";
+
+const INVITE_PENDING = "Invite Pending";
+const INVITED = "Invited";
+const REGISTERED = "Registered";
+
+const INVITEE_STATUSES = [INVITE_PENDING, INVITED, REGISTERED];
+
+/**
+ * Local-calendar ISO date. `toISOString()` converts to UTC first, so
+ * west of Greenwich it returns tomorrow's date all evening.
+ */
+const toIsoDate = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getDate()).padStart(2, "0")}`;
+
+/** Move an ISO date forward whole years, clamping Feb 29 to Feb 28. */
+const shiftIsoDateByYears = (value: string, years: number) => {
+  if (!value || years === 0) {
+    return value;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return value;
+  }
+
+  const targetYear = year + years;
+  const lastDayOfMonth = new Date(targetYear, month, 0).getDate();
+
+  return `${targetYear}-${String(month).padStart(2, "0")}-${String(
+    Math.min(day, lastDayOfMonth)
+  ).padStart(2, "0")}`;
 };
 
 const createInviteeId = () =>
@@ -48,6 +89,8 @@ const [eventCode, setEventCode] = useState("");
 const [registrationOpen, setRegistrationOpen] = useState(true);
 const [includeOrganizer, setIncludeOrganizer] =
   useState(true);
+const [organizerName, setOrganizerName] = useState("");
+const [organizerEmail, setOrganizerEmail] = useState("");
 const [emailSubject, setEmailSubject] = useState("");
 const [registrationDateTouched,
   setRegistrationDateTouched] =
@@ -99,6 +142,43 @@ const [remindBeforeDrawDate, setRemindBeforeDrawDate] =
   const [invitees, setInvitees] = useState<Invitee[]>([]);
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
 
+  const organizerParticipant: Invitee | null =
+    includeOrganizer && organizerName.trim()
+      ? {
+          id: ORGANIZER_ID,
+          name: organizerName.trim(),
+          email: organizerEmail.trim(),
+          status: "Organizer",
+        }
+      : null;
+
+  // Everyone the organizer manages: the organizer plus every invitee,
+  // whatever their status.
+  const roster: Invitee[] = organizerParticipant
+    ? [organizerParticipant, ...invitees]
+    : invitees;
+
+  // Only these are in the draw. An invitee is not a participant until
+  // they register; the organizer counts once they opt in.
+  const participants = roster.filter(
+    (person) =>
+      person.id === ORGANIZER_ID ||
+      person.status === "Registered"
+  );
+
+  // Restrictions whose two ends are both currently in the roster.
+  // Keeps a removed person's restrictions from being shown or counted,
+  // while leaving them intact in case that person comes back.
+  const activeRestrictions = restrictions.filter(
+    (restriction) =>
+      roster.some(
+        (participant) => participant.id === restriction.ownerId
+      ) &&
+      roster.some(
+        (participant) => participant.id === restriction.otherId
+      )
+  );
+
 const [inviteName, setInviteName] = useState("");
 const [inviteEmail, setInviteEmail] = useState("");
   const [editingInviteeId, setEditingInviteeId] =
@@ -109,11 +189,15 @@ const [inviteEmail, setInviteEmail] = useState("");
   useState(false);
 
   const nameForInvitee = (inviteeId: string) =>
-    invitees.find((invitee) => invitee.id === inviteeId)?.name ??
+    roster.find(
+      (participant) => participant.id === inviteeId
+    )?.name ??
     "Removed participant";
 
   const otherInvitees = (inviteeId: string) =>
-    invitees.filter((invitee) => invitee.id !== inviteeId);
+    roster.filter(
+      (participant) => participant.id !== inviteeId
+    );
 
   const hasRestriction = (
     ownerId: string,
@@ -152,12 +236,24 @@ const [inviteEmail, setInviteEmail] = useState("");
   // A participant's own choices only - never restrictions others set
   // that happen to involve them.
   const restrictionsOwnedBy = (inviteeId: string) =>
-    restrictions.filter(
+    activeRestrictions.filter(
       (restriction) => restriction.ownerId === inviteeId
     );
 
   const restrictionCountFor = (inviteeId: string) =>
     restrictionsOwnedBy(inviteeId).length;
+
+  // Sending the invitation moves everyone still pending to "Invited".
+  // Registration (not built yet) is what moves them to "Registered".
+  const markPendingAsInvited = () => {
+    setInvitees((previousInvitees) =>
+      previousInvitees.map((invitee) =>
+        invitee.status === INVITE_PENDING
+          ? { ...invitee, status: INVITED }
+          : invitee
+      )
+    );
+  };
 
   const removeInvitee = (inviteeId: string) => {
     setInvitees((previousInvitees) =>
@@ -189,9 +285,7 @@ const [inviteEmail, setInviteEmail] = useState("");
   !drawDate ||
   registrationDeadline <= drawDate;
   
-  const today = new Date()
-  .toISOString()
-  .split("T")[0];
+  const today = toIsoDate(new Date());
 
 
   const registrationDeadlineInPast =
@@ -219,6 +313,244 @@ const [inviteEmail, setInviteEmail] = useState("");
   
     return code;
   };
+  const buildExchangeSnapshot = () => ({
+    version: 1,
+    eventName,
+    drawDate,
+    registrationDeadline,
+    giftBudget,
+    currency,
+    noGiftLimit,
+    remindBeforeRegistrationDeadline,
+    remindBeforeDrawDate,
+    organizer: {
+      name: organizerName,
+      email: organizerEmail,
+      participating: includeOrganizer,
+    },
+    // A template is for a future run of the exchange, so nobody carries
+    // over as already invited or registered.
+    invitees: invitees.map((invitee) => ({
+      ...invitee,
+      status: INVITE_PENDING,
+    })),
+    restrictions,
+  });
+
+  const exportExchange = () => {
+    const slug =
+      eventName.trim().replace(/[^a-z0-9]+/gi, "-").toLowerCase() ||
+      "mystery-name-draw";
+
+    const blob = new Blob(
+      [JSON.stringify(buildExchangeSnapshot(), null, 2)],
+      { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `${slug}.json`;
+    link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  // Imported files are untrusted: read every field defensively rather
+  // than trusting the shape.
+  const applyExchangeSnapshot = (raw: unknown) => {
+    if (typeof raw !== "object" || raw === null) {
+      throw new Error("Not an exchange file");
+    }
+
+    const data = raw as Record<string, unknown>;
+
+    const text = (value: unknown) =>
+      typeof value === "string" ? value : "";
+
+    const flag = (value: unknown, fallback: boolean) =>
+      typeof value === "boolean" ? value : fallback;
+
+    const isRecord = (
+      value: unknown
+    ): value is Record<string, unknown> =>
+      typeof value === "object" && value !== null;
+
+    const importedInvitees: Invitee[] = (
+      Array.isArray(data.invitees) ? data.invitees : []
+    )
+      .filter(isRecord)
+      .map((entry) => {
+        const status = text(entry.status);
+
+        return {
+          id: text(entry.id) || createInviteeId(),
+          name: text(entry.name).trim(),
+          email: text(entry.email).trim(),
+          status: INVITEE_STATUSES.includes(status)
+            ? status
+            : INVITE_PENDING,
+        };
+      })
+      .filter((invitee) => invitee.name);
+
+    const knownIds = new Set(
+      importedInvitees.map((invitee) => invitee.id)
+    );
+    knownIds.add(ORGANIZER_ID);
+
+    const importedRestrictions: Restriction[] = (
+      Array.isArray(data.restrictions) ? data.restrictions : []
+    )
+      .filter(isRecord)
+      .map((entry) => ({
+        ownerId: text(entry.ownerId),
+        otherId: text(entry.otherId),
+        direction:
+          text(entry.direction) === "receive"
+            ? ("receive" as const)
+            : ("give" as const),
+      }))
+      .filter(
+        (restriction) =>
+          restriction.ownerId !== restriction.otherId &&
+          knownIds.has(restriction.ownerId) &&
+          knownIds.has(restriction.otherId)
+      );
+
+    const organizer = isRecord(data.organizer) ? data.organizer : {};
+
+    // A template from a previous year carries dates that have passed.
+    // Roll them forward by whole years so the seasonal timing survives
+    // (24 December stays 24 December) instead of importing as errors.
+    const fileDrawDate = text(data.drawDate);
+    const fileDeadline = text(data.registrationDeadline);
+    const todayIso = toIsoDate(new Date());
+
+    let yearsForward = 0;
+
+    while (
+      fileDrawDate &&
+      shiftIsoDateByYears(fileDrawDate, yearsForward) < todayIso &&
+      yearsForward < 20
+    ) {
+      yearsForward += 1;
+    }
+
+    const nextDrawDate = shiftIsoDateByYears(
+      fileDrawDate,
+      yearsForward
+    );
+
+    let nextDeadline = shiftIsoDateByYears(fileDeadline, yearsForward);
+
+    // Keep the deadline on or before the draw, and not already past.
+    if (
+      nextDrawDate &&
+      (!nextDeadline ||
+        nextDeadline > nextDrawDate ||
+        nextDeadline < todayIso)
+    ) {
+      const fallback = new Date(`${nextDrawDate}T00:00:00`);
+      fallback.setDate(fallback.getDate() - 5);
+      nextDeadline = toIsoDate(fallback);
+    }
+
+    setEventName(text(data.eventName));
+    setDrawDate(nextDrawDate);
+    setRegistrationDeadline(nextDeadline);
+    setRegistrationDateTouched(true);
+    setGiftBudget(text(data.giftBudget));
+    setCurrency(text(data.currency) || "USD");
+    setNoGiftLimit(flag(data.noGiftLimit, false));
+    setRemindBeforeRegistrationDeadline(
+      flag(data.remindBeforeRegistrationDeadline, true)
+    );
+    setRemindBeforeDrawDate(flag(data.remindBeforeDrawDate, true));
+
+    setOrganizerName(text(organizer.name));
+    setOrganizerEmail(text(organizer.email));
+    setIncludeOrganizer(flag(organizer.participating, true));
+
+    setInvitees(importedInvitees);
+    setRestrictions(importedRestrictions);
+
+    setEditingInviteeId(null);
+    setRestrictionEditorId(null);
+    setShowAllRestrictions(false);
+    setInviteName("");
+    setInviteEmail("");
+    setCopied(false);
+    setRegistrationOpen(true);
+
+    // A template should never reuse the code of the exchange it came
+    // from, or old invitation links would point at the new event.
+    setEventCode(generateEventCode());
+    setEmailSubject(
+      `You're Invited to Join ${
+        text(data.eventName) || "This Gift Exchange"
+      }`
+    );
+
+    // Land on the invitation page when there is a list to work with.
+    setCurrentStep(importedInvitees.length > 0 ? 4 : 1);
+
+    return {
+      count: importedInvitees.length,
+      yearsForward,
+      drawDate: nextDrawDate,
+    };
+  };
+
+  const handleImportFile = async (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    const hasExchangeData =
+      eventName.trim() || organizerName.trim() || invitees.length > 0;
+
+    if (
+      hasExchangeData &&
+      !window.confirm(
+        "Import this exchange?\n\nIt will replace the exchange you have open."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const result = applyExchangeSnapshot(
+        JSON.parse(await file.text())
+      );
+
+      const dateNote =
+        result.yearsForward > 0
+          ? ` Dates were moved forward to ${result.drawDate.slice(
+              0,
+              4
+            )}, so check they still suit you.`
+          : "";
+
+      alert(
+        `Exchange imported with ${result.count} ${
+          result.count === 1 ? "invitee" : "invitees"
+        }.${dateNote} A new event code was generated.`
+      );
+    } catch {
+      alert(
+        "That file could not be imported. It should be a Mystery Name Draw JSON file."
+      );
+    }
+  };
+
   const resetExchange = () => {
     setEventName("");
     setDrawDate("");
@@ -242,6 +574,8 @@ const [inviteEmail, setInviteEmail] = useState("");
     setRestrictionEditorId(null);
     setShowAllRestrictions(false);
     setIncludeOrganizer(true);
+    setOrganizerName("");
+    setOrganizerEmail("");
     setEmailSubject("");
 
     setCurrentStep(1);
@@ -351,7 +685,7 @@ const addInvitee = () => {
         id: createInviteeId(),
         name,
         email,
-        status: "Invite Pending",
+        status: INVITE_PENDING,
       },
     ]);
   }
@@ -372,6 +706,7 @@ return (
       registrationDeadline ||
       giftBudget ||
       eventCode ||
+      organizerName.trim() ||
       invitees.length > 0;
 
     if (hasExchangeData) {
@@ -400,6 +735,17 @@ return (
 
   <div className="wizard-card">
 
+
+  <div className="exchange-io">
+    <label className="secondary-button file-button">
+      Import Exchange / Template
+      <input
+        type="file"
+        accept="application/json,.json"
+        onChange={handleImportFile}
+      />
+    </label>
+  </div>
 
   <h2>Gift Exchange Settings</h2>
 
@@ -576,11 +922,59 @@ return (
         setRemindBeforeDrawDate(e.target.checked)
       }
     />
-    Remind participants before the draw date
+    Remind roster before the draw date
   </label>
 
   <p className="helper-text">
     Leave both unchecked to send no reminders.
+  </p>
+
+  <hr />
+
+  <h3>Organizer</h3>
+
+  <p className="helper-text">
+    Used to contact you about this exchange, and to enter you in the
+    draw if you are taking part.
+  </p>
+
+  <div className="organizer-fields">
+    <label>
+      Your Name
+      <input
+        type="text"
+        placeholder="Your name"
+        value={organizerName}
+        onChange={(e) => setOrganizerName(e.target.value)}
+      />
+    </label>
+
+    <label>
+      Your Email
+      <input
+        type="email"
+        placeholder="you@example.com"
+        value={organizerEmail}
+        onChange={(e) => setOrganizerEmail(e.target.value)}
+      />
+    </label>
+  </div>
+
+  <label className="checkbox-inline">
+    <input
+      type="checkbox"
+      checked={includeOrganizer}
+      onChange={(e) => setIncludeOrganizer(e.target.checked)}
+    />
+    Include me in this gift exchange
+  </label>
+
+  <p className="helper-text">
+    {includeOrganizer
+      ? organizerName.trim()
+        ? "You are in the draw and may be assigned someone to buy for."
+        : "Enter your name above to be added to the participant list."
+      : "You are organizing only, and will not be assigned anyone."}
   </p>
 
   <div className="wizard-navigation">
@@ -664,6 +1058,20 @@ return (
     </div>
   </div>
 
+  <div className="review-card">
+    <div className="review-label">
+      You Are Participating
+    </div>
+
+    <div className="review-value">
+      {organizerParticipant
+        ? `Yes, as ${organizerParticipant.name}`
+        : includeOrganizer
+        ? "Yes - add your name in Settings"
+        : "No, organizing only"}
+    </div>
+  </div>
+
 </div>
 
 <div className="review-logo">
@@ -721,7 +1129,7 @@ return (
 </p>
 
 <p className="step-description next-step-text">
-  Next, invite participants to register using the link below.
+  Next, invite roster to register using the link below.
 </p>
 
 
@@ -752,7 +1160,7 @@ return (
     type="checkbox"
     defaultChecked
   />
-  Allow participants to invite others
+  Allow roster to invite others
 </label>
 
 <p className="helper-text">
@@ -788,7 +1196,7 @@ return (
 </div>
 
 <div className="tip-item">
-⏳ Give participants enough shopping time after the draw date.
+⏳ Give roster enough shopping time after the draw date.
 </div>
 
 <div className="tip-item">
@@ -882,69 +1290,80 @@ return (
 
 <div className="invitee-list">
 
-  {invitees.map((invitee) => (
-    <div
-      key={invitee.id}
-      className="invitee-row"
-    >
-      <span>{invitee.name}</span>
-      <span>{invitee.email}</span>
+  {roster.map((participant) => {
+    const isOrganizer = participant.id === ORGANIZER_ID;
 
-      <div className="invitee-actions">
+    return (
+      <div
+        key={participant.id}
+        className="invitee-row"
+      >
+        <span>{participant.name}</span>
+        <span>{participant.email || "\u2014"}</span>
 
-  <button
-    type="button"
-    className="secondary-button"
-    onClick={() => {
-      setInviteName(invitee.name);
-      setInviteEmail(invitee.email);
-      setEditingInviteeId(invitee.id);
-    }}
-  >
-    Edit
-  </button>
+        <div className="invitee-actions">
+          {isOrganizer ? (
+            <span className="helper-text">
+              Edit in Settings
+            </span>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => {
+                  setInviteName(participant.name);
+                  setInviteEmail(participant.email);
+                  setEditingInviteeId(participant.id);
+                }}
+              >
+                Edit
+              </button>
 
-  <button
-    type="button"
-    className="secondary-button remove-button"
-    onClick={() => removeInvitee(invitee.id)}
-  >
-    Remove
-  </button>
+              <button
+                type="button"
+                className="secondary-button remove-button"
+                onClick={() => removeInvitee(participant.id)}
+              >
+                Remove
+              </button>
+            </>
+          )}
+        </div>
 
-</div>
+        <span className="invitee-status">
+          {isOrganizer
+            ? "Organizer"
+            : participant.status === REGISTERED
+            ? "\u2705 Registered"
+            : participant.status === INVITED
+            ? "\u{1F4E7} Invited"
+            : "\u26AA Invite Pending"}
+        </span>
 
-<span className="invitee-status">
-  {invitee.status === "Invited"
-    ? "📧 Invited"
-    : "⚪ Invite Pending"}
-</span>
-<div className="invitee-restrictions">
+        <div className="invitee-restrictions">
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => {
+              setRestrictionEditorId(participant.id);
 
-<button
-  type="button"
-  className="secondary-button"
-  onClick={() => {
-    setRestrictionEditorId(invitee.id);
-
-    setTimeout(() => {
-      document
-        .getElementById("restriction-editor")
-        ?.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
-    }, 100);
-  }}
->
-  Manage ({restrictionCountFor(invitee.id)})
-</button>
-
-
-</div>
-
-    </div>
-  ))}
+              setTimeout(() => {
+                document
+                  .getElementById("restriction-editor")
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+              }, 100);
+            }}
+          >
+            Manage ({restrictionCountFor(participant.id)})
+          </button>
+        </div>
+      </div>
+    );
+  })}
 {restrictionEditorId !== null && (
   <div
     id="restriction-editor"
@@ -975,7 +1394,7 @@ return (
 
     {otherInvitees(restrictionEditorId).length === 0 ? (
       <p className="helper-text">
-        Add at least two participants to set restrictions.
+        Add at least two roster to set restrictions.
       </p>
     ) : (
       <div className="restriction-sections">
@@ -1073,14 +1492,14 @@ return (
 {showAllRestrictions && (
   <div className="restriction-editor">
 
-    <h3>All Restrictions ({restrictions.length})</h3>
+    <h3>All Restrictions ({activeRestrictions.length})</h3>
 
-    {restrictions.length === 0 ? (
+    {activeRestrictions.length === 0 ? (
       <p className="helper-text">
         No restrictions have been set.
       </p>
     ) : (
-      invitees.map((invitee) => {
+      roster.map((invitee) => {
         const ownRestrictions = restrictionsOwnedBy(invitee.id);
 
         if (ownRestrictions.length === 0) {
@@ -1130,33 +1549,38 @@ return (
   </div>
 )}
 <h3>Participants</h3>
-<label className="checkbox-inline">
-<input
-  type="checkbox"
-  checked={includeOrganizer}
-  onChange={(e) =>
-    setIncludeOrganizer(e.target.checked)
-  }
-/>
-  Include me in this gift exchange
-</label>
 
 <p className="helper-text">
-  The organizer will participate in the gift exchange and may receive a recipient assignment.
+  Only people who have registered are in the draw. Invitees appear here
+  once they register. Change whether you take part in Settings.
 </p>
 
 <div className="created-participants">
-<p>
-  <strong>
-    {includeOrganizer ? "1 Registered" : "0 Registered"}
-  </strong>
-</p>
+  <p>
+    <strong>
+      {participants.length}{" "}
+      {participants.length === 1
+        ? "Participant"
+        : "Participants"}
+    </strong>
+  </p>
 
-{includeOrganizer && (
-  <ul>
-    <li>✅ Organizer</li>
-  </ul>
-)}
+  {participants.length === 0 ? (
+    <p className="helper-text">
+      Nobody has registered yet.
+    </p>
+  ) : (
+    <ul>
+      {participants.map((participant) => (
+        <li key={participant.id}>
+          {participant.name}
+          {participant.id === ORGANIZER_ID
+            ? " (organizer)"
+            : ""}
+        </li>
+      ))}
+    </ul>
+  )}
 </div>
 
   <h3>Registration Link</h3>
@@ -1195,6 +1619,8 @@ return (
       `Subject: ${emailSubject}\n\n${invitationMessage}`
     );
   
+    markPendingAsInvited();
+
     alert(
       "Invitation copied to clipboard. Paste it into your email application."
     );
@@ -1210,6 +1636,8 @@ return (
     await navigator.clipboard.writeText(
       invitationMessage
     );
+
+    markPendingAsInvited();
 
     alert(
       "Invitation copied to your clipboard. Paste it into a text message."
@@ -1335,7 +1763,7 @@ return (
     onClick={() => {
       if (registrationOpen) {
         const confirmed = window.confirm(
-          "Close registration?\n\nNew participants will no longer be able to join this event."
+          "Close registration?\n\nNew roster will no longer be able to join this event."
         );
 
         if (confirmed) {
@@ -1365,6 +1793,14 @@ return (
     }}
   >
     Generate New Code
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={exportExchange}
+  >
+    Save as Template
   </button>
 </div>
 </div>

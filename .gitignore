@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Sample exchanges holding real contact details - keep local
+docs/samples/*.local.json

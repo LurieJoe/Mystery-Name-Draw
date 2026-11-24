@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "eventName": "Impossible Draw (test fixture)",
+  "drawDate": "2026-12-24",
+  "registrationDeadline": "2026-12-19",
+  "giftBudget": "25",
+  "currency": "USD",
+  "noGiftLimit": false,
+  "remindBeforeRegistrationDeadline": true,
+  "remindBeforeDrawDate": true,
+  "organizer": {
+    "name": "Avery",
+    "email": "avery@example.com",
+    "participating": true
+  },
+  "invitees": [
+    {
+      "id": "evelyn",
+      "name": "Blake",
+      "email": "blake@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "henrique",
+      "name": "Casey",
+      "email": "casey@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "filipe",
+      "name": "Dana",
+      "email": "dana@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "rachel",
+      "name": "Elliot",
+      "email": "elliot@example.com",
+      "status": "Registered"
+    },
+    {
+      "id": "alexandra",
+      "name": "Finley",
+      "email": "finley@example.com",
+      "status": "Registered"
+    }
+  ],
+  "restrictions": [
+    {
+      "ownerId": "evelyn",
+      "otherId": "henrique",
+      "direction": "give"
+    },
+    {
+      "ownerId": "evelyn",
+      "otherId": "filipe",
+      "direction": "give"
+    },
+    {
+      "ownerId": "evelyn",
+      "otherId": "rachel",
+      "direction": "give"
+    },
+    {
+      "ownerId": "evelyn",
+      "otherId": "alexandra",
+      "direction": "give"
+    },
+    {
+      "ownerId": "rachel",
+      "otherId": "henrique",
+      "direction": "give"
+    },
+    {
+      "ownerId": "rachel",
+      "otherId": "filipe",
+      "direction": "give"
+    },
+    {
+      "ownerId": "rachel",
+      "otherId": "evelyn",
+      "direction": "give"
+    },
+    {
+      "ownerId": "rachel",
+      "otherId": "alexandra",
+      "direction": "give"
+    },
+    {
+      "ownerId": "alexandra",
+      "otherId": "henrique",
+      "direction": "give"
+    },
+    {
+      "ownerId": "alexandra",
+      "otherId": "filipe",
+      "direction": "give"
+    },
+    {
+      "ownerId": "alexandra",
+      "otherId": "evelyn",
+      "direction": "give"
+    },
+    {
+      "ownerId": "alexandra",
+      "otherId": "rachel",
+      "direction": "give"
+    }
+  ]
+}
