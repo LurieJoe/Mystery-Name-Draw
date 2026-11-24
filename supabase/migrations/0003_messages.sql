@@ -111,17 +111,32 @@ begin
 
   return jsonb_build_object(
     'available', true,
-    -- A giver is talking to someone they know. A receiver is not, and
-    -- is never told more than this.
+    -- A giver is talking to someone they know, so they get the name. A
+    -- receiver is not, and gets the relationship instead: "Your Giver"
+    -- says who this is without saying who they are, and it still reads
+    -- correctly for a book swap or a classroom draw.
     'withName', case
       when p_as = 'giver'
         then (select name from invitees where id = v_thread.receiver_id)
       else null
     end,
+    'withLabel', case
+      when p_as = 'giver'
+        then (select name from invitees where id = v_thread.receiver_id)
+      else 'Your Giver'
+    end,
     'messages', coalesce((
       select jsonb_agg(jsonb_build_object(
         'id', m.id,
+        -- 'from' is for the client to style with: whose side of the
+        -- thread a message sits on. 'fromLabel' is what it says.
         'from', case when m.sender_role = p_as then 'you' else 'them' end,
+        'fromLabel', case
+          when m.sender_role = p_as then 'You'
+          when p_as = 'giver'
+            then (select name from invitees where id = v_thread.receiver_id)
+          else 'Your Giver'
+        end,
         'body', m.body,
         'at', m.created_at
       ) order by m.created_at)
@@ -224,6 +239,11 @@ $$;
 create or replace function pending_message_notifications()
 returns table (
   message_id uuid,
+  exchange_id uuid,
+  -- The job needs this to build the link back: the email says a
+  -- message is waiting and nothing else, so the link is the whole of
+  -- its usefulness.
+  event_code text,
   exchange_name text,
   to_email text,
   to_name text
@@ -235,6 +255,8 @@ set search_path = public, pg_temp
 as $$
   select
     m.id,
+    e.id,
+    e.event_code,
     e.name,
     recipient.email,
     recipient.name

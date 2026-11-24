@@ -73,6 +73,12 @@ begin
     perform assert('messaging before the draw is refused', true);
   end;
 
+  -- Evelyn writes a preference at registration. It matters that this
+  -- exists: the organizer is meant to see it, so a check that the
+  -- organizer cannot see the conversation has to be about words that
+  -- appear only in the conversation.
+  update invitees set preferences = 'Likes candles' where id = v_evelyn;
+
   -- Joe draws Evelyn, Evelyn draws Alan, Alan draws Joe.
   insert into assignments (exchange_id, giver_id, receiver_id)
   values (v_exchange_id, v_joe, v_evelyn),
@@ -107,6 +113,26 @@ begin
       select 1 from jsonb_array_elements(v_thread -> 'messages')
       where value ->> 'from' not in ('you', 'them')
     ));
+
+  -- What the labels actually say, from each end.
+  perform assert('a receiver sees Your Giver, not a name',
+    v_thread ->> 'withLabel' = 'Your Giver'
+    and exists (
+      select 1 from jsonb_array_elements(v_thread -> 'messages')
+      where value ->> 'fromLabel' = 'Your Giver'
+    )
+    and exists (
+      select 1 from jsonb_array_elements(v_thread -> 'messages')
+      where value ->> 'fromLabel' = 'You'
+    ));
+
+  perform assert('and a giver sees the name of the person they drew',
+    my_thread(v_joe_token, 'giver') ->> 'withLabel' = 'Evelyn'
+    and exists (
+      select 1 from jsonb_array_elements(
+        my_thread(v_joe_token, 'giver') -> 'messages')
+      where value ->> 'fromLabel' = 'Evelyn'
+    ));
   perform assert('the reply still names nobody',
     v_thread::text not like '%Joe%');
 
@@ -121,24 +147,44 @@ begin
     and jsonb_array_length(my_thread(v_alan_token, 'receiver') -> 'messages') = 0);
 
   -- The organizer is the one who must learn nothing at all.
-  perform assert('the organizer view carries no messages',
-    organizer_view(v_organizer_token)::text not like '%candles%'
-    and organizer_view(v_organizer_token)::text not like '%vanilla%');
+  perform assert('the organizer view carries no message text',
+    organizer_view(v_organizer_token)::text not like '%vanilla%'
+    and organizer_view(v_organizer_token)::text not like '%scent%');
+
+  -- The counterpart, stated so a change to it is a failing test rather
+  -- than a surprise: preferences are the organizer's to see.
+  perform assert('though the organizer does see stated preferences',
+    organizer_view(v_organizer_token)::text like '%Likes candles%');
   perform assert('and does not reveal that a thread exists',
     not (organizer_view(v_organizer_token) ? 'messages')
     and not (organizer_view(v_organizer_token) ? 'threads'));
 
   -- The email job knows an inbox, and that is all it hands over.
-  select count(*) into v_pending from pending_message_notifications();
+  -- Scoped to this exchange: the queue is global, so an unscoped count
+  -- passes or fails depending on what ran before it.
+  select count(*) into v_pending from pending_message_notifications()
+  where exchange_id = v_exchange_id;
   perform assert('both messages are waiting to be notified', v_pending = 2);
   perform assert('a notification names the exchange, not the sender',
     exists (
       select 1 from pending_message_notifications()
-      where to_email = 'evelyn@example.com' and exchange_name = 'Book swap'
+      where exchange_id = v_exchange_id
+        and to_email = 'evelyn@example.com'
+        and exchange_name = 'Book swap'
     ));
 
-  perform mark_notified(array(select message_id from pending_message_notifications()));
-  select count(*) into v_pending from pending_message_notifications();
+  perform assert('and carries the code the link needs',
+    exists (
+      select 1 from pending_message_notifications()
+      where exchange_id = v_exchange_id and length(event_code) = 6
+    ));
+
+  perform mark_notified(array(
+    select message_id from pending_message_notifications()
+    where exchange_id = v_exchange_id
+  ));
+  select count(*) into v_pending from pending_message_notifications()
+  where exchange_id = v_exchange_id;
   perform assert('and they are not notified twice', v_pending = 0);
 
   -- Reading is per end: Joe reading his thread does not mark his own.
