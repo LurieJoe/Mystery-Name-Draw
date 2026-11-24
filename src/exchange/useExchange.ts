@@ -8,6 +8,11 @@ import {
   type ForbiddenPairing,
 } from "../draw/assignment";
 import { downloadFile, slugify } from "../downloadFile";
+import {
+  removalConfirmation,
+  removalNotice,
+  removalOwners,
+} from "./restrictionNotices";
 import { routeUrl } from "../router";
 import {
   createInviteeId,
@@ -404,19 +409,13 @@ const [inviteEmail, setInviteEmail] = useState("");
 
     const giverName = nameForInvitee(pairing.giverId);
     const receiverName = nameForInvitee(pairing.receiverId);
-    const owners = [
-      ...new Set(records.map((record) => nameForInvitee(record.ownerId))),
-    ];
+
+    // Both sources are honoured, so a pairing can be the organizer's own
+    // doing, a participant's, or both. Who has to be told differs.
+    const owners = removalOwners(records, nameForInvitee);
 
     const confirmed = window.confirm(
-      `Remove this restriction?\n\n` +
-        (records.length > 1
-          ? `${owners.join(
-              " and "
-            )} both set a restriction on this pairing, and both will be removed.\n\n`
-          : "") +
-        `${giverName} could then be assigned to buy for ${receiverName}, ` +
-        `which ${owners.join(" and ")} asked to avoid.`
+      removalConfirmation(owners, records.length, giverName, receiverName)
     );
 
     if (!confirmed) {
@@ -439,11 +438,7 @@ const [inviteEmail, setInviteEmail] = useState("");
 
     setOverrideNotices((previousNotices) => [
       ...previousNotices,
-      owners.length > 1
-        ? `Removed the restrictions ${owners.join(
-            " and "
-          )} set on this pairing. Please let them both know: ${giverName} may now be assigned to buy for ${receiverName}.`
-        : `Removed ${owners[0]}'s restriction. Please let ${owners[0]} know: ${giverName} may now be assigned to buy for ${receiverName}.`,
+      removalNotice(owners, records.length, giverName, receiverName),
     ]);
   };
 

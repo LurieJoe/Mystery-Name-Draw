@@ -1,0 +1,59 @@
+# Supabase pauses a free project after a week without database activity,
+# and a paused project stays down until it is resumed by hand. An
+# exchange created months before its draw date would sit idle long
+# enough to be paused, and the draw would never run.
+#
+# This reads a single row every three days, which is enough to count as
+# activity. It does nothing until both repository secrets are set, so it
+# is safe to have here before the project exists.
+#
+#   SUPABASE_URL       https://<project-ref>.supabase.co
+#   SUPABASE_ANON_KEY  the anon key, which is meant to be public
+#
+# The service role key is not used here and must never be a secret this
+# workflow can read.
+
+name: Keep Supabase awake
+
+on:
+  schedule:
+    # 09:17 UTC every third day. Not on the hour: scheduled jobs pile up
+    # there and GitHub drops the overflow.
+    - cron: "17 9 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read one row
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "No Supabase project configured yet. Nothing to keep awake."
+            exit 0
+          fi
+
+          # A function call, not a table read: the tables deny anon by
+          # design, so a table read would 401 and prove nothing.
+          code=$(curl -sS -o /tmp/out.txt -w '%{http_code}' \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/registration_view" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" \
+            --data '{"p_invitee_token":"keepalive-not-a-real-token"}')
+
+          echo "HTTP $code"
+
+          # The token is deliberately wrong, so the database is reached
+          # and answers. Anything in the 200s or 400s means it is awake;
+          # a 5xx or a refused connection means it is not.
+          if [ "$code" -ge 500 ] || [ "$code" -eq 000 ]; then
+            echo "Supabase did not answer. It may be paused."
+            cat /tmp/out.txt
+            exit 1
+          fi
+
+          echo "Project is awake."

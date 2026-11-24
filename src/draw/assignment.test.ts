@@ -18,6 +18,13 @@ import {
   type ForbiddenPairing,
 } from "./assignment.js";
 import {
+  formatList,
+  removalConfirmation,
+  removalNotice,
+  removalOwners,
+} from "../exchange/restrictionNotices.js";
+import { ORGANIZER_ID, type Restriction } from "../exchange/types.js";
+import {
   csvNamesForEditing,
   flipSurnameFirst,
   parseCsvNames,
@@ -517,6 +524,76 @@ console.log("\n8. Reading a pasted list");
   check(
     "and an unflipped cell really would have been four",
     parseNames('Lovelace, Ada\nHopper, Grace').length === 4
+  );
+}
+
+{
+  console.log("\n11. Who gets told when a restriction is removed");
+
+  const nameOf = (id: string) =>
+    ({ a: "Ada", b: "Grace", organizer: "Joe" })[id] ?? id;
+
+  const give = (ownerId: string, otherId: string): Restriction => ({
+    ownerId,
+    otherId,
+    direction: "give",
+  });
+
+  check(
+    "names are listed with the Oxford comma",
+    formatList(["Ada", "Grace", "Alan"]) === "Ada, Grace, and Alan",
+    formatList(["Ada", "Grace", "Alan"])
+  );
+  check("two names take no comma", formatList(["Ada", "Grace"]) === "Ada and Grace");
+
+  // The organizer sets one on someone's behalf, in case they forget.
+  const organizerOnly = removalOwners([give(ORGANIZER_ID, "b")], nameOf);
+  check(
+    "an organizer-set restriction names no participant to notify",
+    organizerOnly.participants.length === 0 && organizerOnly.fromOrganizer
+  );
+
+  const notice = removalNotice(organizerOnly, 1, "Ada", "Grace");
+  check(
+    "and the organizer is not told to notify themselves",
+    !notice.includes("Please let") && notice.includes("nobody to tell"),
+    notice
+  );
+  check(
+    "the organizer is still told what it now allows",
+    notice.includes("Ada may now be assigned to buy for Grace")
+  );
+
+  const participantOnly = removalOwners([give("a", "b")], nameOf);
+  check(
+    "a participant's own restriction names them",
+    removalNotice(participantOnly, 1, "Ada", "Grace").includes(
+      "Please let Ada know"
+    ),
+    removalNotice(participantOnly, 1, "Ada", "Grace")
+  );
+
+  // Both set the same one: the participant still has to be told.
+  const both = removalOwners([give("a", "b"), give(ORGANIZER_ID, "b")], nameOf);
+  const bothNotice = removalNotice(both, 2, "Ada", "Grace");
+  check(
+    "when both set it, the participant is named and the organizer is not",
+    bothNotice.includes("Please let Ada know") && !bothNotice.includes("Joe"),
+    bothNotice
+  );
+
+  check(
+    "the confirmation says it is yours when only you set it",
+    removalConfirmation(organizerOnly, 1, "Ada", "Grace").includes(
+      "Ada could then be assigned to buy for Grace"
+    )
+  );
+  check(
+    "the confirmation counts both when both set it",
+    removalConfirmation(both, 2, "Ada", "Grace").includes(
+      "You and Ada each set a restriction"
+    ),
+    removalConfirmation(both, 2, "Ada", "Grace")
   );
 }
 

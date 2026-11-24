@@ -5,9 +5,15 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
-    "types": ["node"],
-    "rootDir": "src/draw",
+    "types": [
+      "node"
+    ],
+    "rootDir": "src",
     "outDir": ".tmp-test"
   },
-  "include": ["src/draw/**/*.ts"]
+  "include": [
+    "src/draw/**/*.ts",
+    "src/exchange/restrictionNotices.ts",
+    "src/exchange/types.ts"
+  ]
 }
