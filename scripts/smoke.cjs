@@ -203,6 +203,21 @@ for (const [name, needles, forbidden] of [
   );
 }
 
+// Clicking "Create a Quick Draw" in the header sets the hash. Prove the
+// route resolves, so a dead button can be told apart from a dead route.
+check(
+  "App at /#/quick (the Quick Draw route)",
+  () => {
+    globalThis.window.location.hash = "#/quick";
+    try {
+      return renderToStaticMarkup(React.createElement(App));
+    } finally {
+      globalThis.window.location.hash = "";
+    }
+  },
+  ["Quick Draw", "What are you using this for?"]
+);
+
 function RegisterHarness() {
   const exchange = useExchange();
   return React.createElement(
