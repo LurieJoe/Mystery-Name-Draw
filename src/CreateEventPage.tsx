@@ -1,11 +1,45 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Header from "./components/Header";
 import "./CreateEventPage.css";
 
+type Invitee = {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+};
+
+type RestrictionDirection = "give" | "receive";
+
+/**
+ * One restriction, belonging to the participant who set it.
+ *
+ * `ownerId` is whose choice this is, and it is only ever shown on that
+ * person's own list. `direction` is read from the owner's point of view:
+ *   "give"    -> owner must not be assigned to buy for `otherId`
+ *   "receive" -> `otherId` must not be assigned to buy for owner
+ *
+ * Direction matters: an owner refusing to give to someone says nothing
+ * about the reverse. Two participants can independently express the same
+ * underlying constraint (Joe won't give to Evelyn; Evelyn won't receive
+ * from Joe) - those stay two separate records, because they are two
+ * people's choices. The draw collapses them when it builds the set of
+ * forbidden giver/receiver pairs.
+ */
+type Restriction = {
+  ownerId: string;
+  otherId: string;
+  direction: RestrictionDirection;
+};
+
+const createInviteeId = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `invitee-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 8)}`;
+
 function CreateEventPage() {
-const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "dark"
-  );
   const [eventName, setEventName] = useState("");
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
@@ -57,32 +91,94 @@ const [reminderPreference, setReminderPreference] =
       day
     ).toLocaleDateString();
   };
-  const [invitees, setInvitees] = useState<
-  {
-    name: string;
-    email: string;
-    status: string;
-    restrictions: string[];
-  }[]
->([]);
+  const [invitees, setInvitees] = useState<Invitee[]>([]);
+  const [restrictions, setRestrictions] = useState<Restriction[]>([]);
 
 const [inviteName, setInviteName] = useState("");
 const [inviteEmail, setInviteEmail] = useState("");
-  useEffect(() => {
-    document.documentElement.setAttribute(
-      "data-theme",
-      theme
-    );
-  }, [theme]);
-  useEffect(() => {
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-  const [editingInviteeIndex, setEditingInviteeIndex] =
-  useState<number | null>(null);
-  const [restrictionEditorIndex, setRestrictionEditorIndex] =
-  useState<number | null>(null);
+  const [editingInviteeId, setEditingInviteeId] =
+    useState<string | null>(null);
+  const [restrictionEditorId, setRestrictionEditorId] =
+    useState<string | null>(null);
   const [showAllRestrictions, setShowAllRestrictions] =
   useState(false);
+
+  const nameForInvitee = (inviteeId: string) =>
+    invitees.find((invitee) => invitee.id === inviteeId)?.name ??
+    "Removed participant";
+
+  const otherInvitees = (inviteeId: string) =>
+    invitees.filter((invitee) => invitee.id !== inviteeId);
+
+  const hasRestriction = (
+    ownerId: string,
+    otherId: string,
+    direction: RestrictionDirection
+  ) =>
+    restrictions.some(
+      (restriction) =>
+        restriction.ownerId === ownerId &&
+        restriction.otherId === otherId &&
+        restriction.direction === direction
+    );
+
+  const setRestriction = (
+    ownerId: string,
+    otherId: string,
+    direction: RestrictionDirection,
+    restricted: boolean
+  ) => {
+    setRestrictions((previousRestrictions) => {
+      const withoutThisOne = previousRestrictions.filter(
+        (restriction) =>
+          !(
+            restriction.ownerId === ownerId &&
+            restriction.otherId === otherId &&
+            restriction.direction === direction
+          )
+      );
+
+      return restricted
+        ? [...withoutThisOne, { ownerId, otherId, direction }]
+        : withoutThisOne;
+    });
+  };
+
+  // A participant's own choices only - never restrictions others set
+  // that happen to involve them.
+  const restrictionsOwnedBy = (inviteeId: string) =>
+    restrictions.filter(
+      (restriction) => restriction.ownerId === inviteeId
+    );
+
+  const restrictionCountFor = (inviteeId: string) =>
+    restrictionsOwnedBy(inviteeId).length;
+
+  const removeInvitee = (inviteeId: string) => {
+    setInvitees((previousInvitees) =>
+      previousInvitees.filter(
+        (invitee) => invitee.id !== inviteeId
+      )
+    );
+
+    setRestrictions((previousRestrictions) =>
+      previousRestrictions.filter(
+        (restriction) =>
+          restriction.ownerId !== inviteeId &&
+          restriction.otherId !== inviteeId
+      )
+    );
+
+    if (restrictionEditorId === inviteeId) {
+      setRestrictionEditorId(null);
+    }
+
+    if (editingInviteeId === inviteeId) {
+      setEditingInviteeId(null);
+      setInviteName("");
+      setInviteEmail("");
+    }
+  };
   const registrationDateValid =
   !registrationDeadline ||
   !drawDate ||
@@ -133,10 +229,11 @@ const [inviteEmail, setInviteEmail] = useState("");
     setRegistrationOpen(true);
 
     setInvitees([]);
+    setRestrictions([]);
     setInviteName("");
     setInviteEmail("");
-    setEditingInviteeIndex(null);
-    setRestrictionEditorIndex(null);
+    setEditingInviteeId(null);
+    setRestrictionEditorId(null);
     setShowAllRestrictions(false);
     setIncludeOrganizer(true);
     setEmailSubject("");
@@ -163,33 +260,37 @@ const addInvitee = () => {
   if (!inviteName.trim() || !inviteEmail.trim()) {
     return;
   }
-  const emailRegex =
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-if (!emailRegex.test(inviteEmail.trim())) {
-  alert("Please enter a valid email address.");
-  return;
-}
-  const updatedInvitee = {
-    name: inviteName.trim(),
-    email: inviteEmail.trim(),
-    status: "Invite Pending",
-    restrictions: [],
-  };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (editingInviteeIndex !== null) {
-    const updatedInvitees = [...invitees];
+  if (!emailRegex.test(inviteEmail.trim())) {
+    alert("Please enter a valid email address.");
+    return;
+  }
 
-    updatedInvitees[editingInviteeIndex] =
-      updatedInvitee;
+  const name = inviteName.trim();
+  const email = inviteEmail.trim();
 
-    setInvitees(updatedInvitees);
+  if (editingInviteeId !== null) {
+    // Keyed by id, so renaming someone keeps their restrictions intact.
+    setInvitees((previousInvitees) =>
+      previousInvitees.map((invitee) =>
+        invitee.id === editingInviteeId
+          ? { ...invitee, name, email }
+          : invitee
+      )
+    );
 
-    setEditingInviteeIndex(null);
+    setEditingInviteeId(null);
   } else {
-    setInvitees([
-      ...invitees,
-      updatedInvitee,
+    setInvitees((previousInvitees) => [
+      ...previousInvitees,
+      {
+        id: createInviteeId(),
+        name,
+        email,
+        status: "Invite Pending",
+      },
     ]);
   }
 
@@ -201,8 +302,6 @@ if (!emailRegex.test(inviteEmail.trim())) {
 return (
     <>
       <Header
-  theme={theme}
-  setTheme={setTheme}
   onStartExchange={() => {
 
     const hasExchangeData =
@@ -705,7 +804,7 @@ return (
     onClick={addInvitee}
   >
     {
-  editingInviteeIndex !== null
+  editingInviteeId !== null
     ? "Save Changes"
     : "Add Participant"
 }
@@ -723,9 +822,9 @@ return (
 
 <div className="invitee-list">
 
-  {invitees.map((invitee, index) => (
+  {invitees.map((invitee) => (
     <div
-      key={index}
+      key={invitee.id}
       className="invitee-row"
     >
       <span>{invitee.name}</span>
@@ -739,7 +838,7 @@ return (
     onClick={() => {
       setInviteName(invitee.name);
       setInviteEmail(invitee.email);
-      setEditingInviteeIndex(index);
+      setEditingInviteeId(invitee.id);
     }}
   >
     Edit
@@ -748,13 +847,7 @@ return (
   <button
     type="button"
     className="secondary-button remove-button"
-    onClick={() =>
-      setInvitees(
-        invitees.filter(
-          (_, i) => i !== index
-        )
-      )
-    }
+    onClick={() => removeInvitee(invitee.id)}
   >
     Remove
   </button>
@@ -772,7 +865,7 @@ return (
   type="button"
   className="secondary-button"
   onClick={() => {
-    setRestrictionEditorIndex(index);
+    setRestrictionEditorId(invitee.id);
 
     setTimeout(() => {
       document
@@ -784,7 +877,7 @@ return (
     }, 100);
   }}
 >
-  Manage ({invitee.restrictions.length})
+  Manage ({restrictionCountFor(invitee.id)})
 </button>
 
 
@@ -792,69 +885,112 @@ return (
 
     </div>
   ))}
-{restrictionEditorIndex !== null && (
+{restrictionEditorId !== null && (
   <div
     id="restriction-editor"
     className="restriction-editor"
   >
-    <h3>
-      Restrictions for{" "}
-      {invitees[restrictionEditorIndex].name}
-    </h3>
-    <button
-  type="button"
-  className="secondary-button"
-  onClick={() => setRestrictionEditorIndex(null)}
->
-  Hide Restrictions
-</button>
-    {invitees
-  .filter(
-    (_, i) => i !== restrictionEditorIndex
-  )
-  .map((participant, i) => (
-    <label
-      key={i}
-      className="checkbox-inline"
-    >
-      <input
-        type="checkbox"
-        checked={
-          invitees[
-            restrictionEditorIndex
-          ].restrictions.includes(
-            participant.name
-          )
-        }
-        onChange={(e) => {
-          const isChecked = e.target.checked;
+    <div className="restriction-editor-header">
+      <h3>
+        Restrictions for{" "}
+        {nameForInvitee(restrictionEditorId)}
+      </h3>
 
-          setInvitees((previousInvitees) =>
-            previousInvitees.map((item, itemIndex) =>
-              itemIndex === restrictionEditorIndex
-                ? {
-                    ...item,
-                    restrictions: isChecked
-                      ? Array.from(
-                          new Set([
-                            ...item.restrictions,
-                            participant.name,
-                          ])
-                        )
-                      : item.restrictions.filter(
-                          (restriction) =>
-                            restriction !== participant.name
-                        ),
-                  }
-                : item
-            )
-          );
-        }}
-      />
+      <button
+        type="button"
+        className="secondary-button"
+        onClick={() => setRestrictionEditorId(null)}
+      >
+        Hide Restrictions
+      </button>
+    </div>
 
-      {participant.name}
-    </label>
-  ))}  </div>
+    <p className="helper-text">
+      These are{" "}
+      {nameForInvitee(restrictionEditorId)}&rsquo;s own choices, and
+      they appear on this list only. Each one works in a single
+      direction, so blocking a gift one way does not block the other
+      way.
+    </p>
+
+    {otherInvitees(restrictionEditorId).length === 0 ? (
+      <p className="helper-text">
+        Add at least two participants to set restrictions.
+      </p>
+    ) : (
+      <div className="restriction-sections">
+
+        <div className="restriction-section">
+          <h4>Won&rsquo;t give to</h4>
+
+          <p className="helper-text">
+            {nameForInvitee(restrictionEditorId)} will not be
+            assigned to buy for anyone checked here.
+          </p>
+
+          {otherInvitees(restrictionEditorId).map((other) => (
+            <label
+              key={other.id}
+              className="checkbox-inline"
+            >
+              <input
+                type="checkbox"
+                checked={hasRestriction(
+                  restrictionEditorId,
+                  other.id,
+                  "give"
+                )}
+                onChange={(e) =>
+                  setRestriction(
+                    restrictionEditorId,
+                    other.id,
+                    "give",
+                    e.target.checked
+                  )
+                }
+              />
+              {other.name}
+            </label>
+          ))}
+        </div>
+
+        <div className="restriction-section">
+          <h4>Won&rsquo;t receive from</h4>
+
+          <p className="helper-text">
+            Nobody checked here will be assigned to buy for{" "}
+            {nameForInvitee(restrictionEditorId)}.
+          </p>
+
+          {otherInvitees(restrictionEditorId).map((other) => (
+            <label
+              key={other.id}
+              className="checkbox-inline"
+            >
+              <input
+                type="checkbox"
+                checked={hasRestriction(
+                  restrictionEditorId,
+                  other.id,
+                  "receive"
+                )}
+                onChange={(e) =>
+                  setRestriction(
+                    restrictionEditorId,
+                    other.id,
+                    "receive",
+                    e.target.checked
+                  )
+                }
+              />
+              {other.name}
+            </label>
+          ))}
+        </div>
+
+      </div>
+    )}
+  </div>
 )}
 
 </div>
@@ -877,29 +1013,59 @@ return (
 {showAllRestrictions && (
   <div className="restriction-editor">
 
-    <h3>All Restrictions</h3>
+    <h3>All Restrictions ({restrictions.length})</h3>
 
-    {invitees.map((invitee, index) => (
-      <div key={index}>
+    {restrictions.length === 0 ? (
+      <p className="helper-text">
+        No restrictions have been set.
+      </p>
+    ) : (
+      invitees.map((invitee) => {
+        const ownRestrictions = restrictionsOwnedBy(invitee.id);
 
-        <strong>{invitee.name}</strong>
+        if (ownRestrictions.length === 0) {
+          return null;
+        }
 
-        {invitee.restrictions.length > 0 ? (
-          <ul>
-            {invitee.restrictions.map(
-              (restriction, i) => (
-                <li key={i}>
-                  {restriction}
-                </li>
-              )
+        const willNotGiveTo = ownRestrictions
+          .filter(
+            (restriction) => restriction.direction === "give"
+          )
+          .map((restriction) =>
+            nameForInvitee(restriction.otherId)
+          );
+
+        const willNotReceiveFrom = ownRestrictions
+          .filter(
+            (restriction) => restriction.direction === "receive"
+          )
+          .map((restriction) =>
+            nameForInvitee(restriction.otherId)
+          );
+
+        return (
+          <div
+            key={invitee.id}
+            className="restriction-summary"
+          >
+            <strong>{invitee.name}</strong>
+
+            {willNotGiveTo.length > 0 && (
+              <p>
+                Won&rsquo;t give to: {willNotGiveTo.join(", ")}
+              </p>
             )}
-          </ul>
-        ) : (
-          <p>No restrictions</p>
-        )}
 
-      </div>
-    ))}
+            {willNotReceiveFrom.length > 0 && (
+              <p>
+                Won&rsquo;t receive from:{" "}
+                {willNotReceiveFrom.join(", ")}
+              </p>
+            )}
+          </div>
+        );
+      })
+    )}
 
   </div>
 )}
