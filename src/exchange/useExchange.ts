@@ -277,6 +277,60 @@ const [inviteEmail, setInviteEmail] = useState("");
 
   // Sending the invitation moves everyone still pending to "Invited".
   // Registration (not built yet) is what moves them to "Registered".
+  /**
+   * A participant registering themselves.
+   *
+   * Matched on email so somebody the organizer already invited fills in
+   * their own row rather than appearing twice. Returns their id, which
+   * is what their restrictions are keyed to.
+   */
+  const registerParticipant = (details: {
+    name: string;
+    email: string;
+    wishlist: string;
+    preferences: string;
+  }) => {
+    const name = details.name.trim();
+    const email = details.email.trim();
+    const wishlist = details.wishlist.trim();
+    const preferences = details.preferences.trim();
+
+    const existing = invitees.find(
+      (invitee) =>
+        invitee.email.toLowerCase() === email.toLowerCase()
+    );
+    const id = existing ? existing.id : createInviteeId();
+
+    setInvitees((previousInvitees) =>
+      previousInvitees.some((invitee) => invitee.id === id)
+        ? previousInvitees.map((invitee) =>
+            invitee.id === id
+              ? {
+                  ...invitee,
+                  name,
+                  email,
+                  wishlist,
+                  preferences,
+                  status: REGISTERED,
+                }
+              : invitee
+          )
+        : [
+            ...previousInvitees,
+            {
+              id,
+              name,
+              email,
+              wishlist,
+              preferences,
+              status: REGISTERED,
+            },
+          ]
+    );
+
+    return id;
+  };
+
   const markPendingAsInvited = () => {
     setInvitees((previousInvitees) =>
       previousInvitees.map((invitee) =>
@@ -547,6 +601,8 @@ const [inviteEmail, setInviteEmail] = useState("");
           status: INVITEE_STATUSES.includes(status)
             ? status
             : INVITE_PENDING,
+          wishlist: text(entry.wishlist),
+          preferences: text(entry.preferences),
         };
       })
       .filter((invitee) => invitee.name);
@@ -930,6 +986,7 @@ const addInvitee = () => {
     restrictionsOwnedBy,
     restrictionCountFor,
     markPendingAsInvited,
+    registerParticipant,
     formatList,
     formatNames,
     recordsForPairing,

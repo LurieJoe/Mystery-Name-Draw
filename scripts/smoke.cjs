@@ -168,13 +168,19 @@ for (const [name, needles] of [
   check(name, () => renderToStaticMarkup(React.createElement(Page)), needles);
 }
 
+function RegisterHarness() {
+  const exchange = useExchange();
+  return React.createElement(
+    ExchangeContext.Provider,
+    { value: exchange },
+    React.createElement(RegisterPage, { eventCode: "ABC123" })
+  );
+}
+
 check(
   "RegisterPage at /event/ABC123",
-  () =>
-    renderToStaticMarkup(
-      React.createElement(RegisterPage, { eventCode: "ABC123" })
-    ),
-  ["ABC123", "Registration is not ready yet"]
+  () => renderToStaticMarkup(React.createElement(RegisterHarness)),
+  ["ABC123", "Exchanges are not stored yet"]
 );
 
 console.log(`\n${passed} rendered, ${failed} failed`);

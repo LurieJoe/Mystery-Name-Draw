@@ -1,0 +1,131 @@
+/* The participant-facing registration page. */
+
+.register-page .register-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0 0 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.register-page .register-field input,
+.register-page .register-field textarea {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1e293b;
+  font: inherit;
+  font-weight: 400;
+}
+
+.register-page .register-field textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.register-page .register-field input:focus,
+.register-page .register-field textarea:focus {
+  outline: none;
+  border-color: #6d28d9;
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+}
+
+.register-page .register-field .validation-error {
+  font-weight: 400;
+  font-size: 0.9rem;
+  min-height: 0;
+  margin-top: 0;
+}
+
+.register-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #faf9fc;
+}
+
+.register-facts dt {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.register-facts dd {
+  margin: 0.25rem 0 0;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.register-notice {
+  margin: 1.5rem 0 2rem;
+  padding: 1rem 1.25rem;
+  border-left: 4px solid #a78bfa;
+  border-radius: 8px;
+  background: #f5f3ff;
+}
+
+.register-notice h2 {
+  margin-top: 0;
+}
+
+.register-submit {
+  margin-top: 0.5rem;
+}
+
+.register-after {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.register-restrictions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin: 1rem 0 0;
+}
+
+.register-restrictions section {
+  padding: 1rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.register-restrictions h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.register-check {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  /* A comfortable target without making the list enormous. */
+  min-height: 44px;
+  color: #334155;
+}
+
+.register-empty {
+  padding: 1rem 1.25rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+}
+
+.register-next {
+  padding-left: 1.25rem;
+}
+
+.register-next li {
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}

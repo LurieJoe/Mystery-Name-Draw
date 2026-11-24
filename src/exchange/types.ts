@@ -7,6 +7,10 @@ export type Invitee = {
   name: string;
   email: string;
   status: string;
+  /** What they would like. Written by them at registration, not by the organizer. */
+  wishlist?: string;
+  /** Sizes, interests, things to steer clear of. */
+  preferences?: string;
 };
 
 export type RestrictionDirection = "give" | "receive";
