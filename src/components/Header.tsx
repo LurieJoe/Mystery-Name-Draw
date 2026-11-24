@@ -1,3 +1,4 @@
+import { navigate } from "../router";
 import "./Header.css";
 type HeaderProps = {
   onStartExchange: () => void;
@@ -26,9 +27,12 @@ function Header({
   Start a Gift Exchange
 </button>
 
-<button className="quick-draw-button">
-    Create a Quick Draw
-  </button>
+<button
+  className="quick-draw-button"
+  onClick={() => navigate("/quick")}
+>
+  Create a Quick Draw
+</button>
 
           <button className="signin-button">
             Sign In

@@ -17,6 +17,12 @@ import {
   type DrawResult,
   type ForbiddenPairing,
 } from "./assignment.js";
+import {
+  makeGroups,
+  makeMutualPairs,
+  parseNames,
+  shuffle,
+} from "./grouping.js";
 
 let passed = 0;
 let failed = 0;
@@ -307,6 +313,91 @@ console.log("\n6. Seeded randomness");
   );
 
   check("a different seed gives a different draw", render() !== other);
+}
+
+
+console.log("\n7. Grouping and pairing");
+{
+  const people = (n: number): DrawPerson[] =>
+    Array.from({ length: n }, (_, i) => ({
+      id: `p${i}`,
+      name: `P${i}`,
+    }));
+
+  const everyoneOnce = (groups: DrawPerson[][], n: number) => {
+    const ids = groups.flat().map((p) => p.id);
+    return ids.length === n && new Set(ids).size === n;
+  };
+
+  const sizes = (groups: DrawPerson[][]) =>
+    groups.map((g) => g.length).sort((a, b) => b - a);
+
+  for (const [n, size, expected] of [
+    [10, 3, [4, 3, 3]],
+    [9, 3, [3, 3, 3]],
+    [7, 3, [4, 3]],
+    [4, 3, [4]],
+    [12, 4, [4, 4, 4]],
+    [5, 2, [3, 2]],
+  ] as [number, number, number[]][]) {
+    const groups = makeGroups(people(n), size);
+    const got = sizes(groups);
+    check(
+      `${n} people in groups of ${size} -> ${expected.join(", ")}`,
+      JSON.stringify(got) === JSON.stringify(expected) &&
+        everyoneOnce(groups, n),
+      `got ${got.join(", ")}`
+    );
+  }
+
+  check(
+    "no group is ever left with one person",
+    [5, 7, 9, 11, 13, 25].every((n) =>
+      [2, 3, 4, 5].every((s) =>
+        makeGroups(people(n), s).every((g) => g.length > 1)
+      )
+    )
+  );
+
+  check(
+    "six people pair into three twos",
+    JSON.stringify(sizes(makeMutualPairs(people(6)))) ===
+      JSON.stringify([2, 2, 2])
+  );
+  check(
+    "seven people give one trio, not a leftover",
+    JSON.stringify(sizes(makeMutualPairs(people(7)))) ===
+      JSON.stringify([3, 2, 2])
+  );
+  check("two people make one pair", sizes(makeMutualPairs(people(2)))[0] === 2);
+  check("one person makes no pair to speak of", makeMutualPairs(people(1)).length === 1);
+  check("nobody makes nothing", makeMutualPairs([]).length === 0);
+
+  check(
+    "shuffling keeps everyone",
+    everyoneOnce([shuffle(people(20), Math.random)], 20)
+  );
+}
+
+console.log("\n8. Reading a pasted list");
+{
+  const parsed = parseNames("  Ada \n\nGrace,Alan\n  \nKatherine  Johnson ");
+  check(
+    "trims, splits on newlines and commas, drops blanks",
+    parsed.map((p) => p.name).join("|") ===
+      "Ada|Grace|Alan|Katherine Johnson",
+    parsed.map((p) => p.name).join("|")
+  );
+
+  const dupes = parseNames("Chris\nChris\nChristine\nchris");
+  check(
+    "repeats are numbered, and a longer name is not mistaken for one",
+    dupes.map((p) => p.name).join("|") ===
+      "Chris|Chris (2)|Christine|chris (3)",
+    dupes.map((p) => p.name).join("|")
+  );
+  check("ids are unique", new Set(dupes.map((p) => p.id)).size === 4);
+  check("an empty box gives nobody", parseNames("   \n  ").length === 0);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

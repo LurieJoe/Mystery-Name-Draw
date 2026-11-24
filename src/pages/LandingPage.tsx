@@ -118,6 +118,22 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="landing-section" id="quick-draw">
+          <h2>Need names matched right now?</h2>
+
+          <p className="landing-quick-copy">
+            Quick Draw skips the invitations. Paste a list of names, say
+            what the draw is for, and get the result on the spot: a book
+            swap you forgot to assign, partners for an assignment,
+            groups of three, or who reviews whose work. Nobody registers,
+            and nothing is sent anywhere.
+          </p>
+
+          <a className="landing-secondary" href="#/quick">
+            Create a Quick Draw
+          </a>
+        </section>
+
         <section className="landing-closing">
           <h2>Ready to draw some names?</h2>
 

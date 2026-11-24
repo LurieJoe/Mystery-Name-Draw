@@ -21,6 +21,7 @@ export default function SiteFooter() {
           <a href="#/">Home</a>
           <a href="#/faq">FAQ</a>
           <a href="#/privacy">Privacy</a>
+          <a href="#/quick">Quick Draw</a>
           <a href="#/create">Start an exchange</a>
         </nav>
 

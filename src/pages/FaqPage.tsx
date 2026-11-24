@@ -26,7 +26,11 @@ const QUESTIONS = [
   },
   {
     q: "Can I use this for something other than gifts?",
-    a: "Yes. A book swap, an office Secret Santa, a teacher pairing students, or deciding who reviews whose work. Anywhere each person needs to be matched with exactly one other person.",
+    a: "Yes. A book swap, an office Secret Santa, a teacher pairing students, or deciding who reviews whose work. Anywhere each person needs to be matched with exactly one other person. If you need it sorted out this minute rather than on a draw date, use Quick Draw instead.",
+  },
+  {
+    q: "What is Quick Draw?",
+    a: "The same matching, without the waiting. Paste a list of names, say what the draw is for, and the result appears straight away: everyone draws a name, each person gets someone else's work to review, partners, or groups of whatever size you choose. Nobody registers, nothing is emailed, and the draw happens in your browser rather than on our end. It suits a classroom or a room full of people, where you are the one reading the result out.",
   },
   {
     q: "Can I reuse an exchange next year?",

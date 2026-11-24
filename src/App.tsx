@@ -4,6 +4,7 @@ import FaqPage from "./pages/FaqPage";
 import LandingPage from "./pages/LandingPage";
 import OrganizerPage from "./pages/OrganizerPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import QuickDrawPage from "./pages/QuickDrawPage";
 import RegisterPage from "./pages/RegisterPage";
 import { matchEventCode, usePath } from "./router";
 
@@ -19,6 +20,8 @@ function App() {
         <RegisterPage eventCode={eventCode} />
       ) : route === "/create" ? (
         <OrganizerPage />
+      ) : route === "/quick" ? (
+        <QuickDrawPage />
       ) : route === "/faq" ? (
         <FaqPage />
       ) : route === "/privacy" ? (

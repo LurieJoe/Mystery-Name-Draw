@@ -82,9 +82,24 @@ const STEPS = [
 let passed = 0;
 let failed = 0;
 
+/**
+ * renderToStaticMarkup escapes apostrophes and quotes, so asserting on a
+ * phrase as it is written in the page would fail on "else\u0027s". The
+ * assertions should read the way the page reads.
+ */
+function decodeEntities(html) {
+  return html
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&quot;|&#34;/g, '"')
+    .replace(/&#x2F;/g, "/")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
 function check(label, render, mustContain, mustNotContain) {
   try {
-    const html = render();
+    const html = decodeEntities(render());
 
     if (typeof html !== "string" || html.length < 20) {
       throw new Error("rendered almost nothing");
@@ -160,12 +175,32 @@ for (const [step, name, needle, forbidden] of STEPS) {
   );
 }
 
-for (const [name, needles] of [
+for (const [name, needles, forbidden] of [
   ["FaqPage", ["Questions", "Does anyone need an account?", "Brain Bench Apps"]],
   ["PrivacyPage", ["Privacy", "no accounts and no passwords", "Brain Bench Apps"]],
+  [
+    "QuickDrawPage",
+    [
+      "Quick Draw",
+      "What are you using this for?",
+      "Everyone draws a name",
+      "Hand each person someone else's work",
+      "Partner people up",
+      "Split into groups",
+    ],
+    // Quick Draw asks what the draw is for first. The paste box and the
+    // group size only appear once a purpose is chosen, so a change that
+    // skips the chooser fails here.
+    ["One name per line", "Draw again", "How many people in each group?"],
+  ],
 ]) {
   const Page = require(`${OUT}/pages/${name}.js`).default;
-  check(name, () => renderToStaticMarkup(React.createElement(Page)), needles);
+  check(
+    name,
+    () => renderToStaticMarkup(React.createElement(Page)),
+    needles,
+    forbidden
+  );
 }
 
 function RegisterHarness() {

@@ -187,3 +187,9 @@
   line-height: 1.6;
   color: #475569;
 }
+
+.landing-quick-copy {
+  max-width: 44rem;
+  margin: 0 auto 1.5rem;
+  line-height: 1.65;
+}

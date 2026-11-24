@@ -1,0 +1,253 @@
+/* Quick Draw. Light mode only, matching the landing page's palette.
+   Remember: CSS has no // comments, and lightningcss rejects them. */
+
+.quick-purposes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+}
+
+.quick-purpose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  text-align: left;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.quick-purpose:hover {
+  border-color: #c4b5fd;
+  background: #faf9fc;
+}
+
+.quick-purpose:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.quick-purpose strong {
+  font-size: 1.05rem;
+  color: #2e1065;
+}
+
+.quick-purpose span {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #475569;
+}
+
+.quick-aside {
+  margin-top: 1.75rem;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.quick-chosen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0.5rem 0 0;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  background: #f5f3ff;
+}
+
+.quick-chosen strong {
+  color: #2e1065;
+}
+
+.quick-link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #6d28d9;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.quick-field {
+  display: block;
+  margin: 0.75rem 0 0;
+}
+
+.quick-field textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #1e293b;
+  font: inherit;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.quick-field textarea:focus-visible,
+.quick-size input:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 1px;
+}
+
+.quick-count {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.quick-size {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.quick-size input {
+  width: 5.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1e293b;
+  font: inherit;
+}
+
+.quick-draw-cta {
+  margin-top: 1.75rem;
+  padding: 0.95rem 2.4rem;
+  border: none;
+  border-radius: 999px;
+  background: #6d28d9;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 48px;
+}
+
+.quick-draw-cta:hover {
+  background: #5b21b6;
+}
+
+.quick-draw-cta:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.quick-result {
+  margin-top: 2rem;
+  padding: 0.25rem 1.5rem 1.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.quick-error {
+  margin: 1.25rem 0 0;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.quick-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 1.05rem;
+}
+
+.quick-sets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.quick-set {
+  padding: 1rem 1.25rem;
+  border: 1px solid #ede9fe;
+  border-radius: 12px;
+  background: #faf9fc;
+}
+
+.quick-set h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #2e1065;
+}
+
+.quick-set ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.quick-secondary {
+  padding: 0.65rem 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #4c1d95;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.quick-secondary:hover {
+  border-color: #a78bfa;
+  background: #f5f3ff;
+}
+
+.quick-secondary:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+.quick-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Teachers will print the groups and carry them into the room, so the
+   page furniture and the controls come off the printout. */
+@media print {
+  .header,
+  .site-footer,
+  .quick-actions,
+  .quick-draw-cta,
+  .quick-chosen,
+  .quick-field,
+  .quick-count,
+  .quick-size,
+  .quick-aside,
+  .content-lede {
+    display: none;
+  }
+
+  .quick-result {
+    border: none;
+    padding: 0;
+  }
+}
