@@ -118,8 +118,8 @@ export default function ReviewStep() {
 
     <div className="review-logo">
       <img
-        src="/images/logo-primary-v1.png"
-        alt="Mystery Name Draw"
+        src="/images/pigeon-messenger.png"
+        alt="A carrier pigeon delivering a sealed envelope"
         className="participant-logo"
       />
     </div>

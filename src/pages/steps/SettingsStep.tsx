@@ -335,8 +335,8 @@ export default function SettingsStep() {
     <div className="settings-right">
 
       <img
-        src="/images/logo-primary-v1.png"
-        alt="Mystery Name Draw"
+        src="/images/pigeon-messenger.png"
+        alt="A carrier pigeon delivering a sealed envelope"
         className="settings-logo"
       />
 

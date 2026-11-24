@@ -588,14 +588,13 @@
 .settings-right {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 0.25rem;
+  align-items: center;
 }
 
 .settings-logo {
-  margin-top: -10rem;
-  max-width: 420px;
+  max-width: 340px;
   width: 100%;
+  height: auto;
 }
 [data-theme="dark"] .date-field label,
 [data-theme="dark"] .radio-option,
