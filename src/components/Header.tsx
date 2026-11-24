@@ -24,20 +24,15 @@ function Header({
         </nav>
   
         <div className="header-actions">
-        {/*
-<button
-  className="theme-button"
-  onClick={() =>
-    setTheme(
-      theme === "dark"
-        ? "light"
-        : "dark"
-    )
-  }
->
-  {theme === "dark" ? "☀️" : "🌙"}
-</button>
-*/}
+        <button
+          className="theme-button"
+          onClick={() =>
+            setTheme(theme === "dark" ? "light" : "dark")
+          }
+          title="Toggle light / dark theme"
+        >
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
  <button
   className="start-exchange-button"
   onClick={onStartExchange}

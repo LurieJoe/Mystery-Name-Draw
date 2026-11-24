@@ -3,27 +3,18 @@ import Header from "./components/Header";
 import "./CreateEventPage.css";
 
 function CreateEventPage() {
-    const [participants, setParticipants] = useState<
-  { name: string; email: string }[]
->([]);
 const [theme, setTheme] = useState(
     localStorage.getItem("theme") || "dark"
   );
   const [eventName, setEventName] = useState("");
-  const [newName, setNewName] = useState("");
-const [newEmail, setNewEmail] = useState("");
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
-const [exchangeCreated, setExchangeCreated] = useState(false);
 const [currency, setCurrency] = useState("USD");
 const [eventCode, setEventCode] = useState("");
 const [registrationOpen, setRegistrationOpen] = useState(true);
-const [emailBody, setEmailBody] = useState("");
 const [includeOrganizer, setIncludeOrganizer] =
   useState(true);
 const [emailSubject, setEmailSubject] = useState("");
-const [editingIndex, setEditingIndex] =
-  useState<number | null>(null);
 const [registrationDateTouched,
   setRegistrationDateTouched] =
   useState(false);
@@ -43,51 +34,6 @@ const [reminderPreference, setReminderPreference] =
   useState("draw");
   const participantNameRef =
   useRef<HTMLInputElement>(null);
-  const addParticipant = () => {
-    if (!newName.trim() || !newEmail.trim()) {
-      return;
-    }
-  
-    const emailRegex =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
-    if (!emailRegex.test(newEmail.trim())) {
-      alert("Please enter a valid email address.");
-      return;
-    }
-  
-    const updatedParticipant = {
-      name: newName.trim(),
-      email: newEmail.trim(),
-    };
-    
-    if (editingIndex !== null) {
-      const updatedParticipants = [...participants];
-    
-      updatedParticipants[editingIndex] =
-        updatedParticipant;
-    
-      setParticipants(updatedParticipants);
-    
-      setEditingIndex(null);
-    } else {
-      setParticipants([
-        ...participants,
-        updatedParticipant,
-      ]);
-    }
-  
-    setNewName("");
-    setNewEmail("");
-  };
-  const editParticipant = (index: number) => {
-    const participant = participants[index];
-  
-    setNewName(participant.name);
-    setNewEmail(participant.email);
-  
-    setEditingIndex(index);
-  };
   const copyLink = async () => {
     await navigator.clipboard.writeText(
       `https://mysterynamedraw.com/event/${eventCode}`
@@ -133,18 +79,10 @@ const [inviteEmail, setInviteEmail] = useState("");
   }, [theme]);
   const [editingInviteeIndex, setEditingInviteeIndex] =
   useState<number | null>(null);
-  const [activeRestrictionIndex, setActiveRestrictionIndex] =
-  useState<number | null>(null);
   const [restrictionEditorIndex, setRestrictionEditorIndex] =
   useState<number | null>(null);
   const [showAllRestrictions, setShowAllRestrictions] =
   useState(false);
-  const [selectedRestriction, setSelectedRestriction] =
-  useState("");
-  const [restrictionOwnerIndex, setRestrictionOwnerIndex] =
-  useState<number | null>(null);
-  const [managingInviteeIndex, setManagingInviteeIndex] =
-  useState<number | null>(null);
   const registrationDateValid =
   !registrationDeadline ||
   !drawDate ||
@@ -187,16 +125,22 @@ const [inviteEmail, setInviteEmail] = useState("");
     setRegistrationDateTouched(false);
     setGiftBudget("");
     setCurrency("USD");
-  
     setNoGiftLimit(false);
-    setReminderPreference("both");
-  
+    setReminderPreference("draw");
+
     setEventCode("");
-    setExchangeCreated(false);
     setCopied(false);
-  
     setRegistrationOpen(true);
-  
+
+    setInvitees([]);
+    setInviteName("");
+    setInviteEmail("");
+    setEditingInviteeIndex(null);
+    setRestrictionEditorIndex(null);
+    setShowAllRestrictions(false);
+    setIncludeOrganizer(true);
+    setEmailSubject("");
+
     setCurrentStep(1);
   };
   const invitationMessage = `Hello,
@@ -266,7 +210,8 @@ return (
       drawDate ||
       registrationDeadline ||
       giftBudget ||
-      eventCode;
+      eventCode ||
+      invitees.length > 0;
 
     if (hasExchangeData) {
 
@@ -285,160 +230,6 @@ return (
 />
 
       <div className="create-event-page">
-      {/*
-      {currentStep === 1 && (
-        <>
-        <div className="wizard-header">
-          <h1>Start a Gift Exchange</h1>
-
-          <p>Step 1 of 3</p>
-        </div>
-
-        <div className="wizard-card">
-
-  <h2>Invite Participants</h2>
-
-  <p className="step-description">
-    Every participant added here is entered into the gift exchange upon registration.
-
-  </p>
-
-  <div className="participants-layout">
-
-    <div className="participants-left">
-
-      <div className="participants-table">
-
-<div className="participant-table-header">
-  <span>Name</span>
-  <span className="email-header">
-    Email Address
-  </span>
-  <span></span>
-</div>
-<div className="participant-entry-row">
-
-<input
-  type="text"
-  placeholder="Participant Name"
-  value={newName}
-  onChange={(e) => setNewName(e.target.value)}
-/>
-
-<input
-  type="email"
-  placeholder="Email Address"
-  value={newEmail}
-  onChange={(e) => setNewEmail(e.target.value)}
-/>
-
-<button
-  type="button"
-  className="clear-row-button"
-  title="Clear entry"
-  onClick={() => {
-    setNewName("");
-    setNewEmail("");
-  }}
->
-  x
-</button>
-
-<button
-  type="button"
-  className="add-row-button"
-  title="Add participant"
-  onClick={addParticipant}
->
-  +
-</button>
-
-
-</div>
-{participants.map((participant, index) => (
-  <div
-    key={index}
-    className="participant-row"
-  >
-    <span>{participant.name}</span>
-
-    <span>{participant.email}</span>
-
-    <div className="participant-actions">
-
-      <button
-        type="button"
-        title="Edit participant's name or email address"
-        onClick={() => editParticipant(index)}
-      >
-        ✏️
-      </button>
-
-      <button
-        type="button"
-        title="Remove participant"
-        onClick={() =>
-          setParticipants(
-            participants.filter((_, i) => i !== index)
-          )
-        }
-      >
-        ×
-      </button>
-
-    </div>
-
-  </div>
-))}
-
-
-<div className="participant-placeholder-row">
-  <div className="placeholder-line"></div>
-  <div className="placeholder-line"></div>
-</div>
-
-      </div>
-
-    </div>
-
-    <div className="participants-right">
-
-      <img
-        src="/images/logo-primary-v1.png"
-        alt="Mystery Name Draw"
-        className="participant-logo"
-      />
-
-
-    </div>
-
-  </div>
-
-  <hr />
-
-  <div className="wizard-navigation">
-
-    <button
-      type="button"
-      className="back-button"
-    >
-      ← Back
-    </button>
-
-    <button
-  type="button"
-  className="continue-button"
-  onClick={() => setCurrentStep(2)}
->
-  Continue →
-</button>
-
-  </div>
-
-</div>
-</>
-)}
-*/}
 {currentStep === 1 && (
 <>
   <div className="wizard-header">
@@ -749,7 +540,6 @@ return (
         `You're Invited to Join ${eventName || "This Gift Exchange"}`
       );
     }
-    setExchangeCreated(true);
     setCurrentStep(3);
   }}
 >
@@ -864,7 +654,7 @@ return (
   <button
     type="button"
     className="continue-button"
-    onClick={() => setCurrentStep(5)}
+    onClick={() => setCurrentStep(4)}
   >
     Invite Participants →
   </button>
@@ -875,7 +665,7 @@ return (
 
 )}
 
-{currentStep === 5 && (
+{currentStep === 4 && (
 
 <div className="wizard-card">
 
@@ -1037,34 +827,28 @@ return (
           )
         }
         onChange={(e) => {
-          const updatedInvitees = [...invitees];
+          const isChecked = e.target.checked;
 
-          const restrictions =
-            updatedInvitees[
-              restrictionEditorIndex
-            ].restrictions;
-
-          if (e.target.checked) {
-            if (
-              !restrictions.includes(
-                participant.name
-              )
-            ) {
-              restrictions.push(
-                participant.name
-              );
-            }
-          } else {
-            updatedInvitees[
-              restrictionEditorIndex
-            ].restrictions =
-              restrictions.filter(
-                (r) =>
-                  r !== participant.name
-              );
-          }
-
-          setInvitees(updatedInvitees);
+          setInvitees((previousInvitees) =>
+            previousInvitees.map((item, itemIndex) =>
+              itemIndex === restrictionEditorIndex
+                ? {
+                    ...item,
+                    restrictions: isChecked
+                      ? Array.from(
+                          new Set([
+                            ...item.restrictions,
+                            participant.name,
+                          ])
+                        )
+                      : item.restrictions.filter(
+                          (restriction) =>
+                            restriction !== participant.name
+                        ),
+                  }
+                : item
+            )
+          );
         }}
       />
 
@@ -1282,7 +1066,7 @@ return (
     <button
       type="button"
       className="continue-button"
-      onClick={() => setCurrentStep(6)}
+      onClick={() => setCurrentStep(5)}
     >
       Manage Exchange →
     </button>
@@ -1292,7 +1076,7 @@ return (
 </div>
 
 )}
-{currentStep === 6 && (
+{currentStep === 5 && (
   <div className="wizard-card">
 
     <div className="exchange-title-section">
@@ -1375,7 +1159,7 @@ return (
       <button
         type="button"
         className="back-button"
-        onClick={() => setCurrentStep(5)}
+        onClick={() => setCurrentStep(4)}
       >
         ← Back
       </button>
