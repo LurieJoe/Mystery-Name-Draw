@@ -11,6 +11,11 @@ export default function CreatedStep() {
   } = useExchangeContext();
 
   return (
+    <>
+      <div className="wizard-header">
+        <h1>Start a Gift Exchange</h1>
+        <p>Step 3 of 3</p>
+      </div>
 
     <div className="wizard-card">
 
@@ -21,7 +26,7 @@ export default function CreatedStep() {
     </p>
 
     <p className="step-description next-step-text">
-      Next, invite roster to register using the link below.
+      Next, invite participants to register using the link below.
     </p>
 
 
@@ -52,7 +57,7 @@ export default function CreatedStep() {
         type="checkbox"
         defaultChecked
       />
-      Allow roster to invite others
+      Allow participants to invite others
     </label>
 
     <p className="helper-text">
@@ -88,7 +93,7 @@ export default function CreatedStep() {
     </div>
 
     <div className="tip-item">
-    ⏳ Give roster enough shopping time after the draw date.
+    ⏳ Give participants enough shopping time after the draw date.
     </div>
 
     <div className="tip-item">
@@ -121,5 +126,6 @@ export default function CreatedStep() {
     </div>
 
     </div>
+    </>
   );
 }

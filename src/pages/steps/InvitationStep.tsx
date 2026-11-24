@@ -206,7 +206,7 @@ export default function InvitationStep() {
 
         {otherInvitees(restrictionEditorId).length === 0 ? (
           <p className="helper-text">
-            Add at least two roster to set restrictions.
+            Add at least two participants to set restrictions.
           </p>
         ) : (
           <div className="restriction-sections">

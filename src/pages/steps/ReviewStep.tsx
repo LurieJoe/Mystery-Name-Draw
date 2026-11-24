@@ -20,6 +20,11 @@ export default function ReviewStep() {
   } = useExchangeContext();
 
   return (
+    <>
+      <div className="wizard-header">
+        <h1>Start a Gift Exchange</h1>
+        <p>Step 2 of 3</p>
+      </div>
 
     <div className="wizard-card">
 
@@ -130,5 +135,6 @@ export default function ReviewStep() {
       </div>
 
     </div>
+    </>
   );
 }

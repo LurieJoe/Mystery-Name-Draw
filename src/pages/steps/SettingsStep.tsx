@@ -44,7 +44,9 @@ export default function SettingsStep() {
       <div className="wizard-card">
 
 
-      <div className="exchange-io">
+      <div className="settings-heading-row">
+        <h2>Gift Exchange Settings</h2>
+
         <label className="secondary-button file-button">
           Import Exchange / Template
           <input
@@ -54,8 +56,6 @@ export default function SettingsStep() {
           />
         </label>
       </div>
-
-      <h2>Gift Exchange Settings</h2>
 
       <p className="step-description">
         Configure important details for your gift exchange.
@@ -230,7 +230,7 @@ export default function SettingsStep() {
             setRemindBeforeDrawDate(e.target.checked)
           }
         />
-        Remind roster before the draw date
+        Remind participants before the draw date
       </label>
 
       <p className="helper-text">

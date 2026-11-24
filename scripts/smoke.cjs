@@ -64,9 +64,9 @@ const App = require(`${OUT}/App.js`).default;
 const RegisterPage = require(`${OUT}/pages/RegisterPage.js`).default;
 
 const STEPS = [
-  [1, "SettingsStep", "Gift Exchange Settings"],
-  [2, "ReviewStep", "Review"],
-  [3, "CreatedStep", "Registration Link"],
+  [1, "SettingsStep", ["Gift Exchange Settings", "Step 1 of 3"]],
+  [2, "ReviewStep", ["Review", "Step 2 of 3"]],
+  [3, "CreatedStep", ["Registration Link", "Step 3 of 3"]],
   [4, "InvitationStep", "Invitation List"],
   [5, "ManageStep", "Manage Exchange"],
   [6, "ValidationStep", "Not enough participants"],
@@ -87,6 +87,12 @@ function check(label, render, mustContain) {
       if (!html.includes(needle)) {
         throw new Error(`markup is missing ${JSON.stringify(needle)}`);
       }
+    }
+
+    // "roster" is an internal name for the managed list. It reached the
+    // UI once through a careless rename; it must not again.
+    if (/\broster\b/i.test(html)) {
+      throw new Error('the word "roster" leaked into the rendered page');
     }
 
     passed += 1;

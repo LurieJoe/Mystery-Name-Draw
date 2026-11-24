@@ -56,7 +56,7 @@ export default function ManageStep() {
         onClick={() => {
           if (registrationOpen) {
             const confirmed = window.confirm(
-              "Close registration?\n\nNew roster will no longer be able to join this event."
+              "Close registration?\n\nNew participants will no longer be able to join this event."
             );
 
             if (confirmed) {
