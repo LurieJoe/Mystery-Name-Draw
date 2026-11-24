@@ -912,9 +912,6 @@
 
 .email-subject-input {
   width: 100%;
-  /* Without this the 1rem side padding and border are added ON TOP of
-     100%, pushing the field past the card edge. */
-  box-sizing: border-box;
   margin-top: 0.5rem;
   padding: 0.75rem 1rem;
 
