@@ -1,5 +1,12 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import type { ChangeEvent } from "react";
+import {
+  createSeededRandom,
+  distinctForbiddenPairings,
+  findAssignment,
+  suggestedRemovals,
+  type ForbiddenPairing,
+} from "./draw/assignment";
 import Header from "./components/Header";
 import "./CreateEventPage.css";
 
@@ -142,28 +149,38 @@ const [remindBeforeDrawDate, setRemindBeforeDrawDate] =
   const [invitees, setInvitees] = useState<Invitee[]>([]);
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
 
-  const organizerParticipant: Invitee | null =
-    includeOrganizer && organizerName.trim()
-      ? {
-          id: ORGANIZER_ID,
-          name: organizerName.trim(),
-          email: organizerEmail.trim(),
-          status: "Organizer",
-        }
-      : null;
+  const organizerParticipant: Invitee | null = useMemo(
+    () =>
+      includeOrganizer && organizerName.trim()
+        ? {
+            id: ORGANIZER_ID,
+            name: organizerName.trim(),
+            email: organizerEmail.trim(),
+            status: "Organizer",
+          }
+        : null,
+    [includeOrganizer, organizerName, organizerEmail]
+  );
 
   // Everyone the organizer manages: the organizer plus every invitee,
   // whatever their status.
-  const roster: Invitee[] = organizerParticipant
-    ? [organizerParticipant, ...invitees]
-    : invitees;
+  const roster: Invitee[] = useMemo(
+    () =>
+      organizerParticipant
+        ? [organizerParticipant, ...invitees]
+        : invitees,
+    [organizerParticipant, invitees]
+  );
 
   // Only these are in the draw. An invitee is not a participant until
   // they register; the organizer counts once they opt in.
-  const participants = roster.filter(
-    (person) =>
-      person.id === ORGANIZER_ID ||
-      person.status === "Registered"
+  const participants = useMemo(
+    () =>
+      roster.filter(
+        (person) =>
+          person.id === ORGANIZER_ID || person.status === REGISTERED
+      ),
+    [roster]
   );
 
   // Restrictions whose two ends are both currently in the roster.
@@ -187,6 +204,75 @@ const [inviteEmail, setInviteEmail] = useState("");
     useState<string | null>(null);
   const [showAllRestrictions, setShowAllRestrictions] =
   useState(false);
+  const [overrideNotices, setOverrideNotices] = useState<string[]>([]);
+
+  // Restrictions become forbidden giver/receiver pairings. Only people
+  // actually in the draw count, so a restriction naming someone who
+  // never registered simply does not apply.
+  const forbiddenPairings: ForbiddenPairing[] = useMemo(
+    () =>
+      restrictions
+        .filter(
+          (restriction) =>
+            participants.some((p) => p.id === restriction.ownerId) &&
+            participants.some((p) => p.id === restriction.otherId)
+        )
+        .map((restriction) =>
+          restriction.direction === "give"
+            ? {
+                giverId: restriction.ownerId,
+                receiverId: restriction.otherId,
+              }
+            : {
+                giverId: restriction.otherId,
+                receiverId: restriction.ownerId,
+              }
+        ),
+    [restrictions, participants]
+  );
+
+  const drawPeople = useMemo(
+    () =>
+      participants.map((person) => ({
+        id: person.id,
+        name: person.name,
+      })),
+    [participants]
+  );
+
+  /**
+   * Whether a draw is possible. Seeded so the answer does not change
+   * between renders. Only `ok` is read here - the organizer must never
+   * see who drew whom.
+   */
+  const drawCheck = useMemo(
+    () =>
+      findAssignment(
+        drawPeople,
+        forbiddenPairings,
+        createSeededRandom("validation")
+      ),
+    [drawPeople, forbiddenPairings]
+  );
+
+  const removalSuggestion = useMemo(
+    () =>
+      drawCheck.ok
+        ? null
+        : suggestedRemovals(
+            drawPeople,
+            forbiddenPairings,
+            createSeededRandom("suggestions"),
+            2,
+            3
+          ),
+    [drawCheck.ok, drawPeople, forbiddenPairings]
+  );
+
+  const distinctPairingCount = useMemo(
+    () => distinctForbiddenPairings(drawPeople, forbiddenPairings).length,
+    [drawPeople, forbiddenPairings]
+  );
 
   const nameForInvitee = (inviteeId: string) =>
     roster.find(
@@ -253,6 +339,111 @@ const [inviteEmail, setInviteEmail] = useState("");
           : invitee
       )
     );
+  };
+
+  /**
+   * The restriction records that produce a forbidden pairing.
+   *
+   * There can be two: one person refusing to give, the other refusing
+   * to receive. Both have to go or the pairing stays blocked, which
+   * would look to the organizer like the removal did nothing.
+   */
+  /** "A", "A and B", "A, B, and C" - Oxford comma. */
+  const formatList = (items: string[]) => {
+    if (items.length <= 1) {
+      return items[0] ?? "";
+    }
+
+    if (items.length === 2) {
+      return `${items[0]} and ${items[1]}`;
+    }
+
+    return `${items.slice(0, -1).join(", ")}, and ${
+      items[items.length - 1]
+    }`;
+  };
+
+  const formatNames = (ids: string[]) =>
+    formatList(ids.map(nameForInvitee));
+
+  const recordsForPairing = (pairing: ForbiddenPairing) =>
+    restrictions.filter(
+      (restriction) =>
+        (restriction.direction === "give" &&
+          restriction.ownerId === pairing.giverId &&
+          restriction.otherId === pairing.receiverId) ||
+        (restriction.direction === "receive" &&
+          restriction.ownerId === pairing.receiverId &&
+          restriction.otherId === pairing.giverId)
+    );
+
+  const describePairing = (pairing: ForbiddenPairing) => {
+    const records = recordsForPairing(pairing);
+    const owners = [
+      ...new Set(records.map((record) => nameForInvitee(record.ownerId))),
+    ];
+
+    return {
+      pairing: `${nameForInvitee(
+        pairing.giverId
+      )} must not be assigned to buy for ${nameForInvitee(
+        pairing.receiverId
+      )}`,
+      owners,
+      doubled: records.length > 1,
+    };
+  };
+
+  const removePairing = (pairing: ForbiddenPairing) => {
+    const records = recordsForPairing(pairing);
+
+    if (records.length === 0) {
+      return;
+    }
+
+    const giverName = nameForInvitee(pairing.giverId);
+    const receiverName = nameForInvitee(pairing.receiverId);
+    const owners = [
+      ...new Set(records.map((record) => nameForInvitee(record.ownerId))),
+    ];
+
+    const confirmed = window.confirm(
+      `Remove this restriction?\n\n` +
+        (records.length > 1
+          ? `${owners.join(
+              " and "
+            )} both set a restriction on this pairing, and both will be removed.\n\n`
+          : "") +
+        `${giverName} could then be assigned to buy for ${receiverName}, ` +
+        `which ${owners.join(" and ")} asked to avoid.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setRestrictions((previousRestrictions) =>
+      previousRestrictions.filter(
+        (restriction) =>
+          !(
+            (restriction.direction === "give" &&
+              restriction.ownerId === pairing.giverId &&
+              restriction.otherId === pairing.receiverId) ||
+            (restriction.direction === "receive" &&
+              restriction.ownerId === pairing.receiverId &&
+              restriction.otherId === pairing.giverId)
+          )
+      )
+    );
+
+    setOverrideNotices((previousNotices) => [
+      ...previousNotices,
+      owners.length > 1
+        ? `Removed the restrictions ${owners.join(
+            " and "
+          )} set on this pairing. Please let them both know: ${giverName} may now be assigned to buy for ${receiverName}.`
+        : `Removed ${owners[0]}'s restriction. Please let ${owners[0]} know: ${giverName} may now be assigned to buy for ${receiverName}.`,
+    ]);
   };
 
   const removeInvitee = (inviteeId: string) => {
@@ -573,6 +764,7 @@ const [inviteEmail, setInviteEmail] = useState("");
     setEditingInviteeId(null);
     setRestrictionEditorId(null);
     setShowAllRestrictions(false);
+    setOverrideNotices([]);
     setIncludeOrganizer(true);
     setOrganizerName("");
     setOrganizerEmail("");
@@ -1818,10 +2010,187 @@ return (
       <button
         type="button"
         className="continue-button"
+        onClick={() => setCurrentStep(6)}
       >
         Draw Validation →
       </button>
 
+    </div>
+
+  </div>
+)}
+{currentStep === 6 && (
+  <div className="wizard-card">
+
+    <div className="exchange-title-section">
+      <h3>{eventName || "Unnamed Gift Exchange"}</h3>
+    </div>
+
+    <h2>Draw Validation</h2>
+
+    <p className="step-description">
+      Check that everyone can be given someone to buy for, before the
+      draw date arrives.
+    </p>
+
+    <div className="draw-summary">
+      <span>
+        <strong>{participants.length}</strong>{" "}
+        {participants.length === 1 ? "participant" : "participants"}
+      </span>
+
+      <span>
+        <strong>{distinctPairingCount}</strong>{" "}
+        {distinctPairingCount === 1
+          ? "blocked pairing"
+          : "blocked pairings"}
+        {forbiddenPairings.length !== distinctPairingCount
+          ? ` (from ${forbiddenPairings.length} restrictions)`
+          : ""}
+      </span>
+    </div>
+
+    {activeRestrictions.length > forbiddenPairings.length && (
+      <p className="helper-text">
+        {activeRestrictions.length - forbiddenPairings.length} restriction
+        {activeRestrictions.length - forbiddenPairings.length === 1
+          ? " involves someone who has"
+          : "s involve people who have"}{" "}
+        not registered, so {
+          activeRestrictions.length - forbiddenPairings.length === 1
+            ? "it does"
+            : "they do"
+        } not affect this draw.
+      </p>
+    )}
+
+    {participants.length < 2 ? (
+      <div className="draw-status draw-status-waiting">
+        <h3>Not enough participants yet</h3>
+
+        <p>
+          A draw needs at least two registered participants. Invitees
+          join this list once they register.
+        </p>
+      </div>
+    ) : drawCheck.ok ? (
+      <div className="draw-status draw-status-ok">
+        <h3>This draw will work</h3>
+
+        <p>
+          Everyone can be given someone to buy for without breaking a
+          restriction. The draw runs on {formatDate(drawDate)}.
+        </p>
+
+        <p className="helper-text">
+          Assignments are not shown here. Nobody sees who drew whom,
+          including you.
+        </p>
+      </div>
+    ) : (
+      <div className="draw-status draw-status-blocked">
+        <h3>This draw cannot be completed</h3>
+
+        <p>
+          {drawCheck.availableReceiverIds.length === 0
+            ? `${formatNames(
+                drawCheck.blockedGiverIds
+              )} cannot be matched to anyone.`
+            : `${formatNames(
+                drawCheck.blockedGiverIds
+              )} can only be matched to ${formatNames(
+                drawCheck.availableReceiverIds
+              )}, which is not enough to go round.`}
+        </p>
+
+        {removalSuggestion?.status === "remove" ? (
+          <>
+            <p>
+              {removalSuggestion.size === 1
+                ? "Removing any one of these restrictions would fix it:"
+                : `Removing a single restriction will not be enough here. At least ${removalSuggestion.size} have to go, for example:`}
+            </p>
+
+            <div className="removal-options">
+              {removalSuggestion.options.map((option, optionIndex) => (
+                <div
+                  key={optionIndex}
+                  className="removal-option"
+                >
+                  {removalSuggestion.size > 1 && (
+                    <div className="removal-option-label">
+                      Option {optionIndex + 1}
+                    </div>
+                  )}
+
+                  <ul>
+                    {option.map((pairing, pairingIndex) => {
+                      const described = describePairing(pairing);
+
+                      return (
+                        <li key={pairingIndex}>
+                          <div className="removal-detail">
+                            <span>{described.pairing}</span>
+
+                            <span className="helper-text">
+                              {described.doubled
+                                ? `Set by ${formatList(
+                                    described.owners
+                                  )}. Both restrictions are removed together, or the pairing stays blocked.`
+                                : `${described.owners[0]}\u2019s choice.`}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="secondary-button remove-button"
+                            onClick={() => removePairing(pairing)}
+                          >
+                            Remove
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p>
+            No small set of removals fixes this. The restrictions are too
+            tight for this group: remove several of them, or add more
+            participants.
+          </p>
+        )}
+      </div>
+    )}
+
+    {overrideNotices.length > 0 && (
+      <div className="override-notices">
+        <h3>Restrictions you have removed</h3>
+
+        <p className="helper-text">
+          Mystery Name Draw does not tell participants when their
+          restriction is removed. Please let them know yourself.
+        </p>
+
+        <ul>
+          {overrideNotices.map((notice, index) => (
+            <li key={index}>{notice}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <div className="wizard-navigation">
+      <button
+        type="button"
+        className="back-button"
+        onClick={() => setCurrentStep(5)}
+      >
+        ← Back
+      </button>
     </div>
 
   </div>

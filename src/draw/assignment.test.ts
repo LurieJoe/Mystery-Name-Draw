@@ -12,6 +12,7 @@ import {
   findAssignment,
   permittedRecipients,
   suggestedRemovals,
+  createSeededRandom,
   type DrawPerson,
   type DrawResult,
   type ForbiddenPairing,
@@ -284,6 +285,28 @@ console.log("\n5. Edge cases");
     "nobody is permitted to draw themselves",
     !permittedRecipients(three, []).get("a")?.includes("a")
   );
+}
+
+
+console.log("\n6. Seeded randomness");
+{
+  const people: DrawPerson[] = Array.from({ length: 8 }, (_, i) => ({
+    id: `p${i}`,
+    name: `P${i}`,
+  }));
+
+  const render = () =>
+    JSON.stringify(
+      findAssignment(people, [], createSeededRandom("same-seed"))
+    );
+
+  check("same seed gives the same draw", render() === render());
+
+  const other = JSON.stringify(
+    findAssignment(people, [], createSeededRandom("other-seed"))
+  );
+
+  check("a different seed gives a different draw", render() !== other);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
