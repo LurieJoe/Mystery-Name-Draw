@@ -160,6 +160,14 @@ for (const [step, name, needle, forbidden] of STEPS) {
   );
 }
 
+for (const [name, needles] of [
+  ["FaqPage", ["Questions", "Does anyone need an account?", "Brain Bench Apps"]],
+  ["PrivacyPage", ["Privacy", "no accounts and no passwords", "Brain Bench Apps"]],
+]) {
+  const Page = require(`${OUT}/pages/${name}.js`).default;
+  check(name, () => renderToStaticMarkup(React.createElement(Page)), needles);
+}
+
 check(
   "RegisterPage at /event/ABC123",
   () =>

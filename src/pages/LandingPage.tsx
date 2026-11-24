@@ -1,5 +1,7 @@
 import Header from "../components/Header";
+import SiteFooter from "../components/SiteFooter";
 import { navigate } from "../router";
+import "./ContentPage.css";
 import "./LandingPage.css";
 
 const STEPS = [
@@ -133,14 +135,9 @@ export default function LandingPage() {
           </button>
         </section>
 
-        <footer className="landing-footer">
-          <span>Mystery Name Draw</span>
-          <nav>
-            <a href="#how-it-works">How it works</a>
-            <a href="#/create">Start an exchange</a>
-          </nav>
-        </footer>
       </main>
+
+      <SiteFooter />
     </>
   );
 }

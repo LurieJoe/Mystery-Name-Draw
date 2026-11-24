@@ -588,11 +588,13 @@
 .settings-right {
   display: flex;
   justify-content: center;
-  align-items: center;
+  /* Top, not centre: the settings column is tall, so a centred
+     illustration sits below the fold. */
+  align-items: flex-start;
 }
 
 .settings-logo {
-  max-width: 340px;
+  max-width: 460px;
   width: 100%;
   height: auto;
 }

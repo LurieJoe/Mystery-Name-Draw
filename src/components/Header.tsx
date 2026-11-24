@@ -14,11 +14,8 @@ function Header({
   
         <nav className="nav">
           <a href="#/">Home</a>
-          {/*
-            FAQ, Help and Privacy have no pages yet. Left out rather
-            than pointed at "#", which now routes to the landing page
-            and would discard a part-built exchange.
-          */}
+          <a href="#/faq">FAQ</a>
+          <a href="#/privacy">Privacy</a>
         </nav>
   
         <div className="header-actions">
