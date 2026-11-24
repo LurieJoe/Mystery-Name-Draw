@@ -28,3 +28,6 @@ docs/samples/*.local.json
 
 # Compiled output from `npm run test:draw`
 .tmp-test
+
+# Compiled output from `npm run smoke`
+.tmp-smoke
