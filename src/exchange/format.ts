@@ -38,6 +38,13 @@ export function giftBudgetLabel(budget: {
   giftBudget: string;
   currency: string;
   noGiftLimit: boolean;
+  /**
+   * The organizer's own second way of saying the same amount, for an
+   * exchange spanning two currencies: "about US$30". Free text,
+   * because converting would need live rates and would be wrong by
+   * the time anybody read it.
+   */
+  giftBudgetNote?: string | null;
 }): string {
   if (budget.noGiftLimit) {
     return "No limit";
@@ -49,9 +56,16 @@ export function giftBudgetLabel(budget: {
     return "Not set";
   }
 
-  return `${currencySymbols[budget.currency] ?? ""}${amount} ${
+  const label = `${currencySymbols[budget.currency] ?? ""}${amount} ${
     budget.currency
   }`;
+
+  // Only ever a gloss on an amount: with no limit, or no amount, both
+  // branches above have already returned. This mirrors
+  // gift_budget_label in the database, which the email prints.
+  const note = (budget.giftBudgetNote ?? "").trim();
+
+  return note ? `${label} (${note})` : label;
 }
 
 /**

@@ -86,6 +86,11 @@ export function useExchange() {
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
 const [currency, setCurrency] = useState("USD");
+
+  // The organizer's own second way of saying the amount, for a draw
+  // spanning two currencies. Optional, and meaningless without an
+  // amount, so "no limit" puts it beyond reach.
+  const [giftBudgetNote, setGiftBudgetNote] = useState("");
 const [eventCode, setEventCode] = useState("");
 const [registrationOpen, setRegistrationOpen] = useState(true);
 
@@ -652,6 +657,7 @@ const [inviteEmail, setInviteEmail] = useState("");
       await updateExchangeRemotely(organizerToken, {
         name: snapshot.eventName.trim(),
         giftBudget: snapshot.giftBudget.trim(),
+        giftBudgetNote: snapshot.giftBudgetNote.trim(),
         currency: snapshot.currency,
         noGiftLimit: snapshot.noGiftLimit,
         registrationDeadline: snapshot.registrationDeadline,
@@ -876,6 +882,7 @@ const [inviteEmail, setInviteEmail] = useState("");
     drawDate,
     registrationDeadline,
     giftBudget,
+    giftBudgetNote,
     currency,
     noGiftLimit,
     remindBeforeRegistrationDeadline,
@@ -1011,6 +1018,7 @@ const [inviteEmail, setInviteEmail] = useState("");
     setRegistrationDateTouched(true);
     setGiftBudget(text(data.giftBudget));
     setCurrency(text(data.currency) || "USD");
+    setGiftBudgetNote(text(data.giftBudgetNote));
     setNoGiftLimit(flag(data.noGiftLimit, false));
     setRemindBeforeRegistrationDeadline(
       flag(data.remindBeforeRegistrationDeadline, true)
@@ -1118,6 +1126,7 @@ const [inviteEmail, setInviteEmail] = useState("");
     setRegistrationDateTouched(false);
     setGiftBudget("");
     setCurrency("USD");
+    setGiftBudgetNote("");
     setNoGiftLimit(false);
     setRemindBeforeRegistrationDeadline(true);
     setRemindBeforeDrawDate(true);
@@ -1144,6 +1153,7 @@ const [inviteEmail, setInviteEmail] = useState("");
   };
   const giftBudgetLabel = formatGiftBudget({
     giftBudget,
+    giftBudgetNote,
     currency,
     noGiftLimit,
   });
@@ -1358,6 +1368,8 @@ const [inviteEmail, setInviteEmail] = useState("");
       setEventName(restored.eventName);
       setEventCode(restored.eventCode);
       setGiftBudget(restored.giftBudget);
+      setGiftBudgetNote(restored.giftBudgetNote);
+      setGiftBudgetNote(restored.giftBudgetNote);
       setCurrency(restored.currency);
       setNoGiftLimit(restored.noGiftLimit);
       setRegistrationDeadline(restored.registrationDeadline);
@@ -1630,6 +1642,8 @@ const addInvitee = async () => {
     setDrawDate,
     giftBudget,
     setGiftBudget,
+    giftBudgetNote,
+    setGiftBudgetNote,
     noGiftLimit,
     setNoGiftLimit,
     remindBeforeRegistrationDeadline,

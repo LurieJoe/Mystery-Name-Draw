@@ -80,6 +80,8 @@ const STEPS = [
       "EUR (€)",
       "AUD ($)",
       "BRL (R$)",
+      // The second budget line, for a draw spanning two countries.
+      "Second way of saying it (optional)",
     ],
     // Required-field messages wait until the organizer has typed.
     ["Required because you are in the exchange"],

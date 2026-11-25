@@ -14,6 +14,7 @@ import { rpc } from "../api/config.js";
 export type CreatePayload = {
   name: string;
   giftBudget: string;
+  giftBudgetNote: string;
   currency: string;
   noGiftLimit: boolean;
   registrationDeadline: string;
@@ -55,6 +56,7 @@ export function toCreatePayload(
     drawDate: string;
     registrationDeadline: string;
     giftBudget: string;
+    giftBudgetNote: string;
     currency: string;
     noGiftLimit: boolean;
     remindBeforeRegistrationDeadline: boolean;
@@ -67,6 +69,7 @@ export function toCreatePayload(
   return {
     name: snapshot.eventName.trim(),
     giftBudget: snapshot.giftBudget.trim(),
+    giftBudgetNote: snapshot.giftBudgetNote.trim(),
     currency: snapshot.currency,
     noGiftLimit: snapshot.noGiftLimit,
     registrationDeadline: snapshot.registrationDeadline,
@@ -183,6 +186,7 @@ export type RestoredExchange = {
   eventName: string;
   eventCode: string;
   giftBudget: string;
+  giftBudgetNote: string;
   currency: string;
   noGiftLimit: boolean;
   registrationDeadline: string;
@@ -242,6 +246,7 @@ export function fromOrganizerView(
     eventName: str(exchange.name),
     eventCode: str(exchange.event_code),
     giftBudget: str(exchange.gift_budget),
+    giftBudgetNote: str(exchange.gift_budget_note),
     currency: str(exchange.currency, "USD"),
     noGiftLimit: bool(exchange.no_gift_limit, false),
     registrationDeadline: isoDate(exchange.registration_deadline),

@@ -456,6 +456,37 @@ begin
   perform assert('and so do the others',
     gift_budget_label(v_exchange_id) = '€50 EUR');
 
+  -- A draw with people in two countries has one budget and two ways
+  -- of saying it. The second way is a line the organizer writes.
+  update exchanges set currency = 'BRL', gift_budget_note = 'about US$30'
+  where id = v_exchange_id;
+
+  perform assert('a budget note rides along with the amount',
+    gift_budget_label(v_exchange_id) = 'R$50 BRL (about US$30)');
+
+  update exchanges set gift_budget_note = '   ' where id = v_exchange_id;
+  perform assert('and a note of nothing adds nothing',
+    gift_budget_label(v_exchange_id) = 'R$50 BRL');
+
+  -- No limit means no amount, so there is nothing for a second way
+  -- of saying it to say. A note left over from before must not reach
+  -- the email on the back of it.
+  update exchanges set no_gift_limit = true,
+                       gift_budget_note = 'about US$30'
+  where id = v_exchange_id;
+  perform assert('no limit leaves the note behind',
+    gift_budget_label(v_exchange_id) = 'No limit');
+
+  update exchanges set no_gift_limit = false, gift_budget = null
+  where id = v_exchange_id;
+  perform assert('and so does an amount nobody set',
+    gift_budget_label(v_exchange_id) = 'Not set');
+
+  update exchanges set gift_budget = '50' where id = v_exchange_id;
+
+  update exchanges set no_gift_limit = false, gift_budget_note = null
+  where id = v_exchange_id;
+
   raise notice '';
   raise notice 'All inviting checks passed.';
 end;

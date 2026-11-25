@@ -86,6 +86,7 @@ export default function JoinForm({
           <dd>
             {giftBudgetLabel({
               giftBudget: preview.giftBudget ?? "",
+              giftBudgetNote: preview.giftBudgetNote,
               currency: preview.currency,
               noGiftLimit: preview.noGiftLimit,
             })}

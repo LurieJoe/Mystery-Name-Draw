@@ -24,6 +24,7 @@ import type { RestrictionDirection } from "./types.js";
 export type ExchangePreview = {
   name: string;
   giftBudget: string | null;
+  giftBudgetNote?: string | null;
   currency: string;
   noGiftLimit: boolean;
   registrationDeadline: string;
@@ -52,6 +53,7 @@ export type RegistrationView = {
     eventCode: string;
     name: string;
     giftBudget: string | null;
+    giftBudgetNote?: string | null;
     currency: string;
     noGiftLimit: boolean;
     registrationDeadline: string;

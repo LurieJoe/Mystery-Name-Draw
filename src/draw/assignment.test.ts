@@ -24,6 +24,7 @@ import {
   removalOwners,
 } from "../exchange/restrictionNotices.js";
 import { ORGANIZER_ID, type Restriction } from "../exchange/types.js";
+import { giftBudgetLabel } from "../exchange/format.js";
 import { matchManageToken, shouldScrollToTop } from "../router.js";
 import { createRpc, RpcError } from "../api/rpc.js";
 import { fromOrganizerView, toCreatePayload } from "../exchange/remote.js";
@@ -753,6 +754,7 @@ console.log("\n8. Reading a pasted list");
       drawDate: "2026-12-16",
       registrationDeadline: "2026-12-11",
       giftBudget: " 25 ",
+      giftBudgetNote: "  about R$150  ",
       currency: "USD",
       noGiftLimit: false,
       remindBeforeRegistrationDeadline: true,
@@ -774,6 +776,11 @@ console.log("\n8. Reading a pasted list");
     JSON.stringify(payload.invitees)
   );
   check("the time zone travels with the exchange", payload.timeZone === "America/New_York");
+  check(
+    "and so does the second way of saying the budget",
+    payload.giftBudgetNote === "about R$150",
+    JSON.stringify(payload.giftBudgetNote)
+  );
 
   // Coming back the other way.
   const restored = fromOrganizerView({
@@ -781,6 +788,7 @@ console.log("\n8. Reading a pasted list");
       name: "Office Secret Santa",
       event_code: "ABC123",
       gift_budget: "25",
+      gift_budget_note: "about R$150",
       currency: "USD",
       no_gift_limit: false,
       registration_deadline: "2026-12-11",
@@ -810,6 +818,46 @@ console.log("\n8. Reading a pasted list");
     JSON.stringify(restored.invitees.map((i) => i.id))
   );
   check("what somebody wrote survives the round trip", restored.invitees[0].wishlist === "A book");
+  check("and the budget note comes back too", restored.giftBudgetNote === "about R$150");
+
+  /*
+   * The budget label, which exists twice: here and as
+   * gift_budget_label in the database. The screen prints one and the
+   * invitation email prints the other, so an exchange whose email
+   * disagreed with its own page would be this pair drifting apart.
+   * The database side has matching checks in tests/inviting.sql.
+   */
+  check(
+    "a budget note shows in brackets after the amount",
+    giftBudgetLabel({
+      giftBudget: "50", currency: "BRL", noGiftLimit: false,
+      giftBudgetNote: "about US$30",
+    }) === "R$50 BRL (about US$30)"
+  );
+
+  check(
+    "no limit leaves the note behind, as the email does",
+    giftBudgetLabel({
+      giftBudget: "50", currency: "BRL", noGiftLimit: true,
+      giftBudgetNote: "about US$30",
+    }) === "No limit"
+  );
+
+  check(
+    "and so does an amount nobody set",
+    giftBudgetLabel({
+      giftBudget: "  ", currency: "BRL", noGiftLimit: false,
+      giftBudgetNote: "about US$30",
+    }) === "Not set"
+  );
+
+  check(
+    "a note of nothing adds nothing",
+    giftBudgetLabel({
+      giftBudget: "50", currency: "BRL", noGiftLimit: false,
+      giftBudgetNote: "   ",
+    }) === "R$50 BRL"
+  );
 
   /*
    * Both kinds come back, and each says which it is.

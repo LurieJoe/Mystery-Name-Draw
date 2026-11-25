@@ -142,6 +142,7 @@ export default function RegisteredView({
           <dd>
             {giftBudgetLabel({
               giftBudget: exchange.giftBudget ?? "",
+              giftBudgetNote: exchange.giftBudgetNote,
               currency: exchange.currency,
               noGiftLimit: exchange.noGiftLimit,
             })}

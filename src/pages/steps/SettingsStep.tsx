@@ -23,6 +23,8 @@ export default function SettingsStep() {
     setDrawDate,
     giftBudget,
     setGiftBudget,
+    giftBudgetNote,
+    setGiftBudgetNote,
     noGiftLimit,
     setNoGiftLimit,
     remindBeforeRegistrationDeadline,
@@ -234,6 +236,30 @@ export default function SettingsStep() {
         No Gift Limit
       </label>
 
+    </div>
+
+    {/* Optional, and only meaningful alongside an amount, so it goes
+        away with the amount it describes. */}
+    <div className="register-field budget-note">
+      <label htmlFor="gift-budget-note">
+        Second way of saying it (optional)
+      </label>
+
+      <input
+        id="gift-budget-note"
+        type="text"
+        maxLength={60}
+        placeholder="about US$30"
+        value={giftBudgetNote}
+        onChange={(e) => setGiftBudgetNote(e.target.value)}
+        disabled={noGiftLimit}
+      />
+
+      <p className="helper-text">
+        For a draw spanning two countries. Whatever you type here
+        shows in brackets after the budget, on everyone's page and in
+        the invitation email.
+      </p>
     </div>
 
 
