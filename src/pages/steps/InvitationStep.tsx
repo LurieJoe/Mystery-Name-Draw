@@ -34,7 +34,6 @@ export default function InvitationStep() {
     setRestriction,
     restrictionsOwnedBy,
     restrictionCountFor,
-    markPendingAsInvited,
     removeInvitee,
     registrationLink,
     invitationIntro,
@@ -427,8 +426,6 @@ export default function InvitationStep() {
           `Subject: ${emailSubject}\n\n${invitationMessage}`
         );
   
-        markPendingAsInvited();
-
         alert(
           "Invitation copied to clipboard. Paste it into your email application."
         );
@@ -444,8 +441,6 @@ export default function InvitationStep() {
         await navigator.clipboard.writeText(
           invitationMessage
         );
-
-        markPendingAsInvited();
 
         alert(
           "Invitation copied to your clipboard. Paste it into a text message."

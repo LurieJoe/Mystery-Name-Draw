@@ -3,7 +3,7 @@ import {
   formatDate,
   giftBudgetLabel as formatGiftBudget,
 } from "./format.js";
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useRef, useMemo } from "react";
 import type { ChangeEvent } from "react";
 import {
   createSeededRandom,
@@ -26,9 +26,12 @@ import {
   clearOrganizerRestrictionRemotely,
   createExchangeRemotely,
   invitationCountsRemotely,
+  regenerateEventCodeRemotely,
   removeInviteeRemotely,
   sendInvitationsRemotely,
   setOrganizerRestrictionRemotely,
+  setRegistrationOpenRemotely,
+  updateExchangeRemotely,
   updateInviteeRemotely,
   currentTimeZone,
   fromOrganizerView,
@@ -43,7 +46,6 @@ import {
   isValidEmail,
   shiftIsoDateByYears,
   toIsoDate,
-  INVITED,
   INVITEE_STATUSES,
   INVITE_PENDING,
   ORGANIZER_ID,
@@ -402,15 +404,16 @@ const [inviteEmail, setInviteEmail] = useState("");
    */
 
 
-  const markPendingAsInvited = () => {
-    setInvitees((previousInvitees) =>
-      previousInvitees.map((invitee) =>
-        invitee.status === INVITE_PENDING
-          ? { ...invitee, status: INVITED }
-          : invitee
-      )
-    );
-  };
+  /*
+   * Removed: markPendingAsInvited.
+   *
+   * Copying an invitation to the clipboard used to mark everybody
+   * Invited, which said the app had sent something it had not. The
+   * status did not reach the database either, so it came back as
+   * Invite Pending on the next page load. Now that invitations are
+   * really sent, send_invitations owns that status and the clipboard
+   * buttons only do what they say: copy a message.
+   */
 
   /**
    * The restriction records that produce a forbidden pairing.
@@ -507,6 +510,129 @@ const [inviteEmail, setInviteEmail] = useState("");
     ]);
   };
 
+  /**
+   * Close registration early, or open it again.
+   *
+   * The screen used to flip and nothing else happened: there was no
+   * function to call and no column to write, because open or closed
+   * was worked out from the deadline alone. Reopening still cannot
+   * undo a date that has gone by, and the answer says which it is
+   * rather than leaving the button looking effective.
+   */
+  const changeRegistrationOpen = async (open: boolean) => {
+    if (!hasDatabase || !organizerToken) {
+      setRegistrationOpen(open);
+      return { ok: true as const };
+    }
+
+    const previous = registrationOpen;
+
+    setRegistrationOpen(open);
+    setSaveError(null);
+
+    try {
+      const result = await setRegistrationOpenRemotely(organizerToken, open);
+
+      setRegistrationOpen(result.open);
+
+      return { ok: true as const, ...result };
+    } catch (error) {
+      setRegistrationOpen(previous);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "That couldn't be changed just now.";
+
+      setSaveError(message);
+
+      return { ok: false as const, message };
+    }
+  };
+
+  /**
+   * A new event code, for real this time.
+   *
+   * The button has always warned that existing links stop working.
+   * Until now the code changed in the browser and the database kept
+   * the old one, so the opposite was true: the old links kept
+   * working and the new code matched nothing.
+   */
+  const changeEventCode = async () => {
+    if (!hasDatabase || !organizerToken) {
+      setEventCode(generateEventCode());
+      return { ok: true as const };
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      const result = await regenerateEventCodeRemotely(organizerToken);
+
+      setEventCode(result.eventCode);
+
+      return { ok: true as const, eventCode: result.eventCode };
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "The code couldn't be changed just now.";
+
+      setSaveError(message);
+
+      return { ok: false as const, message };
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /**
+   * Save a change to the exchange itself.
+   *
+   * What "Edit Exchange" always looked like it did. It leaves the
+   * organizer's own details and whether they take part alone: those
+   * add or remove an invitee row, and doing that quietly would take
+   * somebody's registration with it.
+   */
+  const saveExchange = async () => {
+    if (!hasDatabase || !organizerToken) {
+      return { ok: true as const, stored: false };
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      const snapshot = buildExchangeSnapshot();
+
+      await updateExchangeRemotely(organizerToken, {
+        name: snapshot.eventName.trim(),
+        giftBudget: snapshot.giftBudget.trim(),
+        currency: snapshot.currency,
+        noGiftLimit: snapshot.noGiftLimit,
+        registrationDeadline: snapshot.registrationDeadline,
+        drawDate: snapshot.drawDate,
+        remindBeforeRegistrationDeadline:
+          snapshot.remindBeforeRegistrationDeadline,
+        remindBeforeDrawDate: snapshot.remindBeforeDrawDate,
+      });
+
+      return { ok: true as const, stored: true };
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Those changes couldn't be saved just now.";
+
+      setSaveError(message);
+
+      return { ok: false as const, message };
+    } finally {
+      setSaving(false);
+    }
+  };
+
   /*
    * Inviting.
    *
@@ -518,7 +644,9 @@ const [inviteEmail, setInviteEmail] = useState("");
   const [invitationCounts, setInvitationCounts] =
     useState<InvitationCounts | null>(null);
 
-  const refreshInvitationCounts = useCallback(async (token?: string) => {
+  // A plain function: nothing depends on its identity any more, and
+  // memoizing it only gave the compiler a dependency list to argue with.
+  const refreshInvitationCounts = async (token?: string) => {
     // The token can be passed in: straight after creating, the state
     // holding it has not been read back yet.
     const using = token ?? organizerToken;
@@ -531,7 +659,7 @@ const [inviteEmail, setInviteEmail] = useState("");
       // The button falls back to its plain label. Not worth an error
       // on a screen the organizer came to for something else.
     }
-  }, [organizerToken]);
+  };
 
   /**
    * Email the invitations.
@@ -999,6 +1127,25 @@ const [inviteEmail, setInviteEmail] = useState("");
    * nothing would be worse than either.
    */
   const createExchange = async () => {
+    /*
+     * Never twice.
+     *
+     * "Edit Exchange" on the manage screen walks back to step one,
+     * and walking forward from there reached this function again. It
+     * made a second exchange with its own code and its own tokens,
+     * and overwrote the remembered token with the new one - so the
+     * first exchange, with everybody's registrations in it, was still
+     * there and no longer reachable from this browser.
+     *
+     * Changing an exchange that exists goes through saveExchange.
+     */
+    if (hasDatabase && organizerToken && eventCode) {
+      return {
+        ok: false as const,
+        message: "This exchange already exists.",
+      };
+    }
+
     if (!hasDatabase) {
       setEventCode(generateEventCode());
       return { ok: true as const, stored: false };
@@ -1182,6 +1329,11 @@ const [inviteEmail, setInviteEmail] = useState("");
       setIncludeOrganizer(restored.includeOrganizer);
       setInvitees(restored.invitees);
       setOrganizerInviteeId(restored.organizerInviteeId);
+
+      // Fetched all along and then thrown away, so a deadline that
+      // had passed left the database saying closed and this screen
+      // saying open.
+      setRegistrationOpen(restored.registrationOpen);
       setRestrictions(
         restored.restrictions.map((restriction) => ({
           ownerId: restriction.ownerId,
@@ -1475,7 +1627,6 @@ const addInvitee = async () => {
     setRestriction,
     restrictionsOwnedBy,
     restrictionCountFor,
-    markPendingAsInvited,
     allowOpenJoin,
     setAllowOpenJoin,
     changeOpenJoin,
@@ -1494,6 +1645,9 @@ const addInvitee = async () => {
     removePairing,
     removeInvitee,
     invitationCounts,
+    changeRegistrationOpen,
+    changeEventCode,
+    saveExchange,
     sendInvitations,
     refreshInvitationCounts,
     registrationDateValid,

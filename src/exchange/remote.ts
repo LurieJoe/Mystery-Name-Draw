@@ -210,6 +210,8 @@ export type RestoredExchange = {
   }[];
   /** The row the organizer's own ORGANIZER_ID stands for, if any. */
   organizerInviteeId: string | null;
+  /** The database's answer, which is the one that decides who may join. */
+  registrationOpen: boolean;
 };
 
 const str = (value: unknown, fallback = "") =>
@@ -291,6 +293,8 @@ export function fromOrganizerView(
 
     /** The row the organizer's own ORGANIZER_ID stands for, if any. */
     organizerInviteeId,
+
+    registrationOpen: bool(view.registrationOpen, true),
   };
 }
 
@@ -418,5 +422,31 @@ export async function clearOrganizerRestrictionRemotely(
     p_owner_id: ownerId,
     p_other_id: otherId,
     p_direction: direction,
+  });
+}
+
+export async function setRegistrationOpenRemotely(
+  organizerToken: string,
+  open: boolean
+) {
+  return rpc<{ open: boolean; deadlinePassed: boolean }>(
+    "set_registration_open",
+    { p_organizer_token: organizerToken, p_open: open }
+  );
+}
+
+export async function regenerateEventCodeRemotely(organizerToken: string) {
+  return rpc<{ eventCode: string }>("regenerate_event_code", {
+    p_organizer_token: organizerToken,
+  });
+}
+
+export async function updateExchangeRemotely(
+  organizerToken: string,
+  payload: Record<string, unknown>
+) {
+  return rpc<Record<string, unknown>>("update_exchange", {
+    p_organizer_token: organizerToken,
+    p_payload: payload,
   });
 }

@@ -8,10 +8,10 @@ export default function ManageStep() {
   const {
     eventName,
     setCurrentStep,
-    setEventCode,
     registrationOpen,
-    setRegistrationOpen,
-    generateEventCode,
+    changeRegistrationOpen,
+    changeEventCode,
+    saving,
     exportExchange,
     managementLink,
   } = useExchangeContext();
@@ -67,6 +67,7 @@ export default function ManageStep() {
       <button
         type="button"
         className="secondary-button"
+        disabled={saving}
         onClick={() => {
           if (registrationOpen) {
             const confirmed = window.confirm(
@@ -74,10 +75,19 @@ export default function ManageStep() {
             );
 
             if (confirmed) {
-              setRegistrationOpen(false);
+              void changeRegistrationOpen(false);
             }
           } else {
-            setRegistrationOpen(true);
+            void changeRegistrationOpen(true).then((result) => {
+              // Reopening cannot undo a date that has gone by, and the
+              // button would otherwise look as though it had worked.
+              if (result.ok && "deadlinePassed" in result &&
+                  result.deadlinePassed && !result.open) {
+                window.alert(
+                  "The registration deadline has already passed, so registration stays closed. Move the deadline under Edit Exchange to reopen it."
+                );
+              }
+            });
           }
         }}
       >
@@ -89,13 +99,14 @@ export default function ManageStep() {
       <button
         type="button"
         className="secondary-button"
+        disabled={saving}
         onClick={() => {
           const confirmed = window.confirm(
-            "Generate a new event code?\n\nExisting invitation emails, text messages, and registration links will stop working immediately."
+            "Generate a new event code?\n\nThe shared registration link stops working immediately. Personal links already emailed to people keep working."
           );
 
           if (confirmed) {
-            setEventCode(generateEventCode());
+            void changeEventCode();
           }
         }}
       >

@@ -200,6 +200,12 @@ for (const [name, needles, forbidden] of [
       "What if the registration link gets out?",
       "contact@mysterynamedraw.com",
       "Brain Bench Apps",
+      // All four sibling apps, or the footer is inconsistent with the
+      // umbrella site that lists them.
+      "Flashcard Flurry",
+      "Geography Gym",
+      "Mapdle",
+      "Analog Math Clock",
     ],
     // The old address lived in two pages and is easy to reintroduce.
     ["contact@brainbenchapps.com"],
@@ -233,6 +239,39 @@ for (const [name, needles, forbidden] of [
     forbidden
   );
 }
+
+// Editing an exchange that exists. The button used to say Create and
+// mean it, which from "Edit Exchange" on the manage screen built a
+// second exchange and orphaned the first.
+const ReviewStep = require(`${OUT}/pages/steps/ReviewStep.js`).default;
+
+check(
+  "reviewing a new exchange offers to create it",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(Harness, {
+        step: 2,
+        Component: ReviewStep,
+        extra: { eventCode: "" },
+      })
+    ),
+  ["Create Gift Exchange"],
+  ["Save Changes"]
+);
+
+check(
+  "and reviewing one that exists offers to save it",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(Harness, {
+        step: 2,
+        Component: ReviewStep,
+        extra: { eventCode: "ABC123" },
+      })
+    ),
+  ["Save Changes"],
+  ["Create Gift Exchange"]
+);
 
 // Restrictions. Two kinds sit in one list and look alike: the ones the
 // organizer set, which are theirs to undo, and the ones a participant

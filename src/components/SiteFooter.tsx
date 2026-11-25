@@ -28,6 +28,10 @@ export default function SiteFooter() {
         <nav className="site-footer-links" aria-label="Our other apps">
           <a href="https://flashcardflurry.com">Flashcard Flurry</a>
           <a href="https://geographygym.com">Geography Gym</a>
+          {/* Lives inside Geography Gym rather than on a domain of its
+              own, so the two sit together: listed apart they read as
+              one app named twice. */}
+          <a href="https://geographygym.com/mapdle/">Mapdle</a>
           <a href="https://analogmathclock.com">Analog Math Clock</a>
         </nav>
       </div>

@@ -18,9 +18,15 @@ export default function ReviewStep() {
     activeRestrictions,
     formValid,
     createExchange,
+    saveExchange,
+    eventCode,
     saving,
     saveError,
   } = useExchangeContext();
+
+  // An exchange with a code has been created, so this visit is an
+  // edit: everything on this screen is a change to something real.
+  const existing = Boolean(eventCode);
 
   return (
     <>
@@ -160,17 +166,32 @@ export default function ReviewStep() {
           );
         }
 
-        // The event code now comes back from the database, so the step
-        // only advances once there is something to advance to: a link
-        // for an exchange that was never saved is a link to nothing.
-        const result = await createExchange();
+        /*
+         * Creating and saving are different things, and this button
+         * used to do only the first. Reached from "Edit Exchange" on
+         * the manage screen, it made a second exchange with its own
+         * code and tokens, and the first one - with everybody's
+         * registrations in it - was left behind.
+         *
+         * The event code now comes back from the database, so the
+         * step only advances once there is something to advance to.
+         */
+        const result = existing
+          ? await saveExchange()
+          : await createExchange();
 
         if (result.ok) {
           setCurrentStep(3);
         }
       }}
     >
-      {saving ? "Creating\u2026" : "Create Gift Exchange"}
+      {saving
+        ? existing
+          ? "Saving\u2026"
+          : "Creating\u2026"
+        : existing
+        ? "Save Changes"
+        : "Create Gift Exchange"}
     </button>
 
       </div>
