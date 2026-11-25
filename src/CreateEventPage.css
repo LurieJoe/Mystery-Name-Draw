@@ -1400,7 +1400,11 @@
 .tips-art {
   flex: 0 0 auto;
   width: 100%;
-  max-width: 260px;
+
+  /* Scales with the window rather than stepping at a breakpoint, so it
+     never ends up wider than a column of tips sitting next to it. */
+  max-width: clamp(240px, 21vw, 330px);
+
   height: auto;
 }
 
@@ -1423,5 +1427,16 @@
   .continue-button {
     flex: 1 1 100%;
     padding: 1rem 1.25rem;
+  }
+}
+
+/* Once there is room for the bird AND two full columns, let the tips
+   fill the width rather than stopping at the 46rem cap: otherwise the
+   columns end well short of the bird and leave a hole in the middle of
+   the panel. Below this the auto-fit grid and the cap still apply. */
+@media (min-width: 1200px) {
+  .tips-grid {
+    max-width: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
