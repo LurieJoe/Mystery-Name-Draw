@@ -13,7 +13,7 @@
 
 import { ORGANIZER_ID, type Restriction } from "./types.js";
 
-/** "Ada", "Ada and Grace", "Ada, Grace, and Alan" - with the Oxford comma. */
+/** "Rowan", "Rowan and Mina", "Rowan, Mina, and Theo" - with the Oxford comma. */
 export function formatList(names: string[]): string {
   if (names.length <= 1) {
     return names[0] ?? "";

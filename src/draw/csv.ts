@@ -106,7 +106,7 @@ export function toCsvNames(names: string[]): string {
 const SUFFIXES = /^(jr|sr|ii|iii|iv|v|phd|md|dds|esq)\.?$/i;
 
 /**
- * "Lovelace, Ada" -> "Ada Lovelace".
+ * "Hale, Rowan" -> "Rowan Hale".
  *
  * The paste box treats a comma as a separator between people, so a
  * surname-first cell from a gradebook would otherwise be drawn as two

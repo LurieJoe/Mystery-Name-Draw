@@ -290,6 +290,71 @@ const [inviteEmail, setInviteEmail] = useState("");
    * their own row rather than appearing twice. Returns their id, which
    * is what their restrictions are keyed to.
    */
+  /**
+   * Change what a registered person wrote about themselves.
+   *
+   * Separate from registerParticipant because the two are different
+   * acts: joining is a one-off, and this is somebody coming back to
+   * their own page, which is the normal way to use it. Restrictions do
+   * not open until registration closes, so almost everybody returns at
+   * least once, and finding their wishlist frozen would be strange.
+   *
+   * The email is the handle the exchange knows them by, so it is not
+   * editable here; changing it would make them a different person.
+   */
+  const updateRegistration = (
+    inviteeId: string,
+    details: { name: string; wishlist: string; preferences: string }
+  ) => {
+    const name = details.name.trim();
+
+    setInvitees((previousInvitees) =>
+      previousInvitees.map((invitee) =>
+        invitee.id === inviteeId
+          ? {
+              ...invitee,
+              name: name || invitee.name,
+              wishlist: details.wishlist.trim(),
+              preferences: details.preferences.trim(),
+            }
+          : invitee
+      )
+    );
+  };
+
+  /**
+   * Take yourself back out of an exchange.
+   *
+   * The invitee row stays: the organizer invited this person and should
+   * still see them on the list, now as somebody who has not registered,
+   * rather than having them vanish and be re-invited by accident. What
+   * they wrote goes, along with the restrictions they had set, since
+   * those were choices about a draw they are no longer in. Registering
+   * again later is the same act as registering the first time.
+   */
+  const withdrawRegistration = (inviteeId: string) => {
+    setRestrictions((previousRestrictions) =>
+      previousRestrictions.filter(
+        (restriction) =>
+          restriction.ownerId !== inviteeId &&
+          restriction.otherId !== inviteeId
+      )
+    );
+
+    setInvitees((previousInvitees) =>
+      previousInvitees.map((invitee) =>
+        invitee.id === inviteeId
+          ? {
+              ...invitee,
+              status: INVITE_PENDING,
+              wishlist: "",
+              preferences: "",
+            }
+          : invitee
+      )
+    );
+  };
+
   const registerParticipant = (details: {
     name: string;
     email: string;
@@ -984,6 +1049,8 @@ const addInvitee = () => {
     restrictionCountFor,
     markPendingAsInvited,
     registerParticipant,
+    updateRegistration,
+    withdrawRegistration,
     formatList,
     formatNames,
     recordsForPairing,

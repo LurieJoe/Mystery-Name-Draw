@@ -1,19 +1,26 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import SiteFooter from "../components/SiteFooter";
+import RegisteredView from "./RegisteredView";
 import { useExchangeContext } from "../exchange/context";
 import { isValidEmail } from "../exchange/types";
 import { navigate } from "../router";
 import "./ContentPage.css";
 import "./RegisterPage.css";
 
+const WISHLIST_PLACEHOLDER =
+  "A book I have been meaning to read\nSomething for the garden\nA voucher for the bakery on the corner";
+
+const PREFERENCES_PLACEHOLDER =
+  "Medium in most things. Please, no more candles.";
+
 /**
  * Where an invitee lands from their registration link.
  *
+ * Joining is this page; everything afterwards is RegisteredView.
  * Restrictions come after joining, not before: you cannot choose who
- * not to be matched with until you are in the list and can see who else
- * is. The roster also grows as other people register, which is why this
- * page stays reachable afterwards rather than being a one-shot form.
+ * not to be matched with until you are in the list and can see who
+ * else is.
  */
 export default function RegisterPage({
   eventCode,
@@ -26,15 +33,9 @@ export default function RegisterPage({
     registrationDeadline,
     giftBudgetLabel,
     registrationOpen,
-    restrictionsOpen,
-    drawHasPassed,
     eventCode: openExchangeCode,
     formatDate,
-    participants,
     registerParticipant,
-    hasRestriction,
-    setRestriction,
-    nameForInvitee,
   } = useExchangeContext();
 
   const [name, setName] = useState("");
@@ -52,10 +53,6 @@ export default function RegisterPage({
   const nameMissing = !name.trim();
   const emailInvalid = !isValidEmail(email);
   const canSubmit = !nameMissing && !emailInvalid;
-
-  const others = registeredId
-    ? participants.filter((person) => person.id !== registeredId)
-    : [];
 
   const join = () => {
     setAttempted(true);
@@ -98,122 +95,10 @@ export default function RegisterPage({
             </div>
           </>
         ) : registeredId ? (
-          <>
-            <h1>You are in</h1>
-
-            <p className="content-lede">
-              Thanks, {nameForInvitee(registeredId)}. You are registered
-              for {eventName || "this exchange"}.
-            </p>
-
-            <h2>Who you would rather not be matched with</h2>
-            <p>
-              These work in one direction: not wanting to buy for
-              someone is a different thing from not wanting them to buy
-              for you. They are your own choices and do not appear on
-              anyone else&rsquo;s list, though the organizer can see
-              them, since they are the one who has to sort it out if the
-              restrictions make a draw impossible.
-            </p>
-
-            {drawHasPassed ? (
-              <p className="register-empty">
-                The draw has happened, so restrictions are closed.
-              </p>
-            ) : !restrictionsOpen ? (
-              <p className="register-empty">
-                Restrictions open when registration closes on{" "}
-                {formatDate(registrationDeadline)}, once the list of
-                people is final. You can set and change them from then
-                until the draw on {formatDate(drawDate)}.
-              </p>
-            ) : others.length === 0 ? (
-              <p className="register-empty">
-                You are the only person registered so far, so there is
-                nobody to set a restriction against.
-              </p>
-            ) : (
-              <div className="register-restrictions">
-                <section>
-                  <h3>I would rather not buy for</h3>
-                  {others.map((person) => (
-                    <label
-                      key={person.id}
-                      className="register-check"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={hasRestriction(
-                          registeredId,
-                          person.id,
-                          "give"
-                        )}
-                        onChange={(e) =>
-                          setRestriction(
-                            registeredId,
-                            person.id,
-                            "give",
-                            e.target.checked
-                          )
-                        }
-                      />
-                      {person.name}
-                    </label>
-                  ))}
-                </section>
-
-                <section>
-                  <h3>I would rather not receive from</h3>
-                  {others.map((person) => (
-                    <label
-                      key={person.id}
-                      className="register-check"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={hasRestriction(
-                          registeredId,
-                          person.id,
-                          "receive"
-                        )}
-                        onChange={(e) =>
-                          setRestriction(
-                            registeredId,
-                            person.id,
-                            "receive",
-                            e.target.checked
-                          )
-                        }
-                      />
-                      {person.name}
-                    </label>
-                  ))}
-                </section>
-              </div>
-            )}
-
-            <h2>What happens next</h2>
-            <ol className="register-next">
-              <li>
-                More people register until{" "}
-                {formatDate(registrationDeadline)}.
-              </li>
-              <li>
-                On {formatDate(drawDate)} everyone is matched at once,
-                honouring every restriction that has been set.
-              </li>
-              <li>
-                You are emailed the one name you are buying for. Nobody
-                sees the full set of matches, including whoever
-                organized the exchange.
-              </li>
-            </ol>
-
-            <p className="content-updated">
-              Changed your mind? Come back to this page any time before
-              the draw. Your choices save as you tick them.
-            </p>
-          </>
+          <RegisteredView
+            registeredId={registeredId}
+            onWithdraw={() => setRegisteredId(null)}
+          />
         ) : (
           <>
             <h1>Join {eventName || "this gift exchange"}</h1>
@@ -282,50 +167,67 @@ export default function RegisterPage({
 
             <h2>Your wishlist</h2>
             <p>
-              Ideas for whoever draws your name. Only they will see it,
-              and they will not know you wrote it for them.
+              Ideas for whoever draws your name. Only they will see it.
+              Give them enough to buy from: a size, a color, an author,
+              a shop. Vague is harder to shop for than nothing at all.
             </p>
 
             <label className="register-field">
+              <span className="visually-hidden">Your wishlist</span>
               <textarea
                 rows={5}
                 value={wishlist}
-                placeholder={
-                  "A book I have been meaning to read\nSomething for the garden\nA voucher for the bakery on the corner"
-                }
+                placeholder={WISHLIST_PLACEHOLDER}
                 onChange={(e) => setWishlist(e.target.value)}
               />
             </label>
 
             <h2>Anything else worth knowing</h2>
             <p>
-              Sizes, colours you like, or things to steer clear of.
+              Sizes, colors you like, or things to steer clear of.
               Optional, and often more useful than the wishlist.
             </p>
 
             <label className="register-field">
+              <span className="visually-hidden">
+                Anything else worth knowing
+              </span>
               <textarea
                 rows={4}
                 value={preferences}
-                placeholder="Medium in most things. Please, no more candles."
+                placeholder={PREFERENCES_PLACEHOLDER}
                 onChange={(e) => setPreferences(e.target.value)}
               />
             </label>
 
-            <button
-              type="button"
-              className="landing-cta register-submit"
-              onClick={join}
-              disabled={!registrationOpen}
-            >
-              Join the exchange
-            </button>
+            <div className="register-actions">
+              <button
+                type="button"
+                className="landing-cta register-submit"
+                onClick={join}
+                disabled={!registrationOpen}
+              >
+                Confirm Registration
+              </button>
+
+              {/* Nobody has to join because a link arrived. This leaves
+                  without registering, and the link still works later. */}
+              <button
+                type="button"
+                className="register-cancel"
+                onClick={() => navigate("/")}
+              >
+                Cancel
+              </button>
+            </div>
 
             <p className="register-after">
               Once registration closes on{" "}
               {formatDate(registrationDeadline)} you can come back and
               say who you would rather not be matched with, right up
-              until the draw on {formatDate(drawDate)}.
+              until the draw on {formatDate(drawDate)}. Not sure?{" "}
+              <a href="#/faq">The questions people ask</a> covers how
+              this works.
             </p>
           </>
         )}

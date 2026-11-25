@@ -73,6 +73,10 @@ const { renderToStaticMarkup } = require("react-dom/server");
 const stepNumber = Number(process.argv[3]);
 const isStep = page.endsWith("Step");
 
+// Screens that read the exchange rather than standing alone.
+const needsContext =
+  isStep || page === "RegisteredView" || page === "RegisterPage";
+
 const Page = isStep
   ? require(`${OUT}/pages/steps/${page}.js`).default
   : require(`${OUT}/pages/${page}.js`).default;
@@ -98,18 +102,47 @@ function Harness() {
         // overriding invitees alone renders an empty table and the row
         // layout never gets looked at.
         roster: [
-          { id: "a", name: "Ada Lovelace", email: "ada.lovelace@example.com", status: "Registered" },
-          { id: "b", name: "Grace Hopper", email: "grace@example.com", status: "Invited" },
-          { id: "c", name: "Alan Turing", email: "alan.turing@example.com", status: "Invite Pending" },
+          { id: "a", name: "Rowan Hale", email: "ada.lovelace@example.com", status: "Registered" },
+          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Invited" },
+          { id: "c", name: "Theo Barnes", email: "alan.turing@example.com", status: "Invite Pending" },
         ],
+        // RegisteredView reads the saved values back, so the fixture
+        // has to contain something to read.
+        participants: [
+          { id: "a", name: "Rowan Hale", email: "ada.lovelace@example.com", status: "Registered" },
+          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Registered" },
+        ],
+        restrictionsOpen: true,
+        // Matching codes, or RegisterPage shows its "no exchange here"
+        // notice instead of the form.
+        eventCode: "ABC123",
+        giftBudgetLabel: "$25 USD",
+        drawDate: "2026-12-16",
+        registrationDeadline: "2026-12-11",
         invitees: [
-          { id: "a", name: "Ada Lovelace", email: "ada@example.com", status: "Registered" },
-          { id: "b", name: "Grace Hopper", email: "grace@example.com", status: "Invited" },
-          { id: "c", name: "Alan Turing", email: "alan@example.com", status: "Invite Pending" },
+          { id: "a", name: "Rowan Hale", email: "ada@example.com", status: "Registered",
+            wishlist: "A book about engines", preferences: "No chocolate, please" },
+          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Invited" },
+          { id: "c", name: "Theo Barnes", email: "alan@example.com", status: "Invite Pending" },
         ],
       },
     },
-    React.createElement(Page)
+    // The register styles are scoped under .register-page, which lives
+    // on RegisterPage's own <main>. Previewing the inner view without
+    // that wrapper shows a layout the app never renders.
+    page === "RegisteredView"
+      ? React.createElement(
+          "main",
+          { className: "content-page register-page" },
+          React.createElement(Page, {
+            registeredId: "a",
+            onWithdraw: () => {},
+          })
+        )
+      : React.createElement(
+          Page,
+          page === "RegisterPage" ? { eventCode: "ABC123" } : null
+        )
   );
 }
 
@@ -146,7 +179,7 @@ fs.writeFileSync(
 <title>${page} preview</title>
 <style>${css}</style>
 </head>
-<body><div id="root">${renderToStaticMarkup(React.createElement(isStep ? Harness : Page))}</div></body>
+<body><div id="root">${renderToStaticMarkup(React.createElement(needsContext ? Harness : Page))}</div></body>
 </html>`
 );
 

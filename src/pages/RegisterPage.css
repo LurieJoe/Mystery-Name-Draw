@@ -129,3 +129,76 @@
   margin-bottom: 0.6rem;
   line-height: 1.6;
 }
+
+/* --- Coming back to change what you wrote --- */
+
+.register-page .register-field input[readonly] {
+  background: #f8fafc;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.register-hint {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.register-save-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.register-saved {
+  font-weight: 600;
+  color: #15803d;
+}
+
+/* --- Confirming, and changing your mind --- */
+
+.register-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.register-cancel {
+  padding: 0.65rem 1.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.register-cancel:hover {
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.register-cancel:focus-visible {
+  outline: 3px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+/* Set apart from the rest: leaving is a deliberate act, not a button
+   to land on while scrolling past the restrictions. */
+.register-withdraw {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.register-withdraw h2 {
+  margin-top: 0;
+}

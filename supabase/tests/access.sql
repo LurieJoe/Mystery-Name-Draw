@@ -47,9 +47,9 @@ begin
     'organizer', jsonb_build_object(
       'name', 'Joe', 'email', 'joe@example.com', 'participating', true),
     'invitees', jsonb_build_array(
-      jsonb_build_object('name', 'Ada', 'email', 'ada@example.com'),
-      jsonb_build_object('name', 'Grace', 'email', 'grace@example.com'),
-      jsonb_build_object('name', 'Alan', 'email', 'alan@example.com'))
+      jsonb_build_object('name', 'Rowan', 'email', 'ada@example.com'),
+      jsonb_build_object('name', 'Mina', 'email', 'grace@example.com'),
+      jsonb_build_object('name', 'Theo', 'email', 'alan@example.com'))
   ));
 
   v_exchange_id := (v_created ->> 'exchangeId')::uuid;
@@ -100,9 +100,9 @@ begin
   perform assert('restrictions are shut until registration closes',
     not restrictions_are_open(v_exchange_id));
 
-  perform register_participant(v_ada_token, 'Ada Lovelace',
+  perform register_participant(v_ada_token, 'Rowan Hale',
     'Books about engines', 'No chocolate');
-  perform register_participant(v_grace_token, 'Grace Hopper',
+  perform register_participant(v_grace_token, 'Mina Okafor',
     'A good compiler', null);
 
   v_view := registration_view(v_ada_token);
@@ -126,13 +126,13 @@ begin
     restrictions_are_open(v_exchange_id));
 
   begin
-    perform register_participant(v_ada_token, 'Ada', null, null);
+    perform register_participant(v_ada_token, 'Rowan', null, null);
     perform assert('registering after the deadline is refused', false);
   exception when check_violation then
     perform assert('registering after the deadline is refused', true);
   end;
 
-  -- Ada will not give to Grace. Her choice, and hers alone.
+  -- Rowan will not give to Mina. Her choice, and hers alone.
   perform set_my_restriction(v_ada_token, v_grace, 'give');
 
   v_view := registration_view(v_ada_token);
@@ -143,7 +143,7 @@ begin
   perform assert('and nobody else sees it',
     jsonb_array_length(v_view -> 'myRestrictions') = 0);
 
-  -- The organizer adds one for Grace, in case she forgets.
+  -- The organizer adds one for Mina, in case she forgets.
   insert into restrictions (exchange_id, owner_invitee_id,
                             other_invitee_id, direction, set_by_organizer)
   values (v_exchange_id, v_grace, v_ada, 'give', true);
@@ -192,7 +192,7 @@ begin
   update exchanges set drawn_at = now() where id = v_exchange_id;
 
   perform assert('a participant is told one name, their own',
-    my_assignment(v_ada_token) ->> 'name' = 'Alan');
+    my_assignment(v_ada_token) ->> 'name' = 'Theo');
   perform assert('and sees the wishlist of the person they drew',
     my_assignment(v_grace_token) ->> 'wishlist' = 'Books about engines');
 

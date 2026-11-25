@@ -395,11 +395,11 @@ console.log("\n7. Grouping and pairing");
 
 console.log("\n8. Reading a pasted list");
 {
-  const parsed = parseNames("  Ada \n\nGrace,Alan\n  \nKatherine  Johnson ");
+  const parsed = parseNames("  Rowan \n\nMina,Theo\n  \nNadia  Reyes ");
   check(
     "trims, splits on newlines and commas, drops blanks",
     parsed.map((p) => p.name).join("|") ===
-      "Ada|Grace|Alan|Katherine Johnson",
+      "Rowan|Mina|Theo|Nadia Reyes",
     parsed.map((p) => p.name).join("|")
   );
 
@@ -419,69 +419,69 @@ console.log("\n8. Reading a pasted list");
 
   const gradebook =
     "Student Name,ID,Email\n" +
-    '"Lovelace, Ada",1001,ada@example.edu\n' +
-    "Grace Hopper,1002,grace@example.edu\n" +
-    "Alan Turing,1003,alan@example.edu\n";
+    '"Hale, Rowan",1001,ada@example.edu\n' +
+    "Mina Okafor,1002,grace@example.edu\n" +
+    "Theo Barnes,1003,alan@example.edu\n";
 
   const fromGradebook = parseCsvNames(gradebook);
   check(
     "the heading row is dropped and the first column wins",
-    fromGradebook.join("|") === "Lovelace, Ada|Grace Hopper|Alan Turing",
+    fromGradebook.join("|") === "Hale, Rowan|Mina Okafor|Theo Barnes",
     fromGradebook.join("|")
   );
 
   check(
     "a plain text list needs no commas at all",
-    parseCsvNames("Ada\nGrace\nAlan").join("|") === "Ada|Grace|Alan"
+    parseCsvNames("Rowan\nMina\nTheo").join("|") === "Rowan|Mina|Theo"
   );
 
   check(
     "a name that merely looks like a heading is kept when it is not first",
-    parseCsvNames("Ada\nName\nGrace").join("|") === "Ada|Name|Grace",
-    parseCsvNames("Ada\nName\nGrace").join("|")
+    parseCsvNames("Rowan\nName\nMina").join("|") === "Rowan|Name|Mina",
+    parseCsvNames("Rowan\nName\nMina").join("|")
   );
 
   check(
     "CRLF line endings do not produce empty rows",
-    parseCsvNames("Name\r\nAda\r\nGrace\r\n").join("|") === "Ada|Grace",
-    parseCsvNames("Name\r\nAda\r\nGrace\r\n").join("|")
+    parseCsvNames("Name\r\nRowan\r\nMina\r\n").join("|") === "Rowan|Mina",
+    parseCsvNames("Name\r\nRowan\r\nMina\r\n").join("|")
   );
 
   check(
     "a doubled quote inside a quoted cell is one quote",
-    parseCsvNames('"Ada ""Addy"" Lovelace",1001').join("|") ===
-      'Ada "Addy" Lovelace',
-    parseCsvNames('"Ada ""Addy"" Lovelace",1001').join("|")
+    parseCsvNames('"Rowan ""Ro"" Hale",1001').join("|") ===
+      'Rowan "Ro" Hale',
+    parseCsvNames('"Rowan ""Ro"" Hale",1001').join("|")
   );
 
   check(
     "a leading byte order mark does not stick to the first name",
-    parseCsvNames("\uFEFFAda\nGrace")[0] === "Ada",
-    parseCsvNames("\uFEFFAda\nGrace")[0]
+    parseCsvNames("\uFEFFRowan\nMina")[0] === "Rowan",
+    parseCsvNames("\uFEFFRowan\nMina")[0]
   );
 
-  check("blank rows are skipped", parseCsvNames("Ada\n\n\nGrace").length === 2);
+  check("blank rows are skipped", parseCsvNames("Rowan\n\n\nMina").length === 2);
   check("an empty file gives nobody", parseCsvNames("").length === 0);
 
-  const written = toCsvNames(['Lovelace, Ada', 'Ada "Addy"', "Grace"]);
+  const written = toCsvNames(['Hale, Rowan', 'Rowan "Ro"', "Mina"]);
   check(
     "a name with a comma or a quote is quoted on the way out",
-    written === 'Name\n"Lovelace, Ada"\n"Ada ""Addy"""\nGrace',
+    written === 'Name\n"Hale, Rowan"\n"Rowan ""Ro"""\nMina',
     JSON.stringify(written)
   );
 
   check(
     "what is written reads back unchanged",
-    parseCsvNames(written).join("|") === 'Lovelace, Ada|Ada "Addy"|Grace',
+    parseCsvNames(written).join("|") === 'Hale, Rowan|Rowan "Ro"|Mina',
     parseCsvNames(written).join("|")
   );
 
-  const everyName = ["Ada", "Grace", "Alan"];
+  const everyName = ["Rowan", "Mina", "Theo"];
   check(
     "a round trip survives the draw's own parser too",
     parseNames(parseCsvNames(toCsvNames(everyName)).join("\n"))
       .map((person) => person.name)
-      .join("|") === "Ada|Grace|Alan"
+      .join("|") === "Rowan|Mina|Theo"
   );
 }
 
@@ -490,7 +490,7 @@ console.log("\n8. Reading a pasted list");
 
   check(
     "a surname-first name is flipped",
-    flipSurnameFirst("Lovelace, Ada") === "Ada Lovelace"
+    flipSurnameFirst("Hale, Rowan") === "Rowan Hale"
   );
   check(
     "a suffix is left where it is",
@@ -498,19 +498,19 @@ console.log("\n8. Reading a pasted list");
   );
   check(
     "a plain name is untouched",
-    flipSurnameFirst("Ada Lovelace") === "Ada Lovelace"
+    flipSurnameFirst("Rowan Hale") === "Rowan Hale"
   );
   check(
     "a cell with two commas is left alone rather than guessed at",
-    flipSurnameFirst("Lovelace, Ada, Ada") === "Lovelace, Ada, Ada"
+    flipSurnameFirst("Hale, Rowan, Rowan") === "Hale, Rowan, Rowan"
   );
 
   const imported = csvNamesForEditing(
-    'Student Name,ID\n"Lovelace, Ada",1\n"Hopper, Grace",2\n'
+    'Student Name,ID\n"Hale, Rowan",1\n"Okafor, Mina",2\n'
   );
   check(
     "a gradebook import arrives first-name-first",
-    imported.join("|") === "Ada Lovelace|Grace Hopper",
+    imported.join("|") === "Rowan Hale|Mina Okafor",
     imported.join("|")
   );
 
@@ -524,7 +524,7 @@ console.log("\n8. Reading a pasted list");
   );
   check(
     "and an unflipped cell really would have been four",
-    parseNames('Lovelace, Ada\nHopper, Grace').length === 4
+    parseNames('Hale, Rowan\nOkafor, Mina').length === 4
   );
 }
 
@@ -532,7 +532,7 @@ console.log("\n8. Reading a pasted list");
   console.log("\n11. Who gets told when a restriction is removed");
 
   const nameOf = (id: string) =>
-    ({ a: "Ada", b: "Grace", organizer: "Joe" })[id] ?? id;
+    ({ a: "Rowan", b: "Mina", organizer: "Joe" })[id] ?? id;
 
   const give = (ownerId: string, otherId: string): Restriction => ({
     ownerId,
@@ -542,10 +542,10 @@ console.log("\n8. Reading a pasted list");
 
   check(
     "names are listed with the Oxford comma",
-    formatList(["Ada", "Grace", "Alan"]) === "Ada, Grace, and Alan",
-    formatList(["Ada", "Grace", "Alan"])
+    formatList(["Rowan", "Mina", "Theo"]) === "Rowan, Mina, and Theo",
+    formatList(["Rowan", "Mina", "Theo"])
   );
-  check("two names take no comma", formatList(["Ada", "Grace"]) === "Ada and Grace");
+  check("two names take no comma", formatList(["Rowan", "Mina"]) === "Rowan and Mina");
 
   // The organizer sets one on someone's behalf, in case they forget.
   const organizerOnly = removalOwners([give(ORGANIZER_ID, "b")], nameOf);
@@ -554,7 +554,7 @@ console.log("\n8. Reading a pasted list");
     organizerOnly.participants.length === 0 && organizerOnly.fromOrganizer
   );
 
-  const notice = removalNotice(organizerOnly, 1, "Ada", "Grace");
+  const notice = removalNotice(organizerOnly, 1, "Rowan", "Mina");
   check(
     "and the organizer is not told to notify themselves",
     !notice.includes("Please let") && notice.includes("nobody to tell"),
@@ -562,39 +562,39 @@ console.log("\n8. Reading a pasted list");
   );
   check(
     "the organizer is still told what it now allows",
-    notice.includes("Ada may now be assigned to buy for Grace")
+    notice.includes("Rowan may now be assigned to buy for Mina")
   );
 
   const participantOnly = removalOwners([give("a", "b")], nameOf);
   check(
     "a participant's own restriction names them",
-    removalNotice(participantOnly, 1, "Ada", "Grace").includes(
-      "Please let Ada know"
+    removalNotice(participantOnly, 1, "Rowan", "Mina").includes(
+      "Please let Rowan know"
     ),
-    removalNotice(participantOnly, 1, "Ada", "Grace")
+    removalNotice(participantOnly, 1, "Rowan", "Mina")
   );
 
   // Both set the same one: the participant still has to be told.
   const both = removalOwners([give("a", "b"), give(ORGANIZER_ID, "b")], nameOf);
-  const bothNotice = removalNotice(both, 2, "Ada", "Grace");
+  const bothNotice = removalNotice(both, 2, "Rowan", "Mina");
   check(
     "when both set it, the participant is named and the organizer is not",
-    bothNotice.includes("Please let Ada know") && !bothNotice.includes("Joe"),
+    bothNotice.includes("Please let Rowan know") && !bothNotice.includes("Joe"),
     bothNotice
   );
 
   check(
     "the confirmation says it is yours when only you set it",
-    removalConfirmation(organizerOnly, 1, "Ada", "Grace").includes(
-      "Ada could then be assigned to buy for Grace"
+    removalConfirmation(organizerOnly, 1, "Rowan", "Mina").includes(
+      "Rowan could then be assigned to buy for Mina"
     )
   );
   check(
     "the confirmation counts both when both set it",
-    removalConfirmation(both, 2, "Ada", "Grace").includes(
-      "You and Ada each set a restriction"
+    removalConfirmation(both, 2, "Rowan", "Mina").includes(
+      "You and Rowan each set a restriction"
     ),
-    removalConfirmation(both, 2, "Ada", "Grace")
+    removalConfirmation(both, 2, "Rowan", "Mina")
   );
 }
 

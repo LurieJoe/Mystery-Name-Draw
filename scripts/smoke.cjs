@@ -234,6 +234,68 @@ check(
   ["Quick Draw", "What are you using this for?"]
 );
 
+// The screen a registered person comes back to. It only appears after
+// a click, so it is rendered directly: a branch nothing can reach is a
+// branch nothing checks.
+const RegisteredView = require(`${OUT}/pages/RegisteredView.js`).default;
+
+function RegisteredHarness() {
+  const exchange = useExchange();
+
+  return React.createElement(
+    ExchangeContext.Provider,
+    {
+      value: {
+        ...exchange,
+        eventName: "Office Secret Santa",
+        drawDate: "2026-12-16",
+        registrationDeadline: "2026-12-11",
+        restrictionsOpen: true,
+        invitees: [
+          {
+            id: "a",
+            name: "Rowan Hale",
+            email: "ada@example.com",
+            status: "Registered",
+            wishlist: "A book about engines",
+            preferences: "No chocolate, please",
+          },
+        ],
+        participants: [
+          { id: "a", name: "Rowan Hale", email: "ada@example.com", status: "Registered" },
+          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Registered" },
+        ],
+      },
+    },
+    React.createElement(RegisteredView, {
+      registeredId: "a",
+      onWithdraw: () => {},
+    })
+  );
+}
+
+check(
+  "RegisteredView (coming back to your own page)",
+  () => renderToStaticMarkup(React.createElement(RegisteredHarness)),
+  [
+    "You are in",
+    // What was saved is what is shown: the fields are seeded from the
+    // exchange, not left blank for the person to retype.
+    "A book about engines",
+    "No chocolate, please",
+    "Save changes",
+    // Preferences, not guarantees: said plainly, because a draw can
+    // need one of them set aside.
+    "preferences, not guarantees",
+    "Cancel my registration",
+    "I would rather not buy for",
+    "I would rather not receive from",
+    "Mina Okafor",
+  ],
+  // Nobody sets a restriction against themselves.
+  ["Rowan Hale</label>"]
+);
+
 function RegisterHarness() {
   const exchange = useExchange();
   return React.createElement(

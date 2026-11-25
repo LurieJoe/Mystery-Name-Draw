@@ -44,7 +44,7 @@ begin
     'invitees', jsonb_build_array(
       jsonb_build_object('name', 'Joe', 'email', 'joe@example.com'),
       jsonb_build_object('name', 'Evelyn', 'email', 'evelyn@example.com'),
-      jsonb_build_object('name', 'Alan', 'email', 'alan@example.com'))
+      jsonb_build_object('name', 'Theo', 'email', 'alan@example.com'))
   ));
 
   v_exchange_id := (v_created ->> 'exchangeId')::uuid;
@@ -79,7 +79,7 @@ begin
   -- appear only in the conversation.
   update invitees set preferences = 'Likes candles' where id = v_evelyn;
 
-  -- Joe draws Evelyn, Evelyn draws Alan, Alan draws Joe.
+  -- Joe draws Evelyn, Evelyn draws Theo, Theo draws Joe.
   insert into assignments (exchange_id, giver_id, receiver_id)
   values (v_exchange_id, v_joe, v_evelyn),
          (v_exchange_id, v_evelyn, v_alan),
@@ -138,10 +138,10 @@ begin
 
   -- Evelyn's own two threads are different conversations.
   perform assert('a person is in two threads, with different people',
-    (my_thread(v_evelyn_token, 'giver') ->> 'withName') = 'Alan'
+    (my_thread(v_evelyn_token, 'giver') ->> 'withName') = 'Theo'
     and (my_thread(v_evelyn_token, 'receiver') -> 'withName') = 'null'::jsonb);
 
-  -- Alan is in neither of those conversations.
+  -- Theo is in neither of those conversations.
   perform assert('a third party sees none of it',
     jsonb_array_length(my_thread(v_alan_token, 'giver') -> 'messages') = 0
     and jsonb_array_length(my_thread(v_alan_token, 'receiver') -> 'messages') = 0);

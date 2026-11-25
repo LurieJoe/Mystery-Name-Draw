@@ -26,7 +26,7 @@ type Purpose = {
   /** Heading above the paste box. */
   namesHeading: string;
   placeholder: string;
-  /** Reads a result row aloud: ("Ada", "Grace") -> "Ada gives to Grace". */
+  /** Reads a result row aloud: ("Rowan", "Mina") -> "Rowan gives to Mina". */
   line: (from: string, to: string) => string;
   /** Singular label for a pair or group, numbered in the results. */
   groupNoun: string;
@@ -41,7 +41,7 @@ const PURPOSES: Purpose[] = [
       "A gift exchange, a book swap, or a card exchange you are sorting out on the spot. Everyone gives to one person, and nobody draws themselves.",
     mechanism: "assign",
     namesHeading: "Who is taking part?",
-    placeholder: "Ada\nGrace\nAlan\nKatherine",
+    placeholder: "Rowan\nMina\nTheo\nNadia",
     line: (from, to) => `${from} gives to ${to}`,
     groupNoun: "Group",
     resultHeading: "Who gives to whom",
@@ -53,7 +53,7 @@ const PURPOSES: Purpose[] = [
       "Peer review, grading swaps, or a second pair of eyes on an assignment. Each person gets exactly one other person's work, and never their own.",
     mechanism: "assign",
     namesHeading: "Whose work is in the pile?",
-    placeholder: "Ada\nGrace\nAlan\nKatherine",
+    placeholder: "Rowan\nMina\nTheo\nNadia",
     line: (from, to) => `${from} reviews ${to}'s work`,
     groupNoun: "Group",
     resultHeading: "Who reviews whose work",
@@ -65,7 +65,7 @@ const PURPOSES: Purpose[] = [
       "Two at a time, both ways, for an assignment, a drill, or an interview exercise. An odd number leaves one group of three rather than someone on their own.",
     mechanism: "pairs",
     namesHeading: "Who needs a partner?",
-    placeholder: "Ada\nGrace\nAlan\nKatherine",
+    placeholder: "Rowan\nMina\nTheo\nNadia",
     line: (from, to) => `${from} and ${to}`,
     groupNoun: "Pair",
     resultHeading: "The pairs",
@@ -77,7 +77,7 @@ const PURPOSES: Purpose[] = [
       "Group work, stations, or teams. Pick how many people you want in each group, and the sizes come out even.",
     mechanism: "groups",
     namesHeading: "Who is being grouped?",
-    placeholder: "Ada\nGrace\nAlan\nKatherine",
+    placeholder: "Rowan\nMina\nTheo\nNadia",
     line: (from, to) => `${from} and ${to}`,
     groupNoun: "Group",
     resultHeading: "The groups",
