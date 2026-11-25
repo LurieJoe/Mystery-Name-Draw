@@ -235,6 +235,19 @@ function Harness() {
           { id: "b", name: "Mina Okafor", email: "mina@example.com", status: "Invited" },
           { id: "c", name: "Theo Barnes", email: "theo@example.com", status: "Invite Pending" },
         ],
+        // invites=3,1 previews the invitation panel: three never
+        // emailed, one already invited.
+        ...(overrides.invites
+          ? {
+              invitationCounts: {
+                pending: Number(overrides.invites.split(",")[0] ?? 0),
+                invited: Number(overrides.invites.split(",")[1] ?? 0),
+                registered: 0,
+                waiting: Number(overrides.invites.split(",")[2] ?? 0),
+              },
+              sendInvitations: async () => ({ ok: true, queued: 0, skipped: 0 }),
+            }
+          : {}),
         ...overrides,
       },
     },

@@ -1454,3 +1454,83 @@
   background: #fffbeb;
   color: #78350f;
 }
+
+/* -------------------------------------------------------------- */
+/* Inviting the people on the list.                               */
+/*                                                                */
+/* Boxed and set apart from the links around it, because the      */
+/* button inside it is the one control on these screens that      */
+/* sends real email to real people.                               */
+/* -------------------------------------------------------------- */
+
+.send-invitations {
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+
+  border: 1px solid var(--accent-border);
+  border-radius: 14px;
+
+  background: var(--accent-bg);
+}
+
+.send-invitations h3 {
+  margin-top: 0;
+}
+
+.invitation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.invitation-confirm {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+
+  border-radius: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.invitation-confirm p {
+  margin: 0;
+}
+
+.invitation-result {
+  margin: 1rem 0 0;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .send-invitations {
+    padding: 1rem 1.1rem;
+  }
+
+  /* Side by side these wrap to two short lines each and read as four
+     buttons. Stacked, each one is a full-width target. */
+  .invitation-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* A disabled send has to look unavailable rather than merely pale:
+   this is the control that mails people, so "nothing to do" and
+   "ready to go" must not be a question of shade alone. */
+.send-invitations .primary-button:disabled,
+.send-invitations .secondary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.send-invitations .primary-button:disabled:hover {
+  background: #4f46e5;
+}
+
+/* The panel holds one paragraph of text; past a comfortable measure
+   it runs the width of a desktop window and stops being readable. */
+.send-invitations p {
+  max-width: 42rem;
+}

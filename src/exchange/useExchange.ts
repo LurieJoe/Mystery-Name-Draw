@@ -3,7 +3,7 @@ import {
   formatDate,
   giftBudgetLabel as formatGiftBudget,
 } from "./format.js";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import type { ChangeEvent } from "react";
 import {
   createSeededRandom,
@@ -20,8 +20,14 @@ import {
 } from "./restrictionNotices";
 import { routeUrl } from "../router";
 import { hasDatabase } from "../api/config";
+import type { InvitationCounts } from "./remote";
 import {
+  addInviteeRemotely,
   createExchangeRemotely,
+  invitationCountsRemotely,
+  removeInviteeRemotely,
+  sendInvitationsRemotely,
+  updateInviteeRemotely,
   currentTimeZone,
   fromOrganizerView,
   organizerView,
@@ -423,7 +429,89 @@ const [inviteEmail, setInviteEmail] = useState("");
     ]);
   };
 
+  /*
+   * Inviting.
+   *
+   * The counts come from the database rather than from the list on
+   * screen, because "who has already been emailed" is not something
+   * this browser can know: another device may have sent them, and a
+   * person who opted out is never counted as invited at all.
+   */
+  const [invitationCounts, setInvitationCounts] =
+    useState<InvitationCounts | null>(null);
+
+  const refreshInvitationCounts = useCallback(async (token?: string) => {
+    // The token can be passed in: straight after creating, the state
+    // holding it has not been read back yet.
+    const using = token ?? organizerToken;
+
+    if (!hasDatabase || !using) return;
+
+    try {
+      setInvitationCounts(await invitationCountsRemotely(using));
+    } catch {
+      // The button falls back to its plain label. Not worth an error
+      // on a screen the organizer came to for something else.
+    }
+  }, [organizerToken]);
+
+  /**
+   * Email the invitations.
+   *
+   * Resend is the organizer saying so out loud: everybody who has not
+   * registered hears from us again. Without it, only the people who
+   * have never been sent one, which is everybody the first time and
+   * the latecomers after that.
+   */
+  const sendInvitations = async (resend = false) => {
+    if (!hasDatabase || !organizerToken) {
+      return { ok: false as const, message: "This exchange isn't saved yet." };
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      const result = await sendInvitationsRemotely(organizerToken, resend);
+
+      /*
+       * Read the list back rather than marking everybody invited
+       * here. Somebody who opted out is deliberately left pending,
+       * and guessing at that from this side would put a status on
+       * screen that the database disagrees with.
+       */
+      try {
+        const refreshed = fromOrganizerView(
+          await organizerView(organizerToken)
+        );
+
+        setInvitees(refreshed.invitees);
+      } catch {
+        // The counts below still move, and the next page load is
+        // correct either way.
+      }
+
+      await refreshInvitationCounts();
+
+      return { ok: true as const, ...result };
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "The invitations couldn't be sent just now.";
+
+      setSaveError(message);
+
+      return { ok: false as const, message };
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const removeInvitee = (inviteeId: string) => {
+    const previousList = invitees;
+    const previousRestrictionList = restrictions;
+
     setInvitees((previousInvitees) =>
       previousInvitees.filter(
         (invitee) => invitee.id !== inviteeId
@@ -440,6 +528,26 @@ const [inviteEmail, setInviteEmail] = useState("");
 
     if (restrictionEditorId === inviteeId) {
       setRestrictionEditorId(null);
+    }
+
+    /*
+     * The screen goes first and the database catches up, because
+     * removing somebody is the one change an organizer makes while
+     * reading a list out loud. If it is refused, the row comes back
+     * rather than the list quietly disagreeing with what is stored.
+     */
+    if (hasDatabase && organizerToken) {
+      void removeInviteeRemotely(organizerToken, inviteeId)
+        .then(() => refreshInvitationCounts())
+        .catch((error: unknown) => {
+          setInvitees(previousList);
+          setRestrictions(previousRestrictionList);
+          setSaveError(
+            error instanceof Error
+              ? error.message
+              : "That person couldn't be taken off the list just now."
+          );
+        });
     }
 
     if (editingInviteeId === inviteeId) {
@@ -833,19 +941,42 @@ const [inviteEmail, setInviteEmail] = useState("");
         token: created.organizerToken,
       });
 
-      // The ids the database gave each invitee replace the ones made
-      // up here, so restrictions and registrations line up with rows
-      // that exist rather than with local inventions.
-      setInvitees((previousInvitees) =>
-        previousInvitees.map((invitee) => {
-          const match = created.invitees.find(
+      /*
+       * The ids the database gave each invitee replace the ones made
+       * up here, so restrictions and registrations line up with rows
+       * that exist rather than with local inventions.
+       *
+       * Matched by consuming the rows in order rather than looking
+       * each address up, because an address no longer picks out one
+       * person: a family sharing an inbox would otherwise all be
+       * handed the first row's id and collapse into one participant.
+       * The database inserts the organizer first, when they are
+       * taking part, and then this list in the order it was sent.
+       */
+      const rows = created.invitees.slice(includeOrganizer ? 1 : 0);
+
+      setInvitees((previousInvitees) => {
+        const unused = [...rows];
+
+        return previousInvitees.map((invitee) => {
+          if (invitee.email.trim() === "") return invitee;
+
+          const at = unused.findIndex(
             (row) =>
-              row.email.toLowerCase() === invitee.email.toLowerCase()
+              row.email.toLowerCase() === invitee.email.trim().toLowerCase()
           );
 
-          return match ? { ...invitee, id: match.id } : invitee;
-        })
-      );
+          if (at === -1) return invitee;
+
+          const [match] = unused.splice(at, 1);
+
+          return { ...invitee, id: match.id };
+        });
+      });
+
+      // The confirmation screen offers to send the invitations, so it
+      // needs to know how many people that is before it is drawn.
+      await refreshInvitationCounts(created.organizerToken);
 
       return { ok: true as const, stored: true };
     } catch (error) {
@@ -913,6 +1044,16 @@ const [inviteEmail, setInviteEmail] = useState("");
         }))
       );
       setOrganizerToken(remembered.token);
+
+      // Who has already been emailed is part of the exchange, not
+      // something a fresh page could work out from the list alone.
+      try {
+        setInvitationCounts(
+          await invitationCountsRemotely(remembered.token)
+        );
+      } catch {
+        // The button falls back to its plain label.
+      }
 
       // Arriving by link counts as this browser knowing the exchange
       // from now on, so the next visit needs no link.
@@ -1020,30 +1161,84 @@ ${registrationLink}
 
 We hope you'll join us!
 `;
-const addInvitee = () => {
+/*
+ * Add somebody, or save a change to somebody already listed.
+ *
+ * Before the exchange exists this is a list in a browser and stays
+ * one. Once it exists the database is the list, and this waits for
+ * it: an added person comes back with the id their restrictions and
+ * their registration will be keyed by, and inventing one here would
+ * mean a row that the next page load quietly replaced.
+ */
+const addInvitee = async () => {
   if (!inviteName.trim() || !inviteEmail.trim()) {
     return;
   }
 
   if (!isValidEmail(inviteEmail)) {
-    alert("Please enter a valid email address.");
+    setSaveError("That doesn't look like an email address.");
     return;
   }
 
   const name = inviteName.trim();
   const email = inviteEmail.trim();
+  const editing = editingInviteeId;
+  const live = hasDatabase && organizerToken;
 
-  if (editingInviteeId !== null) {
+  setSaveError(null);
+
+  if (live) {
+    setSaving(true);
+
+    try {
+      if (editing !== null) {
+        const saved = await updateInviteeRemotely(
+          organizerToken,
+          editing,
+          name,
+          email
+        );
+
+        setInvitees((previousInvitees) =>
+          previousInvitees.map((invitee) =>
+            invitee.id === editing
+              ? { ...invitee, name, email, status: saved.status }
+              : invitee
+          )
+        );
+      } else {
+        const added = await addInviteeRemotely(organizerToken, name, email);
+
+        setInvitees((previousInvitees) => [
+          ...previousInvitees,
+          {
+            id: added.id,
+            name: added.name,
+            email: added.email,
+            status: added.status,
+          },
+        ]);
+      }
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "That couldn't be saved just now."
+      );
+
+      return;
+    } finally {
+      setSaving(false);
+    }
+
+    await refreshInvitationCounts();
+  } else if (editing !== null) {
     // Keyed by id, so renaming someone keeps their restrictions intact.
     setInvitees((previousInvitees) =>
       previousInvitees.map((invitee) =>
-        invitee.id === editingInviteeId
-          ? { ...invitee, name, email }
-          : invitee
+        invitee.id === editing ? { ...invitee, name, email } : invitee
       )
     );
-
-    setEditingInviteeId(null);
   } else {
     setInvitees((previousInvitees) => [
       ...previousInvitees,
@@ -1056,6 +1251,7 @@ const addInvitee = () => {
     ]);
   }
 
+  setEditingInviteeId(null);
   setInviteName("");
   setInviteEmail("");
 
@@ -1149,6 +1345,9 @@ const addInvitee = () => {
     describePairing,
     removePairing,
     removeInvitee,
+    invitationCounts,
+    sendInvitations,
+    refreshInvitationCounts,
     registrationDateValid,
     today,
     registrationDeadlineInPast,

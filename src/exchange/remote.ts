@@ -271,3 +271,81 @@ export async function setOpenJoinRemotely(
     p_allowed: allowed,
   });
 }
+
+// --------------------------------------------------------------------
+// The list, after the exchange exists
+//
+// Everything above this line happens once, at creation. These are the
+// changes an organizer makes afterwards, which until now lived only in
+// the browser that made them: the row appeared, the next page load
+// read the roster back from the database, and it was gone.
+// --------------------------------------------------------------------
+
+export type AddedInvitee = {
+  id: string;
+  name: string;
+  email: string;
+  status: string;
+};
+
+export async function addInviteeRemotely(
+  organizerToken: string,
+  name: string,
+  email: string
+) {
+  return rpc<AddedInvitee>("add_invitee", {
+    p_organizer_token: organizerToken,
+    p_name: name,
+    p_email: email,
+  });
+}
+
+export async function updateInviteeRemotely(
+  organizerToken: string,
+  inviteeId: string,
+  name: string,
+  email: string
+) {
+  return rpc<AddedInvitee & { addressChanged: boolean }>("update_invitee", {
+    p_organizer_token: organizerToken,
+    p_invitee_id: inviteeId,
+    p_name: name,
+    p_email: email,
+  });
+}
+
+export async function removeInviteeRemotely(
+  organizerToken: string,
+  inviteeId: string
+) {
+  return rpc<{ removed: boolean; id: string }>("remove_invitee", {
+    p_organizer_token: organizerToken,
+    p_invitee_id: inviteeId,
+  });
+}
+
+export type InvitationCounts = {
+  /** Never sent one. */
+  pending: number;
+  /** Sent one, nothing back yet: who a resend is for. */
+  invited: number;
+  registered: number;
+  /** Already in the queue, so neither button would move them. */
+  waiting: number;
+};
+
+export async function invitationCountsRemotely(organizerToken: string) {
+  return rpc<InvitationCounts>("invitation_counts", {
+    p_organizer_token: organizerToken,
+  });
+}
+
+export async function sendInvitationsRemotely(
+  organizerToken: string,
+  resend: boolean
+) {
+  return rpc<{ queued: number; skipped: number }>("send_invitations", {
+    p_organizer_token: organizerToken,
+    p_resend: resend,
+  });
+}

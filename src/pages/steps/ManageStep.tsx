@@ -1,4 +1,6 @@
 import { useState } from "react";
+import OpenJoinSetting from "./OpenJoinSetting";
+import SendInvitations from "./SendInvitations";
 import { useExchangeContext } from "../../exchange/context";
 
 /** Step 5: registration status, event code, and templates. */
@@ -28,6 +30,14 @@ export default function ManageStep() {
         <p className="step-description">
         Manage participant restrictions, registration settings, and draw options for this exchange.
         </p>
+        <SendInvitations />
+
+        <h3>Who the registration link works for</h3>
+
+        <OpenJoinSetting />
+
+        <hr />
+
         <h3>Event Management</h3>
 
     <div className="event-management">

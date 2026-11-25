@@ -1,4 +1,6 @@
 import { useState } from "react";
+import OpenJoinSetting from "./OpenJoinSetting";
+import SendInvitations from "./SendInvitations";
 import { useExchangeContext } from "../../exchange/context";
 
 /** Step 3: confirmation and the registration link. */
@@ -9,8 +11,6 @@ export default function CreatedStep() {
     setCurrentStep,
     copyLink,
     registrationLink,
-    allowOpenJoin,
-    changeOpenJoin,
     managementLink,
   } = useExchangeContext();
 
@@ -32,7 +32,7 @@ export default function CreatedStep() {
     </p>
 
     <p className="step-description next-step-text">
-      Next, invite participants to register using the link below.
+      Next, invite the people on your list.
     </p>
 
 
@@ -41,6 +41,10 @@ export default function CreatedStep() {
       <div className="exchange-title-section">
       <h3>{eventName || "Unnamed Gift Exchange"}</h3>
     </div>
+
+      <SendInvitations />
+
+      <hr />
 
       <h3>Registration Link</h3>
 
@@ -56,23 +60,7 @@ export default function CreatedStep() {
         >
           {copied ? "✓ Copied!" : "Copy Link"}
         </button>
-        <div className="invite-setting">
-
-        <label className="checkbox-inline">
-      <input
-        type="checkbox"
-        checked={allowOpenJoin}
-        onChange={(e) => void changeOpenJoin(e.target.checked)}
-      />
-      Allow participants to invite others
-    </label>
-
-    <p className="helper-text">
-      {allowOpenJoin
-        ? "Anyone with the registration link can join, so participants can pass it on."
-        : "Only the people you list can join. Anyone else following the link is told it's invitation only."}
-    </p>
-    </div>
+        <OpenJoinSetting />
     </div>
 
     <hr />

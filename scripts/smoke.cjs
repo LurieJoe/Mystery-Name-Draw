@@ -73,9 +73,24 @@ const STEPS = [
     ["Required because you are in the exchange"],
   ],
   [2, "ReviewStep", ["Review", "Step 2 of 3"]],
-  [3, "CreatedStep", ["Registration Link", "Step 3 of 3", "/#/event/"]],
+  [
+    3,
+    "CreatedStep",
+    [
+      "Registration Link",
+      "Step 3 of 3",
+      "/#/event/",
+      "Let anyone with the link join",
+    ],
+    // The old label promised an inviting feature that never existed.
+    ["Allow participants to invite others"],
+  ],
   [4, "InvitationStep", "Invitation List"],
-  [5, "ManageStep", "Manage Exchange"],
+  [
+    5,
+    "ManageStep",
+    ["Manage Exchange", "Who the registration link works for"],
+  ],
   [6, "ValidationStep", "Not enough participants"],
 ];
 
@@ -218,6 +233,104 @@ for (const [name, needles, forbidden] of [
     forbidden
   );
 }
+
+// Inviting. The panel is the one control in the wizard that sends real
+// email, so what it says before it is pressed is worth pinning down:
+// how many people, and which of the two sends is on offer.
+const SendInvitations = require(`${OUT}/pages/steps/SendInvitations.js`).default;
+
+function invitations(counts) {
+  return () =>
+    renderToStaticMarkup(
+      React.createElement(
+        ExchangeContext.Provider,
+        {
+          value: {
+            invitationCounts: counts,
+            sendInvitations: async () => ({ ok: true, queued: 0, skipped: 0 }),
+            saving: false,
+          },
+        },
+        React.createElement(SendInvitations)
+      )
+    );
+}
+
+check(
+  "the invitation panel says how many people have not been emailed",
+  invitations({ pending: 3, invited: 0, registered: 0, waiting: 0 }),
+  ["Email 3 people", "their own private registration link"],
+  // Nothing to resend to yet, so that choice must not be offered.
+  ["Send again to everybody"]
+);
+
+check(
+  "and offers a resend once people have been emailed",
+  invitations({ pending: 0, invited: 2, registered: 1, waiting: 0 }),
+  ["Everybody on your list has been emailed", "Send again to everybody"],
+  ["Email 1 person", "Email 2 people"]
+);
+
+check(
+  "one person reads as one person, not 1 people",
+  invitations({ pending: 1, invited: 0, registered: 0, waiting: 0 }),
+  ["Email 1 person"],
+  ["1 people"]
+);
+
+check(
+  "and says so when invitations are already on their way",
+  invitations({ pending: 0, invited: 2, registered: 0, waiting: 2 }),
+  ["2 people already have an invitation in the queue", "goes out hourly"]
+);
+
+// Wrapped, because a panel that renders nothing is the point here and
+// the harness rightly treats an empty render as a broken one.
+check(
+  "an exchange with nobody on the list offers nothing to send",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(
+        ExchangeContext.Provider,
+        {
+          value: {
+            invitationCounts: { pending: 0, invited: 0, registered: 0, waiting: 0 },
+            sendInvitations: async () => ({ ok: true, queued: 0, skipped: 0 }),
+            saving: false,
+          },
+        },
+        React.createElement(
+          "main",
+          null,
+          "Manage Exchange",
+          React.createElement(SendInvitations)
+        )
+      )
+    ),
+  ["Manage Exchange"],
+  ["Invitations", "Email"]
+);
+
+// An exchange that has not been saved yet knows no counts, and the
+// panel must not guess at them from the list on screen.
+check(
+  "and neither does one that has not reached the database",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(
+        ExchangeContext.Provider,
+        { value: { invitationCounts: null, saving: false } },
+        React.createElement(
+          "main",
+          null,
+          "Gift Exchange Created",
+          React.createElement(SendInvitations)
+        )
+      )
+    ),
+  ["Gift Exchange Created"],
+  ["Invitations", "Email"]
+);
 
 // Clicking "Create a Quick Draw" in the header sets the hash. Prove the
 // route resolves, so a dead button can be told apart from a dead route.
