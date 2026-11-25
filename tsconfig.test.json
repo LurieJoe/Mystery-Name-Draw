@@ -15,6 +15,7 @@
     "src/draw/**/*.ts",
     "src/exchange/restrictionNotices.ts",
     "src/exchange/types.ts",
-    "src/router.ts"
+    "src/router.ts",
+    "src/api/rpc.ts"
   ]
 }

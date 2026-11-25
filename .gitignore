@@ -36,3 +36,6 @@ _to_delete
 # Compiled output never belongs beside its source: a stray
 # types.js would shadow types.ts at import time.
 src/**/*.js
+
+# Local Supabase values; see .env.example
+.env.local

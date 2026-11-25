@@ -25,6 +25,7 @@ import {
 } from "../exchange/restrictionNotices.js";
 import { ORGANIZER_ID, type Restriction } from "../exchange/types.js";
 import { shouldScrollToTop } from "../router.js";
+import { createRpc, RpcError } from "../api/rpc.js";
 import {
   csvNamesForEditing,
   flipSurnameFirst,
@@ -626,6 +627,120 @@ console.log("\n8. Reading a pasted list");
     "a registration link starts at the top",
     shouldScrollToTop("/", "/event/ABC123")
   );
+}
+
+{
+  console.log("\n13. Talking to the database");
+
+  // A fetch that answers from memory: the client is checkable without
+  // a network, a browser, or a project that might be asleep.
+  const fakeFetch = (reply: {
+    status: number;
+    body: string;
+    onCall?: (url: string, init: RequestInit) => void;
+  }) =>
+    (async (url: string, init: RequestInit) => {
+      reply.onCall?.(url, init);
+      return {
+        ok: reply.status >= 200 && reply.status < 300,
+        status: reply.status,
+        text: async () => reply.body,
+      };
+    }) as unknown as typeof fetch;
+
+  let seenUrl = "";
+  let seenInit: RequestInit = {};
+
+  const rpc = createRpc({
+    url: "https://example.supabase.co/",
+    key: "sb_publishable_test",
+    fetchImpl: fakeFetch({
+      status: 200,
+      body: JSON.stringify({ awake: true }),
+      onCall: (url, init) => {
+        seenUrl = url;
+        seenInit = init;
+      },
+    }),
+  });
+
+  const result = await rpc<{ awake: boolean }>("ping");
+
+  check("a call reaches the function it names", seenUrl === "https://example.supabase.co/rest/v1/rpc/ping", seenUrl);
+  check("a trailing slash on the url does not double up", !seenUrl.includes("//rest"));
+  check("it is a POST", seenInit.method === "POST");
+
+  const headers = seenInit.headers as Record<string, string>;
+  check("the key goes in the apikey header, spelled exactly", headers.apikey === "sb_publishable_test");
+  check("and in Authorization as a bearer token", headers.Authorization === "Bearer sb_publishable_test");
+  check("arguments default to an empty object, not nothing", seenInit.body === "{}");
+  check("the answer comes back parsed", result.awake === true);
+
+  // A refusal from the database.
+  const refusing = createRpc({
+    url: "https://example.supabase.co",
+    key: "k",
+    fetchImpl: fakeFetch({
+      status: 404,
+      body: JSON.stringify({ message: "No invitation for that link", code: "P0002" }),
+    }),
+  });
+
+  let refused: unknown = null;
+  try {
+    await refusing("registration_view", { p_invitee_token: "nope" });
+  } catch (error) {
+    refused = error;
+  }
+
+  check("a refusal throws", refused instanceof RpcError);
+  check(
+    "and keeps the database's own words, which are written for a person",
+    (refused as RpcError).message === "No invitation for that link",
+    String((refused as RpcError).message)
+  );
+  check("with the sqlstate for code that wants to branch on it", (refused as RpcError).code === "P0002");
+  check("a refusal is not unreachable", !(refused as RpcError).unreachable);
+
+  // Nothing answering at all: offline, or a paused project.
+  const dead = createRpc({
+    url: "https://example.supabase.co",
+    key: "k",
+    fetchImpl: (async () => {
+      throw new TypeError("Failed to fetch");
+    }) as unknown as typeof fetch,
+  });
+
+  let unreachable: unknown = null;
+  try {
+    await dead("ping");
+  } catch (error) {
+    unreachable = error;
+  }
+
+  check("nothing answering is told apart from being refused", (unreachable as RpcError).unreachable);
+  check(
+    "and says something a person can act on",
+    (unreachable as RpcError).message.includes("Could not reach"),
+    (unreachable as RpcError).message
+  );
+
+  // PostgREST does not always return JSON; a gateway might not either.
+  const garbled = createRpc({
+    url: "https://example.supabase.co",
+    key: "k",
+    fetchImpl: fakeFetch({ status: 502, body: "<html>Bad Gateway</html>" }),
+  });
+
+  let gatewayError: unknown = null;
+  try {
+    await garbled("ping");
+  } catch (error) {
+    gatewayError = error;
+  }
+
+  check("a non-JSON failure does not crash the parser", gatewayError instanceof RpcError);
+  check("and reports its status", (gatewayError as RpcError).status === 502);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

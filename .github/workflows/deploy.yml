@@ -33,7 +33,19 @@ jobs:
       # the deploy, so a broken build never reaches the live site.
       - run: npm run check
 
+      # Vite bakes these into the bundle at build time, so the live
+      # site needs them here rather than at runtime. Both are public:
+      # the publishable key is in the JavaScript every visitor
+      # downloads and reaches nothing without a token. The secret key
+      # is deliberately not named anywhere in this file.
+      #
+      # Missing secrets do not fail the build. The app says it cannot
+      # save anything and still runs, which beats a deploy that stops
+      # because a value was renamed.
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - uses: actions/configure-pages@v5
 
