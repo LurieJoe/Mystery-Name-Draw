@@ -149,12 +149,12 @@ function check(label, render, mustContain, mustNotContain) {
   }
 }
 
-function Harness({ step, Component }) {
+function Harness({ step, Component, extra }) {
   const exchange = useExchange();
 
   return React.createElement(
     ExchangeContext.Provider,
-    { value: { ...exchange, currentStep: step } },
+    { value: { ...exchange, currentStep: step, ...(extra ?? {}) } },
     React.createElement(Component)
   );
 }
@@ -233,6 +233,55 @@ for (const [name, needles, forbidden] of [
     forbidden
   );
 }
+
+// Restrictions. Two kinds sit in one list and look alike: the ones the
+// organizer set, which are theirs to undo, and the ones a participant
+// chose on their own page, which are not. The screen has to tell them
+// apart, because the database refuses the second and an organizer
+// clicking a box that silently fails learns nothing.
+const InvitationStep = require(`${OUT}/pages/steps/InvitationStep.js`).default;
+
+const restrictionEditor = {
+  restrictionEditorId: "a",
+  nameForInvitee: (id) =>
+    ({ a: "Rowan Hale", b: "Mina Okafor", c: "Theo Barnes" })[id] ?? id,
+  otherInvitees: () => [
+    { id: "b", name: "Mina Okafor" },
+    { id: "c", name: "Theo Barnes" },
+  ],
+  hasRestriction: (ownerId, otherId, direction) =>
+    ownerId === "a" && direction === "give" &&
+    (otherId === "b" || otherId === "c"),
+  restrictionIsTheirs: (ownerId, otherId, direction) =>
+    ownerId === "a" && otherId === "c" && direction === "give",
+};
+
+check(
+  "a participant's own restriction is shown, but not as the organizer's to undo",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(Harness, {
+        step: 4,
+        Component: InvitationStep,
+        extra: restrictionEditor,
+      })
+    ),
+  [
+    // Theirs: marked, and not something to click.
+    'class="checkbox-inline restriction-theirs"><input type="checkbox" disabled="" checked=""/>Theo Barnes',
+    "their choice",
+    // The organizer's own, in the same list, still a working box.
+    'class="checkbox-inline"><input type="checkbox" checked=""/>Mina Okafor',
+  ],
+  [
+    // The old copy called the whole list the person's own choices,
+    // which is the opposite of what the organizer mostly puts in it.
+    "'s own choices",
+    // A blanket disable would satisfy the first assertion and leave
+    // the editor unusable.
+    'class="checkbox-inline"><input type="checkbox" disabled=""',
+  ]
+);
 
 // Inviting. The panel is the one control in the wizard that sends real
 // email, so what it says before it is pressed is worth pinning down:

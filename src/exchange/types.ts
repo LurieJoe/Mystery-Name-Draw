@@ -34,6 +34,17 @@ export type Restriction = {
   ownerId: string;
   otherId: string;
   direction: RestrictionDirection;
+  /**
+   * True when the organizer entered it on somebody's behalf. The draw
+   * honors both kinds equally; the difference is whose it is to
+   * change. A person's own choice is theirs, so the organizer's
+   * screen shows it without offering to undo it.
+   *
+   * Absent on a restriction made in the wizard before the exchange
+   * exists, which has not been written anywhere yet and is read as
+   * the organizer's.
+   */
+  setByOrganizer?: boolean;
 };
 
 // The organizer is a participant like anyone else, with a fixed id so

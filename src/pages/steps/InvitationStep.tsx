@@ -30,6 +30,7 @@ export default function InvitationStep() {
     nameForInvitee,
     otherInvitees,
     hasRestriction,
+    restrictionIsTheirs,
     setRestriction,
     restrictionsOwnedBy,
     restrictionCountFor,
@@ -197,9 +198,9 @@ export default function InvitationStep() {
         </div>
 
         <p className="helper-text">
-          These are{" "}
-          {nameForInvitee(restrictionEditorId)}'s own choices, and
-          they appear on this list only. Each one works in a single
+          Set here, these are yours and {nameForInvitee(restrictionEditorId)}{" "}
+          never sees them. Anything they chose themselves is shown as
+          theirs and stays theirs. Each one works in a single
           direction, so blocking a gift one way doesn't block the other
           way.
         </p>
@@ -220,28 +221,23 @@ export default function InvitationStep() {
               </p>
 
               {otherInvitees(restrictionEditorId).map((other) => (
-                <label
+                <RestrictionBox
                   key={other.id}
-                  className="checkbox-inline"
-                >
-                  <input
-                    type="checkbox"
-                    checked={hasRestriction(
-                      restrictionEditorId,
-                      other.id,
-                      "give"
-                    )}
-                    onChange={(e) =>
-                      setRestriction(
-                        restrictionEditorId,
-                        other.id,
-                        "give",
-                        e.target.checked
-                      )
-                    }
-                  />
-                  {other.name}
-                </label>
+                  name={other.name}
+                  checked={hasRestriction(
+                    restrictionEditorId,
+                    other.id,
+                    "give"
+                  )}
+                  theirs={restrictionIsTheirs(
+                    restrictionEditorId,
+                    other.id,
+                    "give"
+                  )}
+                  onChange={(on) =>
+                    setRestriction(restrictionEditorId, other.id, "give", on)
+                  }
+                />
               ))}
             </div>
 
@@ -254,28 +250,28 @@ export default function InvitationStep() {
               </p>
 
               {otherInvitees(restrictionEditorId).map((other) => (
-                <label
+                <RestrictionBox
                   key={other.id}
-                  className="checkbox-inline"
-                >
-                  <input
-                    type="checkbox"
-                    checked={hasRestriction(
+                  name={other.name}
+                  checked={hasRestriction(
+                    restrictionEditorId,
+                    other.id,
+                    "receive"
+                  )}
+                  theirs={restrictionIsTheirs(
+                    restrictionEditorId,
+                    other.id,
+                    "receive"
+                  )}
+                  onChange={(on) =>
+                    setRestriction(
                       restrictionEditorId,
                       other.id,
-                      "receive"
-                    )}
-                    onChange={(e) =>
-                      setRestriction(
-                        restrictionEditorId,
-                        other.id,
-                        "receive",
-                        e.target.checked
-                      )
-                    }
-                  />
-                  {other.name}
-                </label>
+                      "receive",
+                      on
+                    )
+                  }
+                />
               ))}
             </div>
 
@@ -529,5 +525,43 @@ export default function InvitationStep() {
       </div>
 
     </div>
+  );
+}
+
+/**
+ * One restriction box.
+ *
+ * Two states that look alike and are not: a box the organizer ticked,
+ * which they may untick, and one the participant ticked on their own
+ * page, which is theirs. The second is shown rather than hidden,
+ * because an organizer looking at a draw that will not resolve needs
+ * to see every constraint, but it is not offered as something to
+ * undo: the database would refuse, and more to the point it is not
+ * the organizer's choice to reverse.
+ */
+function RestrictionBox({
+  name,
+  checked,
+  theirs,
+  onChange,
+}: {
+  name: string;
+  checked: boolean;
+  theirs: boolean;
+  onChange: (on: boolean) => void;
+}) {
+  return (
+    <label
+      className={`checkbox-inline${theirs ? " restriction-theirs" : ""}`}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={theirs}
+        onChange={(event) => onChange(event.target.checked)}
+      />
+      {name}
+      {theirs && <span className="restriction-note">their choice</span>}
+    </label>
   );
 }

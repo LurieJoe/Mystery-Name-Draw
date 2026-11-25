@@ -1534,3 +1534,24 @@
 .send-invitations p {
   max-width: 42rem;
 }
+
+/* A restriction somebody made on their own page. Shown, because an
+   organizer untangling a draw needs the whole picture, but not
+   offered as something to undo. */
+.checkbox-inline.restriction-theirs {
+  opacity: 0.8;
+  cursor: default;
+}
+
+.restriction-note {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+
+  border-radius: 999px;
+  border: 1px solid var(--border);
+
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}

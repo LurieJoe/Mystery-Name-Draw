@@ -811,13 +811,53 @@ console.log("\n8. Reading a pasted list");
   );
   check("what somebody wrote survives the round trip", restored.invitees[0].wishlist === "A book");
 
-  // The one that matters: a restriction the organizer set for somebody
-  // is honoured by the draw and must never appear on that person's own
-  // list, and this state is that list.
+  /*
+   * Both kinds come back, and each says which it is.
+   *
+   * This used to assert that organizer-set restrictions were dropped,
+   * on the grounds that they must never appear on the person's own
+   * list. They must not, and they do not: that list is built from
+   * registration_view, which has never carried them. This is the
+   * organizer's own screen, and dropping them here meant everything
+   * an organizer set disappeared from their editor on reload - which
+   * it did, because nothing was saving them in the first place.
+   */
   check(
-    "an organizer-set restriction doesn't come back as the person's own",
-    restored.restrictions.length === 1 && restored.restrictions[0].ownerId === "a",
+    "both kinds of restriction come back",
+    restored.restrictions.length === 2,
     JSON.stringify(restored.restrictions)
+  );
+
+  check(
+    "and each one says whose it is",
+    restored.restrictions.find((r) => r.ownerId === "a")?.setByOrganizer === false &&
+      restored.restrictions.find((r) => r.ownerId === "b")?.setByOrganizer === true,
+    JSON.stringify(restored.restrictions)
+  );
+
+  // The organizer is a row in the database and a fixed id in the app.
+  const withOrganizer = fromOrganizerView({
+    invitees: [
+      { id: "org-row", name: "Joe", email: "joe@example.com", is_organizer: true },
+      { id: "a", name: "Rowan", email: "rowan@example.com" },
+    ],
+    restrictions: [
+      { ownerId: "org-row", otherId: "a", direction: "give", setByOrganizer: true },
+    ],
+  });
+
+  check(
+    "the organizer's own row is translated back to the id the app uses",
+    withOrganizer.restrictions[0].ownerId === "organizer" &&
+      withOrganizer.organizerInviteeId === "org-row",
+    JSON.stringify(withOrganizer.restrictions)
+  );
+
+  check(
+    "and an exchange the organizer sits out of has no such row",
+    fromOrganizerView({
+      invitees: [{ id: "a", name: "Rowan", email: "rowan@example.com" }],
+    }).organizerInviteeId === null
   );
 
   // A date column can arrive with a time on it depending on the driver.

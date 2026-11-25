@@ -8,6 +8,7 @@
 
 // ".js" because the draw tests compile this to ESM and run it in
 // Node, which requires the extension. Vite resolves it either way.
+import { ORGANIZER_ID } from "./types.js";
 import { rpc } from "../api/config.js";
 
 export type CreatePayload = {
@@ -200,7 +201,15 @@ export type RestoredExchange = {
     wishlist: string;
     preferences: string;
   }[];
-  restrictions: { ownerId: string; otherId: string; direction: string }[];
+  restrictions: {
+    ownerId: string;
+    otherId: string;
+    direction: string;
+    /** True: entered by the organizer, and never shown to the person. */
+    setByOrganizer: boolean;
+  }[];
+  /** The row the organizer's own ORGANIZER_ID stands for, if any. */
+  organizerInviteeId: string | null;
 };
 
 const str = (value: unknown, fallback = "") =>
@@ -216,6 +225,14 @@ export function fromOrganizerView(
   view: OrganizerViewShape
 ): RestoredExchange {
   const exchange = view.exchange ?? {};
+
+  // Captured before the invitees are filtered: once their own row is
+  // taken out of the list, there is nothing left to recognize it by.
+  const organizerRow = (view.invitees ?? []).find((invitee) =>
+    bool(invitee.is_organizer, false)
+  );
+
+  const organizerInviteeId = organizerRow ? str(organizerRow.id) : null;
 
   return {
     eventName: str(exchange.name),
@@ -249,17 +266,43 @@ export function fromOrganizerView(
         preferences: str(invitee.preferences),
       })),
 
-    // An organizer-set restriction speaks for somebody who never chose
-    // it. The draw honours it; the person's own list must not show it,
-    // and the app's restriction state is that list.
-    restrictions: (view.restrictions ?? [])
-      .filter((restriction) => !restriction.setByOrganizer)
-      .map((restriction) => ({
-        ownerId: restriction.ownerId,
-        otherId: restriction.otherId,
-        direction: restriction.direction,
-      })),
+    /*
+     * Both kinds come back, and each says which it is.
+     *
+     * They used to be filtered to the participants' own choices, on
+     * the grounds that an organizer-set restriction speaks for
+     * somebody who never chose it. That is true of the page the
+     * person reads, which is built from registration_view and has
+     * never carried them. It is not true here: this is the
+     * organizer's own screen, and dropping them meant the editor
+     * showed nothing of what the organizer had set the moment the
+     * page reloaded.
+     *
+     * The organizer's own row is a real invitee in the database and a
+     * fixed local id in the app, so it is translated at this one
+     * boundary rather than in every place that reads a restriction.
+     */
+    restrictions: (view.restrictions ?? []).map((restriction) => ({
+      ownerId: asLocalId(str(restriction.ownerId), organizerInviteeId),
+      otherId: asLocalId(str(restriction.otherId), organizerInviteeId),
+      direction: restriction.direction,
+      setByOrganizer: Boolean(restriction.setByOrganizer),
+    })),
+
+    /** The row the organizer's own ORGANIZER_ID stands for, if any. */
+    organizerInviteeId,
   };
+}
+
+/**
+ * The organizer is ORGANIZER_ID everywhere in the app and a uuid in
+ * the database. One translation each way, here and in the hook that
+ * writes, so nothing in between has to know there are two.
+ */
+function asLocalId(id: string, organizerInviteeId: string | null) {
+  return organizerInviteeId && id === organizerInviteeId
+    ? ORGANIZER_ID
+    : id;
 }
 
 export async function setOpenJoinRemotely(
@@ -347,5 +390,33 @@ export async function sendInvitationsRemotely(
   return rpc<{ queued: number; skipped: number }>("send_invitations", {
     p_organizer_token: organizerToken,
     p_resend: resend,
+  });
+}
+
+export async function setOrganizerRestrictionRemotely(
+  organizerToken: string,
+  ownerId: string,
+  otherId: string,
+  direction: "give" | "receive"
+) {
+  return rpc<{ set: boolean }>("set_organizer_restriction", {
+    p_organizer_token: organizerToken,
+    p_owner_id: ownerId,
+    p_other_id: otherId,
+    p_direction: direction,
+  });
+}
+
+export async function clearOrganizerRestrictionRemotely(
+  organizerToken: string,
+  ownerId: string,
+  otherId: string,
+  direction: "give" | "receive"
+) {
+  return rpc<{ cleared: boolean }>("clear_organizer_restriction", {
+    p_organizer_token: organizerToken,
+    p_owner_id: ownerId,
+    p_other_id: otherId,
+    p_direction: direction,
   });
 }

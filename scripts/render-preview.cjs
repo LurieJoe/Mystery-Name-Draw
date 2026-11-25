@@ -222,6 +222,27 @@ function Harness() {
           { id: "b", name: "Mina Okafor", email: "mina@example.com", status: "Registered" },
         ],
         restrictionsOpen: true,
+        // One of each kind, so the editor shows a box the organizer
+        // may untick beside one that belongs to the person.
+        restrictions: [
+          { ownerId: "a", otherId: "b", direction: "give", setByOrganizer: true },
+          { ownerId: "a", otherId: "c", direction: "give", setByOrganizer: false },
+        ],
+        restrictionIsTheirs: (ownerId, otherId, direction) =>
+          ownerId === "a" && otherId === "c" && direction === "give",
+        hasRestriction: (ownerId, otherId, direction) =>
+          ownerId === "a" &&
+          direction === "give" &&
+          (otherId === "b" || otherId === "c"),
+        restrictionEditorId: "a",
+        // These come from the hook's own state, which this preview
+        // overrides around rather than fills, so they are supplied too.
+        nameForInvitee: (id) =>
+          ({ a: "Rowan Hale", b: "Mina Okafor", c: "Theo Barnes" })[id] ?? id,
+        otherInvitees: () => [
+          { id: "b", name: "Mina Okafor" },
+          { id: "c", name: "Theo Barnes" },
+        ],
         // Matching codes, or RegisterPage shows its "no exchange here"
         // notice instead of the form.
         eventCode: "ABC123",

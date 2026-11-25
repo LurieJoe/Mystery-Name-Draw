@@ -23,10 +23,12 @@ import { hasDatabase } from "../api/config";
 import type { InvitationCounts } from "./remote";
 import {
   addInviteeRemotely,
+  clearOrganizerRestrictionRemotely,
   createExchangeRemotely,
   invitationCountsRemotely,
   removeInviteeRemotely,
   sendInvitationsRemotely,
+  setOrganizerRestrictionRemotely,
   updateInviteeRemotely,
   currentTimeZone,
   fromOrganizerView,
@@ -126,6 +128,14 @@ const [remindBeforeDrawDate, setRemindBeforeDrawDate] =
   };
   const [invitees, setInvitees] = useState<Invitee[]>([]);
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
+
+  /*
+   * The database row the organizer's own ORGANIZER_ID stands for.
+   * Null before the exchange exists, and null when the organizer is
+   * not taking part: in both cases there is no row to point at.
+   */
+  const [organizerInviteeId, setOrganizerInviteeId] =
+    useState<string | null>(null);
 
   const organizerParticipant: Invitee | null = useMemo(
     () =>
@@ -277,12 +287,49 @@ const [inviteEmail, setInviteEmail] = useState("");
         restriction.direction === direction
     );
 
+  /**
+   * Keep two people apart, or stop keeping them apart.
+   *
+   * The screen moves first and the database catches up, because this
+   * is a checkbox and it has to feel like one. If the write is
+   * refused the box goes back, since a restriction that looks set and
+   * is not would be honored by nothing and noticed by nobody until
+   * the draw had already paired them.
+   *
+   * Before the exchange exists these are collected and sent with it,
+   * so the local list is the whole story and there is nothing to
+   * save yet.
+   */
+  /**
+   * Whether this box is the organizer's to uncheck.
+   *
+   * A restriction somebody set on their own page belongs to them. The
+   * organizer can see that it is there, because an impossible draw is
+   * theirs to untangle, but undoing somebody's private choice from a
+   * screen that person never sees is not theirs to do. The database
+   * refuses it, so the box says so rather than failing on click.
+   */
+  const restrictionIsTheirs = (
+    ownerId: string,
+    otherId: string,
+    direction: RestrictionDirection
+  ) =>
+    restrictions.some(
+      (restriction) =>
+        restriction.ownerId === ownerId &&
+        restriction.otherId === otherId &&
+        restriction.direction === direction &&
+        restriction.setByOrganizer === false
+    );
+
   const setRestriction = (
     ownerId: string,
     otherId: string,
     direction: RestrictionDirection,
     restricted: boolean
   ) => {
+    const previousList = restrictions;
+
     setRestrictions((previousRestrictions) => {
       const withoutThisOne = previousRestrictions.filter(
         (restriction) =>
@@ -296,6 +343,37 @@ const [inviteEmail, setInviteEmail] = useState("");
       return restricted
         ? [...withoutThisOne, { ownerId, otherId, direction }]
         : withoutThisOne;
+    });
+
+    if (!hasDatabase || !organizerToken) {
+      return;
+    }
+
+    const owner = asRowId(ownerId, organizerInviteeId);
+    const other = asRowId(otherId, organizerInviteeId);
+
+    // The organizer taking part is a row like anybody else, but only
+    // once the exchange exists. Before that there is nothing to name.
+    if (!owner || !other) {
+      return;
+    }
+
+    const save = restricted
+      ? setOrganizerRestrictionRemotely(organizerToken, owner, other, direction)
+      : clearOrganizerRestrictionRemotely(
+          organizerToken,
+          owner,
+          other,
+          direction
+        );
+
+    void save.catch((error: unknown) => {
+      setRestrictions(previousList);
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "That restriction couldn't be saved just now."
+      );
     });
   };
 
@@ -955,24 +1033,91 @@ const [inviteEmail, setInviteEmail] = useState("");
        */
       const rows = created.invitees.slice(includeOrganizer ? 1 : 0);
 
-      setInvitees((previousInvitees) => {
-        const unused = [...rows];
+      /*
+       * Built as the rows are consumed, because the restrictions
+       * written below still name people by the ids this browser
+       * invented, and those ids are about to stop existing.
+       */
+      const idsByLocalId = new Map<string, string>();
 
-        return previousInvitees.map((invitee) => {
-          if (invitee.email.trim() === "") return invitee;
+      const unused = [...rows];
 
-          const at = unused.findIndex(
-            (row) =>
-              row.email.toLowerCase() === invitee.email.trim().toLowerCase()
+      const withRealIds = invitees.map((invitee) => {
+        if (invitee.email.trim() === "") return invitee;
+
+        const at = unused.findIndex(
+          (row) =>
+            row.email.toLowerCase() === invitee.email.trim().toLowerCase()
+        );
+
+        if (at === -1) return invitee;
+
+        const [match] = unused.splice(at, 1);
+
+        idsByLocalId.set(invitee.id, match.id);
+
+        return { ...invitee, id: match.id };
+      });
+
+      setInvitees(withRealIds);
+
+      setRestrictions((previousRestrictions) =>
+        previousRestrictions.map((restriction) => ({
+          ...restriction,
+          ownerId:
+            idsByLocalId.get(restriction.ownerId) ?? restriction.ownerId,
+          otherId:
+            idsByLocalId.get(restriction.otherId) ?? restriction.otherId,
+          setByOrganizer: true,
+        }))
+      );
+
+      const organizerRowId = includeOrganizer
+        ? (created.invitees[0]?.id ?? null)
+        : null;
+
+      setOrganizerInviteeId(organizerRowId);
+
+      /*
+       * Restrictions set in the wizard have been sitting in this
+       * browser with no row to attach to. The exchange exists now and
+       * every person in it has an id, so they go up before anything
+       * else can navigate away from this screen.
+       *
+       * They are written one at a time rather than sent with the
+       * exchange, so that a restriction naming somebody whose row did
+       * not come back is skipped on its own instead of failing the
+       * creation that has already succeeded.
+       */
+      await Promise.all(
+        restrictions.map(async (restriction) => {
+          const owner = asRowId(
+            restriction.ownerId,
+            organizerRowId,
+            idsByLocalId
+          );
+          const other = asRowId(
+            restriction.otherId,
+            organizerRowId,
+            idsByLocalId
           );
 
-          if (at === -1) return invitee;
+          if (!owner || !other) return;
 
-          const [match] = unused.splice(at, 1);
-
-          return { ...invitee, id: match.id };
-        });
-      });
+          try {
+            await setOrganizerRestrictionRemotely(
+              created.organizerToken,
+              owner,
+              other,
+              restriction.direction
+            );
+          } catch {
+            // One restriction failing is not a reason to tell
+            // somebody their exchange was not created. It shows on
+            // the editor either way, and setting it again saves it.
+          }
+        })
+      );
 
       // The confirmation screen offers to send the invitations, so it
       // needs to know how many people that is before it is drawn.
@@ -1036,11 +1181,13 @@ const [inviteEmail, setInviteEmail] = useState("");
       setOrganizerEmail(restored.organizerEmail);
       setIncludeOrganizer(restored.includeOrganizer);
       setInvitees(restored.invitees);
+      setOrganizerInviteeId(restored.organizerInviteeId);
       setRestrictions(
         restored.restrictions.map((restriction) => ({
           ownerId: restriction.ownerId,
           otherId: restriction.otherId,
           direction: restriction.direction as RestrictionDirection,
+          setByOrganizer: restriction.setByOrganizer,
         }))
       );
       setOrganizerToken(remembered.token);
@@ -1324,6 +1471,7 @@ const addInvitee = async () => {
     nameForInvitee,
     otherInvitees,
     hasRestriction,
+    restrictionIsTheirs,
     setRestriction,
     restrictionsOwnedBy,
     restrictionCountFor,
@@ -1381,3 +1529,22 @@ const addInvitee = async () => {
 }
 
 export type ExchangeState = ReturnType<typeof useExchange>;
+
+/**
+ * The id a restriction is stored under.
+ *
+ * The app calls the organizer ORGANIZER_ID wherever they appear, so
+ * that a restriction naming them survives "Include me" being toggled
+ * off and on. The database calls them by the id of their invitee row.
+ * Null when there is no such row yet, which is the one case where a
+ * restriction cannot be saved and has to wait.
+ */
+function asRowId(
+  id: string,
+  organizerInviteeId: string | null,
+  idsByLocalId?: Map<string, string>
+) {
+  if (id === ORGANIZER_ID) return organizerInviteeId;
+
+  return idsByLocalId?.get(id) ?? id;
+}
