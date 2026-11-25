@@ -213,9 +213,9 @@ export default function RegisteredView({
           {exchange.name || "This exchange"} draws on{" "}
           {formatDate(exchange.drawDate)}, which is too soon after
           registration closes for anyone to set restrictions, so
-          everyone is matched at random. If that matters to you, ask{" "}
-          {exchange.organizerName || "the organizer"} to move the draw
-          date back a day or two.
+          everyone is matched at random. If there's someone you'd
+          rather not be matched with, let{" "}
+          {exchange.organizerName || "the organizer"} know.
         </p>
       ) : (
         <>

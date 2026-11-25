@@ -350,7 +350,7 @@ check(
         onWithdraw: () => {},
       })
     ),
-  ["too soon after", "matched at random", "Dana Whitlock"],
+  ["too soon after", "matched at random", "let Dana Whitlock know"],
   // The explanation and the checkboxes both have to go: describing
   // how restrictions work and then saying they are off reads as a
   // fault with the page.
@@ -367,8 +367,14 @@ check(
         onCancel: () => {},
       })
     ),
-  ["too soon after", "matched at random"],
-  ["you can come back and say who you would rather not"]
+  ["too soon after", "matched at random", "let Dana Whitlock know"],
+  [
+    "you can come back and say who you would rather not",
+    // Moving the draw date is the organizer's call, and asking a
+    // participant to request it puts them in an awkward position
+    // over something that affects everybody else's schedule.
+    "move the draw date",
+  ]
 );
 
 const { matchInviteeToken } = require(`${OUT}/router.js`);

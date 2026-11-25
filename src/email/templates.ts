@@ -116,8 +116,24 @@ export const MANAGEMENT_LINK_WARNING =
   "change the dates. They still can't see who drew whom, because " +
   "nobody can.";
 
-function compose(lines: string[], signoff: string[]): string {
-  return [...lines, "", "---", "", ...signoff].join("\n");
+/*
+ * Every participant email ends on a warning about the link, which
+ * reads as a telling-off rather than a goodbye. The closing goes
+ * after it, so the last thing somebody reads is a human one.
+ */
+function compose(
+  lines: string[],
+  signoff: string[],
+  closing?: string
+): string {
+  return [
+    ...lines,
+    ...(closing ? ["", closing] : []),
+    "",
+    "---",
+    "",
+    ...signoff,
+  ].join("\n");
 }
 
 // --------------------------------------------------------------------
@@ -147,14 +163,15 @@ export function invitationEmail(
         ``,
         `It takes a minute, there's no account and no password, and ` +
           `what you write is a wishlist for whoever draws your name. ` +
-          `They see it; you never find out who they're.`,
+          `They see it; you never find out who they are.`,
         ``,
         `Register by ${details.registrationDeadline}. The draw is on ` +
           `${details.drawDate}. Budget: ${details.budget}.`,
         ``,
         PERSONAL_LINK_WARNING,
       ],
-      PARTICIPANT_SIGNOFF
+      PARTICIPANT_SIGNOFF,
+      "See you in the draw."
     ),
   };
 }
@@ -182,7 +199,8 @@ export function registrationReminderEmail(
         ``,
         REMINDERS_NOTE,
       ],
-      PARTICIPANT_SIGNOFF
+      PARTICIPANT_SIGNOFF,
+      "Hope you can make it."
     ),
   };
 }
@@ -219,7 +237,8 @@ export function registrationClosedEmail(
         ``,
         REMINDERS_NOTE,
       ],
-      PARTICIPANT_SIGNOFF
+      PARTICIPANT_SIGNOFF,
+      "Not long now."
     ),
   };
 }
@@ -245,7 +264,8 @@ export function drawReminderEmail(
         ``,
         REMINDERS_NOTE,
       ],
-      PARTICIPANT_SIGNOFF
+      PARTICIPANT_SIGNOFF,
+      "Nearly there."
     ),
   };
 }
@@ -270,12 +290,14 @@ export function drawResultEmail(details: Personal): Email {
           `between you and the app.`,
         ``,
         `While you're there you can read their wishlist, see what ` +
-          `they would rather not receive, and send them a message ` +
-          `without either of you knowing who the other is.`,
+          `they'd rather not receive, and send them a message. ` +
+          `They'll know it came from whoever drew their name, but ` +
+          `not that it's you.`,
         ``,
         PERSONAL_LINK_WARNING,
       ],
-      PARTICIPANT_SIGNOFF
+      PARTICIPANT_SIGNOFF,
+      "Have fun with it."
     ),
   };
 }
@@ -300,13 +322,14 @@ export function messageWaitingEmail(details: Personal): Email {
         `Read it here:`,
         details.link,
         ``,
-        `Messages stay anonymous in both directions. Replying does ` +
-          `not tell them who you're, and theirs doesn't tell you ` +
-          `who they're.`,
+        `It only goes one way: whoever drew a name knows whose it ` +
+          `is, and the person whose name was drawn never finds out ` +
+          `who drew it. Replying doesn't change that either way.`,
         ``,
         PERSONAL_LINK_WARNING,
       ],
-      PARTICIPANT_SIGNOFF
+      PARTICIPANT_SIGNOFF,
+      "Worth a look."
     ),
   };
 }

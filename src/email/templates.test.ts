@@ -97,6 +97,29 @@ for (const [name, email] of toOrganizer) {
 }
 
 /*
+ * Nothing ends on the link warning. It is a caution, and a message
+ * that stops there reads as a telling-off rather than a goodbye.
+ */
+for (const [name, email] of toParticipants) {
+  const body = email.body;
+  const beforeSignoff = body.slice(0, body.lastIndexOf("---")).trimEnd();
+
+  check(`${name} ends on something human`,
+    !beforeSignoff.endsWith(PERSONAL_LINK_WARNING) &&
+      !beforeSignoff.endsWith(REMINDERS_NOTE));
+}
+
+/*
+ * The draw is one-way and the copy has to say so. The giver knows
+ * exactly who they drew; the receiver never learns who drew them.
+ * "Neither of you knows who the other is" was simply untrue.
+ */
+for (const [name, email] of all) {
+  check(`${name} does not claim the anonymity runs both ways`,
+    !/both directions|either of you|neither of you/i.test(email.body));
+}
+
+/*
  * Only the emails somebody can actually switch off offer to switch
  * them off. Telling a person they can stop the email that tells them
  * who they drew would be a promise this app does not keep.

@@ -230,7 +230,9 @@ export default function JoinForm({
             This exchange draws on{" "}
             {formatDate(preview.drawDate)}, too soon after
             registration closes for restrictions, so everyone is
-            matched at random.{" "}
+            matched at random. If there's someone you'd rather not be
+            matched with, let{" "}
+            {preview.organizerName || "the organizer"} know.{" "}
           </>
         )}
         Not sure? <a href="#/faq">The questions people ask</a> covers
