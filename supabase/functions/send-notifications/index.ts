@@ -237,6 +237,13 @@ Deno.serve(async (request) => {
   let due: Claimed[];
 
   try {
+    /*
+     * Notice what has come round before draining. One call rather than
+     * a third scheduled job, and it runs first so a reminder that
+     * became due this hour goes out this hour rather than next.
+     */
+    await rpc("queue_due_notifications", {});
+
     due = await rpc<Claimed[]>("claim_notifications", { p_limit: 50 });
   } catch (caught) {
     return new Response(
