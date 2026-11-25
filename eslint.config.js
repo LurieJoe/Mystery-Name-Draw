@@ -6,7 +6,11 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // Build output, not source. .tmp-smoke holds the CommonJS copy the
+  // render checks run, so linting it reports every problem twice and
+  // reports rules against compiled JavaScript that only apply to the
+  // TypeScript it came from.
+  globalIgnores(['dist', '.tmp-smoke', '.tmp-test', '.tmp-preview']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

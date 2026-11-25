@@ -73,9 +73,33 @@ const { renderToStaticMarkup } = require("react-dom/server");
 const stepNumber = Number(process.argv[3]);
 const isStep = page.endsWith("Step");
 
-// Screens that read the exchange rather than standing alone.
-const needsContext =
-  isStep || page === "RegisteredView" || page === "RegisterPage";
+// Only the wizard steps read the organizer's exchange. The
+// registration screens are handed their data, so they are rendered
+// from the same fixture the smoke checks use.
+const needsContext = isStep;
+
+const {
+  exchangePreview,
+  registrationView,
+} = require("./fixtures/registration.cjs");
+
+const REGISTRATION_PROPS = {
+  RegisteredView: {
+    view: registrationView,
+    busy: false,
+    error: null,
+    onSave: () => {},
+    onToggleRestriction: () => {},
+    onWithdraw: () => {},
+  },
+  JoinForm: {
+    preview: exchangePreview,
+    busy: false,
+    error: null,
+    onJoin: () => {},
+    onCancel: () => {},
+  },
+};
 
 const Page = isStep
   ? require(`${OUT}/pages/steps/${page}.js`).default
@@ -102,15 +126,15 @@ function Harness() {
         // overriding invitees alone renders an empty table and the row
         // layout never gets looked at.
         roster: [
-          { id: "a", name: "Rowan Hale", email: "ada.lovelace@example.com", status: "Registered" },
-          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Invited" },
-          { id: "c", name: "Theo Barnes", email: "alan.turing@example.com", status: "Invite Pending" },
+          { id: "a", name: "Rowan Hale", email: "rowan@example.com", status: "Registered" },
+          { id: "b", name: "Mina Okafor", email: "mina@example.com", status: "Invited" },
+          { id: "c", name: "Theo Barnes", email: "theo@example.com", status: "Invite Pending" },
         ],
         // RegisteredView reads the saved values back, so the fixture
         // has to contain something to read.
         participants: [
-          { id: "a", name: "Rowan Hale", email: "ada.lovelace@example.com", status: "Registered" },
-          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Registered" },
+          { id: "a", name: "Rowan Hale", email: "rowan@example.com", status: "Registered" },
+          { id: "b", name: "Mina Okafor", email: "mina@example.com", status: "Registered" },
         ],
         restrictionsOpen: true,
         // Matching codes, or RegisterPage shows its "no exchange here"
@@ -121,29 +145,48 @@ function Harness() {
         drawDate: "2026-12-16",
         registrationDeadline: "2026-12-11",
         invitees: [
-          { id: "a", name: "Rowan Hale", email: "ada@example.com", status: "Registered",
+          { id: "a", name: "Rowan Hale", email: "rowan@example.com", status: "Registered",
             wishlist: "A book about engines", preferences: "No chocolate, please" },
-          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Invited" },
-          { id: "c", name: "Theo Barnes", email: "alan@example.com", status: "Invite Pending" },
+          { id: "b", name: "Mina Okafor", email: "mina@example.com", status: "Invited" },
+          { id: "c", name: "Theo Barnes", email: "theo@example.com", status: "Invite Pending" },
         ],
       },
     },
     // The register styles are scoped under .register-page, which lives
-    // on RegisterPage's own <main>. Previewing the inner view without
+    // on RegisterPage's own <main>. Previewing an inner view without
     // that wrapper shows a layout the app never renders.
-    page === "RegisteredView"
+    REGISTRATION_PROPS[page]
       ? React.createElement(
           "main",
           { className: "content-page register-page" },
-          React.createElement(Page, {
-            registeredId: "a",
-            onWithdraw: () => {},
-          })
+          React.createElement(Page, REGISTRATION_PROPS[page])
         )
       : React.createElement(
           Page,
           page === "RegisterPage" ? { eventCode: "ABC123" } : null
         )
+  );
+}
+
+/*
+ * A page that needs no exchange context. The registration screens take
+ * props and are scoped under .register-page, so they get the wrapper
+ * the app gives them; everything else renders as itself.
+ */
+function Standalone() {
+  const props = REGISTRATION_PROPS[page];
+
+  if (props) {
+    return React.createElement(
+      "main",
+      { className: "content-page register-page" },
+      React.createElement(Page, props)
+    );
+  }
+
+  return React.createElement(
+    Page,
+    page === "RegisterPage" ? { eventCode: "ABC123" } : null
   );
 }
 
@@ -180,7 +223,7 @@ fs.writeFileSync(
 <title>${page} preview</title>
 <style>${css}</style>
 </head>
-<body><div id="root">${renderToStaticMarkup(React.createElement(needsContext ? Harness : Page))}</div></body>
+<body><div id="root">${renderToStaticMarkup(React.createElement(needsContext ? Harness : Standalone))}</div></body>
 </html>`
 );
 

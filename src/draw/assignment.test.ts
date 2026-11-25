@@ -421,9 +421,9 @@ console.log("\n8. Reading a pasted list");
 
   const gradebook =
     "Student Name,ID,Email\n" +
-    '"Hale, Rowan",1001,ada@example.edu\n' +
-    "Mina Okafor,1002,grace@example.edu\n" +
-    "Theo Barnes,1003,alan@example.edu\n";
+    '"Hale, Rowan",1001,rowan@example.edu\n' +
+    "Mina Okafor,1002,mina@example.edu\n" +
+    "Theo Barnes,1003,theo@example.edu\n";
 
   const fromGradebook = parseCsvNames(gradebook);
   check(

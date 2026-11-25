@@ -33,6 +33,14 @@
   color: #334155;
 }
 
+/* Paragraphs are flush to zero site-wide, which the layouts that set
+   their own spacing rely on. Two in a row have nothing between them
+   though, and read as one block with a bad line break in it. This adds
+   the gap only where there is currently none. */
+.content-page p + p {
+  margin-top: 1rem;
+}
+
 .content-page ul {
   padding-left: 1.25rem;
 }

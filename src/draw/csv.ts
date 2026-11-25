@@ -73,7 +73,7 @@ const HEADINGS =
  * whole, so a plain list in a .txt file works too.
  */
 export function parseCsvNames(text: string): string[] {
-  const rows = parseRows(text.replace(/^﻿/, ""));
+  const rows = parseRows(text.replace(/^\uFEFF/, ""));
   const names: string[] = [];
 
   for (const [index, row] of rows.entries()) {

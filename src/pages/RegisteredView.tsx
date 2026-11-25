@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { useExchangeContext } from "../exchange/context";
+import { formatDate, giftBudgetLabel } from "../exchange/format";
+import type { RestrictionDirection } from "../exchange/types";
+import type { RegistrationView } from "../exchange/registration";
 import "./RegisterPage.css";
 
 const WISHLIST_PLACEHOLDER =
@@ -13,65 +15,116 @@ const PREFERENCES_PLACEHOLDER =
  *
  * Its own component rather than a branch inside RegisterPage, because
  * it is a screen people come back to rather than a thank-you: almost
- * everybody returns at least once, since restrictions do not open until
- * registration closes. Being separate also means it can be rendered on
- * its own, which a branch behind a click cannot.
+ * everybody returns at least once, since restrictions do not open
+ * until registration closes. Being separate also means it can be
+ * rendered on its own, which a branch behind a click cannot.
  *
- * It reads the current values from the exchange rather than being
- * handed them, so what it shows is what was saved.
+ * Everything it shows is handed to it, and every change is handed
+ * back: it holds no opinion about where the data came from, so the
+ * same component renders a live exchange and a fixture.
  */
 export default function RegisteredView({
-  registeredId,
+  view,
+  busy,
+  error,
+  onSave,
+  onToggleRestriction,
   onWithdraw,
 }: {
-  registeredId: string;
+  view: RegistrationView;
+  busy?: boolean;
+  error?: string | null;
+  onSave: (fields: {
+    name: string;
+    wishlist: string;
+    preferences: string;
+  }) => void;
+  onToggleRestriction: (
+    otherId: string,
+    direction: RestrictionDirection,
+    on: boolean
+  ) => void;
   onWithdraw: () => void;
 }) {
-  const {
-    invitees,
-    participants,
-    eventName,
-    drawDate,
-    registrationDeadline,
-    restrictionsOpen,
-    drawHasPassed,
-    formatDate,
-    hasRestriction,
-    setRestriction,
-    updateRegistration,
-    withdrawRegistration,
-  } = useExchangeContext();
+  const { me, others, myRestrictions, exchange } = view;
 
-  const me = invitees.find((invitee) => invitee.id === registeredId);
-
-  const [name, setName] = useState(me?.name ?? "");
-  const [wishlist, setWishlist] = useState(me?.wishlist ?? "");
-  const [preferences, setPreferences] = useState(me?.preferences ?? "");
+  const [name, setName] = useState(me.name ?? "");
+  const [wishlist, setWishlist] = useState(me.wishlist ?? "");
+  const [preferences, setPreferences] = useState(me.preferences ?? "");
   const [saved, setSaved] = useState(false);
 
-  const others = participants.filter(
-    (person) => person.id !== registeredId
-  );
+  const hasRestriction = (
+    otherId: string,
+    direction: RestrictionDirection
+  ) =>
+    myRestrictions.some(
+      (restriction) =>
+        restriction.otherId === otherId &&
+        restriction.direction === direction
+    );
 
   const edited = (set: (value: string) => void) => (value: string) => {
     set(value);
     setSaved(false);
   };
 
+  const restrictionList = (direction: RestrictionDirection) =>
+    others.map((person) => (
+      <label key={person.id} className="register-check">
+        <input
+          type="checkbox"
+          checked={hasRestriction(person.id, direction)}
+          disabled={busy}
+          onChange={(e) =>
+            onToggleRestriction(person.id, direction, e.target.checked)
+          }
+        />
+        {person.name}
+      </label>
+    ));
+
   return (
     <>
       <h1>You are in</h1>
 
       <p className="content-lede">
-        Thanks, {me?.name || name}. You are registered for{" "}
-        {eventName || "this exchange"}.
+        Thanks, {me.name || name}. You are registered for{" "}
+        {exchange.name || "this exchange"}.
       </p>
+
+      <dl className="register-facts">
+        <div>
+          <dt>Draw date</dt>
+          <dd>{formatDate(exchange.drawDate)}</dd>
+        </div>
+        <div>
+          <dt>Register by</dt>
+          <dd>{formatDate(exchange.registrationDeadline)}</dd>
+        </div>
+        <div>
+          <dt>Budget</dt>
+          <dd>
+            {giftBudgetLabel({
+              giftBudget: exchange.giftBudget ?? "",
+              currency: exchange.currency,
+              noGiftLimit: exchange.noGiftLimit,
+            })}
+          </dd>
+        </div>
+      </dl>
+
+      {error && (
+        <p className="register-error" role="alert">
+          {error}
+        </p>
+      )}
 
       <h2>Your wishlist and preferences</h2>
       <p>
         Only the person who draws your name sees these. You will not
-        know who that is, and they have no way to tell you. Change these
-        as often as you like, up to the draw on {formatDate(drawDate)}.
+        know who that is, and they have no way to tell you. Change
+        these as often as you like, up to the draw on{" "}
+        {formatDate(exchange.drawDate)}.
       </p>
 
       <label className="register-field">
@@ -85,10 +138,11 @@ export default function RegisteredView({
 
       <label className="register-field">
         Your email
-        <input type="email" value={me?.email ?? ""} readOnly />
+        <input type="email" value={me.email} readOnly />
         <span className="register-hint">
           This is how the exchange knows you, so it cannot be changed
-          here. Ask the organizer if it is wrong.
+          here. Ask {exchange.organizerName || "the organizer"} if it
+          is wrong.
         </span>
       </label>
 
@@ -126,19 +180,16 @@ export default function RegisteredView({
         <button
           type="button"
           className="landing-cta register-submit"
+          disabled={busy}
           onClick={() => {
-            updateRegistration(registeredId, {
-              name,
-              wishlist,
-              preferences,
-            });
+            onSave({ name, wishlist, preferences });
             setSaved(true);
           }}
         >
-          Save changes
+          {busy ? "Saving…" : "Save changes"}
         </button>
 
-        {saved && (
+        {saved && !busy && !error && (
           <span className="register-saved" role="status">
             Saved.
           </span>
@@ -147,11 +198,11 @@ export default function RegisteredView({
 
       <h2>Who you would rather not be matched with</h2>
       <p>
-        These are preferences, not guarantees. The draw honors every one
-        it can, but enough of them together can make a valid draw
+        These are preferences, not guarantees. The draw honors every
+        one it can, but enough of them together can make a valid draw
         impossible, and the organizer may then have to set one aside to
-        let the exchange happen at all. They would tell you if yours was
-        the one.
+        let the exchange happen at all. They would tell you if yours
+        was the one.
       </p>
       <p>
         They work in one direction: not wanting to buy for someone is a
@@ -161,16 +212,16 @@ export default function RegisteredView({
         has to sort it out.
       </p>
 
-      {drawHasPassed ? (
+      {exchange.drawn ? (
         <p className="register-empty">
           The draw has happened, so restrictions are closed.
         </p>
-      ) : !restrictionsOpen ? (
+      ) : !view.restrictionsOpen ? (
         <p className="register-empty">
           Restrictions open when registration closes on{" "}
-          {formatDate(registrationDeadline)}, once the list of people is
-          final. You can set and change them from then until the draw on{" "}
-          {formatDate(drawDate)}.
+          {formatDate(exchange.registrationDeadline)}, once the list of
+          people is final. You can set and change them from then until
+          the draw on {formatDate(exchange.drawDate)}.
         </p>
       ) : others.length === 0 ? (
         <p className="register-empty">
@@ -181,48 +232,12 @@ export default function RegisteredView({
         <div className="register-restrictions">
           <section>
             <h3>I would rather not buy for</h3>
-            {others.map((person) => (
-              <label key={person.id} className="register-check">
-                <input
-                  type="checkbox"
-                  checked={hasRestriction(registeredId, person.id, "give")}
-                  onChange={(e) =>
-                    setRestriction(
-                      registeredId,
-                      person.id,
-                      "give",
-                      e.target.checked
-                    )
-                  }
-                />
-                {person.name}
-              </label>
-            ))}
+            {restrictionList("give")}
           </section>
 
           <section>
             <h3>I would rather not receive from</h3>
-            {others.map((person) => (
-              <label key={person.id} className="register-check">
-                <input
-                  type="checkbox"
-                  checked={hasRestriction(
-                    registeredId,
-                    person.id,
-                    "receive"
-                  )}
-                  onChange={(e) =>
-                    setRestriction(
-                      registeredId,
-                      person.id,
-                      "receive",
-                      e.target.checked
-                    )
-                  }
-                />
-                {person.name}
-              </label>
-            ))}
+            {restrictionList("receive")}
           </section>
         </div>
       )}
@@ -231,11 +246,11 @@ export default function RegisteredView({
       <ol className="register-next">
         <li>
           More people register until{" "}
-          {formatDate(registrationDeadline)}.
+          {formatDate(exchange.registrationDeadline)}.
         </li>
         <li>
-          On {formatDate(drawDate)} everyone is matched at once,
-          honoring every restriction that has been set.
+          On {formatDate(exchange.drawDate)} everyone is matched at
+          once, honoring every restriction that has been set.
         </li>
         <li>
           You are emailed the one name you are buying for. Nobody sees
@@ -263,13 +278,13 @@ export default function RegisteredView({
         <button
           type="button"
           className="register-cancel"
+          disabled={busy}
           onClick={() => {
             const confirmed = window.confirm(
               "Cancel your registration?\n\nYour wishlist, preferences, and restrictions will be deleted. You can register again from the same link."
             );
 
             if (confirmed) {
-              withdrawRegistration(registeredId);
               onWithdraw();
             }
           }}

@@ -1,3 +1,8 @@
+import {
+  currencySymbols,
+  formatDate,
+  giftBudgetLabel as formatGiftBudget,
+} from "./format.js";
 import { useState, useRef, useMemo } from "react";
 import type { ChangeEvent } from "react";
 import {
@@ -112,18 +117,6 @@ const [remindBeforeDrawDate, setRemindBeforeDrawDate] =
     setTimeout(() => {
       setCopied(false);
     }, 2000);
-  };
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Not set";
-  
-    const [year, month, day] =
-      dateString.split("-").map(Number);
-  
-    return new Date(
-      year,
-      month - 1,
-      day
-    ).toLocaleDateString();
   };
   const [invitees, setInvitees] = useState<Invitee[]>([]);
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
@@ -312,124 +305,18 @@ const [inviteEmail, setInviteEmail] = useState("");
 
   // Sending the invitation moves everyone still pending to "Invited".
   // Registration (not built yet) is what moves them to "Registered".
-  /**
-   * A participant registering themselves.
+  /*
+   * Registering, changing what you wrote, and withdrawing used to live
+   * here, against this hook's own state. They were how registration
+   * worked while an exchange existed only in the browser that made it,
+   * which meant a registration link opened nothing anywhere else.
    *
-   * Matched on email so somebody the organizer already invited fills in
-   * their own row rather than appearing twice. Returns their id, which
-   * is what their restrictions are keyed to.
+   * They now live in useRegistration, against the database, and are
+   * gone from here rather than left unused: a working local copy of
+   * the wrong behavior is the easiest thing in the world to wire a
+   * screen back up to by accident.
    */
-  /**
-   * Change what a registered person wrote about themselves.
-   *
-   * Separate from registerParticipant because the two are different
-   * acts: joining is a one-off, and this is somebody coming back to
-   * their own page, which is the normal way to use it. Restrictions do
-   * not open until registration closes, so almost everybody returns at
-   * least once, and finding their wishlist frozen would be strange.
-   *
-   * The email is the handle the exchange knows them by, so it is not
-   * editable here; changing it would make them a different person.
-   */
-  const updateRegistration = (
-    inviteeId: string,
-    details: { name: string; wishlist: string; preferences: string }
-  ) => {
-    const name = details.name.trim();
 
-    setInvitees((previousInvitees) =>
-      previousInvitees.map((invitee) =>
-        invitee.id === inviteeId
-          ? {
-              ...invitee,
-              name: name || invitee.name,
-              wishlist: details.wishlist.trim(),
-              preferences: details.preferences.trim(),
-            }
-          : invitee
-      )
-    );
-  };
-
-  /**
-   * Take yourself back out of an exchange.
-   *
-   * The invitee row stays: the organizer invited this person and should
-   * still see them on the list, now as somebody who has not registered,
-   * rather than having them vanish and be re-invited by accident. What
-   * they wrote goes, along with the restrictions they had set, since
-   * those were choices about a draw they are no longer in. Registering
-   * again later is the same act as registering the first time.
-   */
-  const withdrawRegistration = (inviteeId: string) => {
-    setRestrictions((previousRestrictions) =>
-      previousRestrictions.filter(
-        (restriction) =>
-          restriction.ownerId !== inviteeId &&
-          restriction.otherId !== inviteeId
-      )
-    );
-
-    setInvitees((previousInvitees) =>
-      previousInvitees.map((invitee) =>
-        invitee.id === inviteeId
-          ? {
-              ...invitee,
-              status: INVITE_PENDING,
-              wishlist: "",
-              preferences: "",
-            }
-          : invitee
-      )
-    );
-  };
-
-  const registerParticipant = (details: {
-    name: string;
-    email: string;
-    wishlist: string;
-    preferences: string;
-  }) => {
-    const name = details.name.trim();
-    const email = details.email.trim();
-    const wishlist = details.wishlist.trim();
-    const preferences = details.preferences.trim();
-
-    const existing = invitees.find(
-      (invitee) =>
-        invitee.email.toLowerCase() === email.toLowerCase()
-    );
-    const id = existing ? existing.id : createInviteeId();
-
-    setInvitees((previousInvitees) =>
-      previousInvitees.some((invitee) => invitee.id === id)
-        ? previousInvitees.map((invitee) =>
-            invitee.id === id
-              ? {
-                  ...invitee,
-                  name,
-                  email,
-                  wishlist,
-                  preferences,
-                  status: REGISTERED,
-                }
-              : invitee
-          )
-        : [
-            ...previousInvitees,
-            {
-              id,
-              name,
-              email,
-              wishlist,
-              preferences,
-              status: REGISTERED,
-            },
-          ]
-    );
-
-    return id;
-  };
 
   const markPendingAsInvited = () => {
     setInvitees((previousInvitees) =>
@@ -898,19 +785,11 @@ const [inviteEmail, setInviteEmail] = useState("");
 
     setCurrentStep(1);
   };
-  const currencySymbols: Record<string, string> = {
-    USD: "$",
-    CAD: "$",
-    GBP: "\u00A3",
-    EUR: "\u20AC",
-    AUD: "$",
-  };
-
-  const giftBudgetLabel = noGiftLimit
-    ? "No limit"
-    : giftBudget.trim()
-    ? `${currencySymbols[currency] ?? ""}${giftBudget} ${currency}`
-    : "Not set";
+  const giftBudgetLabel = formatGiftBudget({
+    giftBudget,
+    currency,
+    noGiftLimit,
+  });
 
   const reminderSummary =
     remindBeforeRegistrationDeadline && remindBeforeDrawDate
@@ -1264,9 +1143,6 @@ const addInvitee = () => {
     saveError,
     restoring,
     hasDatabase,
-    registerParticipant,
-    updateRegistration,
-    withdrawRegistration,
     formatList,
     formatNames,
     recordsForPairing,

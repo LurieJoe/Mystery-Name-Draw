@@ -239,48 +239,30 @@ check(
 // branch nothing checks.
 const RegisteredView = require(`${OUT}/pages/RegisteredView.js`).default;
 
-function RegisteredHarness() {
-  const exchange = useExchange();
+const {
+  exchangePreview,
+  registrationView,
+} = require("./fixtures/registration.cjs");
 
-  return React.createElement(
-    ExchangeContext.Provider,
-    {
-      value: {
-        ...exchange,
-        eventName: "Office Secret Santa",
-        drawDate: "2026-12-16",
-        registrationDeadline: "2026-12-11",
-        restrictionsOpen: true,
-        invitees: [
-          {
-            id: "a",
-            name: "Rowan Hale",
-            email: "ada@example.com",
-            status: "Registered",
-            wishlist: "A book about engines",
-            preferences: "No chocolate, please",
-          },
-        ],
-        participants: [
-          { id: "a", name: "Rowan Hale", email: "ada@example.com", status: "Registered" },
-          { id: "b", name: "Mina Okafor", email: "grace@example.com", status: "Registered" },
-        ],
-      },
-    },
-    React.createElement(RegisteredView, {
-      registeredId: "a",
-      onWithdraw: () => {},
-    })
-  );
-}
+const JoinForm = require(`${OUT}/pages/JoinForm.js`).default;
 
 check(
   "RegisteredView (coming back to your own page)",
-  () => renderToStaticMarkup(React.createElement(RegisteredHarness)),
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: registrationView,
+        busy: false,
+        error: null,
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onWithdraw: () => {},
+      })
+    ),
   [
     "You are in",
     // What was saved is what is shown: the fields are seeded from the
-    // exchange, not left blank for the person to retype.
+    // registration, not left blank for the person to retype.
     "A book about engines",
     "No chocolate, please",
     "Save changes",
@@ -291,24 +273,71 @@ check(
     "I would rather not buy for",
     "I would rather not receive from",
     "Mina Okafor",
+    "Teo Vasquez",
   ],
   // Nobody sets a restriction against themselves.
   ["Rowan Hale</label>"]
 );
 
-function RegisterHarness() {
-  const exchange = useExchange();
-  return React.createElement(
-    ExchangeContext.Provider,
-    { value: exchange },
-    React.createElement(RegisterPage, { eventCode: "ABC123" })
-  );
-}
+check(
+  "JoinForm (arriving from the link)",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(JoinForm, {
+        preview: exchangePreview,
+        busy: false,
+        error: null,
+        onJoin: () => {},
+        onCancel: () => {},
+      })
+    ),
+  [
+    "Join Office Secret Santa",
+    "Confirm Registration",
+    "Cancel",
+    "$25 USD",
+    "Your wishlist",
+  ],
+  // An exchange anybody may join does not warn about invitations, and
+  // an open one does not say registration is closed.
+  ["invitation only", "Registration is closed"]
+);
 
 check(
+  "JoinForm when the organizer kept it to the people they listed",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(JoinForm, {
+        preview: { ...exchangePreview, openToAnyone: false },
+        onJoin: () => {},
+        onCancel: () => {},
+      })
+    ),
+  ["This one is invitation only", "Dana Whitlock"]
+);
+
+check(
+  "JoinForm after the deadline",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(JoinForm, {
+        preview: { ...exchangePreview, registrationOpen: false },
+        onJoin: () => {},
+        onCancel: () => {},
+      })
+    ),
+  ["Registration is closed"]
+);
+
+// Without settings to reach a database, the page says so rather than
+// blaming the link the reader was sent.
+check(
   "RegisterPage at /event/ABC123",
-  () => renderToStaticMarkup(React.createElement(RegisterHarness)),
-  ["ABC123", "Exchanges are not stored yet"]
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisterPage, { eventCode: "ABC123" })
+    ),
+  ["ABC123", "Not connected to a database"]
 );
 
 console.log(`\n${passed} rendered, ${failed} failed`);

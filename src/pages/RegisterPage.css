@@ -202,3 +202,31 @@
 .register-withdraw h2 {
   margin-top: 0;
 }
+
+/* What the database said went wrong, shown where the person was
+   working rather than in an alert they have to dismiss. Loud enough
+   to find after a failed save, since the page otherwise looks as
+   though nothing happened. */
+.register-error {
+  margin: 1.25rem 0;
+  padding: 0.9rem 1.1rem;
+
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: 10px;
+
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* The retry on the "nothing answered" screen needs room above it. */
+.register-notice .secondary-button {
+  margin-top: 1rem;
+}
+
+/* A field that follows a paragraph of explanation, rather than a
+   heading, had nothing between the two: the label read as the last
+   line of the paragraph. */
+.register-page p + .register-field {
+  margin-top: 1.5rem;
+}

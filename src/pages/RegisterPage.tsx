@@ -1,26 +1,21 @@
-import { useState } from "react";
 import Header from "../components/Header";
 import SiteFooter from "../components/SiteFooter";
+import JoinForm from "./JoinForm";
 import RegisteredView from "./RegisteredView";
-import { useExchangeContext } from "../exchange/context";
-import { isValidEmail } from "../exchange/types";
+import { useRegistration } from "../exchange/useRegistration";
 import { navigate } from "../router";
 import "./ContentPage.css";
 import "./RegisterPage.css";
 
-const WISHLIST_PLACEHOLDER =
-  "A book I have been meaning to read\nSomething for the garden\nA voucher for the bakery on the corner";
-
-const PREFERENCES_PLACEHOLDER =
-  "Medium in most things. Please, no more candles.";
-
 /**
  * Where an invitee lands from their registration link.
  *
- * Joining is this page; everything afterwards is RegisteredView.
- * Restrictions come after joining, not before: you cannot choose who
- * not to be matched with until you are in the list and can see who
- * else is.
+ * This page decides which of two screens to show and nothing else.
+ * Both of them are presentational, and the state behind them comes
+ * from useRegistration, which talks to the database rather than to the
+ * organizer's copy of the exchange. That is the whole difference
+ * between a link that works and one that only worked in the browser
+ * that made it.
  */
 export default function RegisterPage({
   eventCode,
@@ -28,50 +23,100 @@ export default function RegisterPage({
   eventCode: string;
 }) {
   const {
-    eventName,
-    drawDate,
-    registrationDeadline,
-    giftBudgetLabel,
-    registrationOpen,
-    eventCode: openExchangeCode,
-    formatDate,
-    registerParticipant,
-  } = useExchangeContext();
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [wishlist, setWishlist] = useState("");
-  const [preferences, setPreferences] = useState("");
-  const [registeredId, setRegisteredId] = useState<string | null>(null);
-  const [attempted, setAttempted] = useState(false);
-
-  // Without a backend this page can only show the exchange open in this
-  // browser. A link opened anywhere else has nothing to look up.
-  const exchangeIsHere =
-    !!openExchangeCode && openExchangeCode === eventCode;
-
-  const nameMissing = !name.trim();
-  const emailInvalid = !isValidEmail(email);
-  const canSubmit = !nameMissing && !emailInvalid;
-
-  const join = () => {
-    setAttempted(true);
-
-    if (!canSubmit) {
-      return;
-    }
-
-    setRegisteredId(
-      registerParticipant({ name, email, wishlist, preferences })
-    );
-  };
+    state,
+    busy,
+    error,
+    retry,
+    join,
+    save,
+    toggleRestriction,
+    withdraw,
+  } = useRegistration(eventCode);
 
   return (
     <>
       <Header onStartExchange={() => navigate("/create")} />
 
       <main className="content-page register-page">
-        {!exchangeIsHere ? (
+        {state.kind === "loading" && (
+          <>
+            <h1>Opening your invitation</h1>
+            <p className="content-lede">
+              Invitation code <strong>{eventCode}</strong>
+            </p>
+            <p className="register-empty" role="status">
+              One moment.
+            </p>
+          </>
+        )}
+
+        {state.kind === "registered" && (
+          <RegisteredView
+            view={state.view}
+            busy={busy}
+            error={error}
+            onSave={save}
+            onToggleRestriction={toggleRestriction}
+            onWithdraw={withdraw}
+          />
+        )}
+
+        {state.kind === "join" && (
+          <JoinForm
+            preview={state.preview}
+            busy={busy}
+            error={error}
+            onJoin={join}
+            onCancel={() => navigate("/")}
+          />
+        )}
+
+        {state.kind === "missing" && (
+          <>
+            <h1>That link did not open anything</h1>
+
+            <p className="content-lede">
+              Invitation code <strong>{eventCode}</strong>
+            </p>
+
+            <div className="register-notice">
+              <h2>No exchange with that code</h2>
+              <p>
+                The code may have been mistyped, the link may have been
+                cut short by whatever it was sent through, or the
+                organizer may have deleted the exchange. Ask them for
+                the link again.
+              </p>
+            </div>
+          </>
+        )}
+
+        {state.kind === "unreachable" && (
+          <>
+            <h1>Could not reach Mystery Name Draw</h1>
+
+            <p className="content-lede">
+              Invitation code <strong>{eventCode}</strong>
+            </p>
+
+            <div className="register-notice">
+              <h2>Nothing answered</h2>
+              <p>
+                Your link is probably fine. Check your connection and
+                try again.
+              </p>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => void retry()}
+              >
+                Try again
+              </button>
+            </div>
+          </>
+        )}
+
+        {state.kind === "no-database" && (
           <>
             <h1>This link needs a moment</h1>
 
@@ -80,155 +125,14 @@ export default function RegisterPage({
             </p>
 
             <div className="register-notice">
-              <h2>Exchanges are not stored yet</h2>
+              <h2>Not connected to a database</h2>
               <p>
-                Mystery Name Draw currently runs entirely in the
-                browser, so a registration link only opens in the same
-                browser that created the exchange. Storing exchanges so
-                that a link works for everyone is the next thing being
-                built.
-              </p>
-              <p>
-                To see this page working, create an exchange in this
-                browser and follow its own registration link.
+                This copy of Mystery Name Draw was built without the
+                settings it needs to look an exchange up, so it cannot
+                open this link. That is something to fix where the site
+                is built, not on this page.
               </p>
             </div>
-          </>
-        ) : registeredId ? (
-          <RegisteredView
-            registeredId={registeredId}
-            onWithdraw={() => setRegisteredId(null)}
-          />
-        ) : (
-          <>
-            <h1>Join {eventName || "this gift exchange"}</h1>
-
-            <p className="content-lede">
-              No account and no password. Fill this in and you are done.
-            </p>
-
-            <dl className="register-facts">
-              <div>
-                <dt>Draw date</dt>
-                <dd>{formatDate(drawDate)}</dd>
-              </div>
-              <div>
-                <dt>Register by</dt>
-                <dd>{formatDate(registrationDeadline)}</dd>
-              </div>
-              <div>
-                <dt>Budget</dt>
-                <dd>{giftBudgetLabel}</dd>
-              </div>
-            </dl>
-
-            {!registrationOpen && (
-              <div className="register-notice">
-                <h2>Registration is closed</h2>
-                <p>
-                  The organizer has stopped accepting new participants
-                  for this exchange.
-                </p>
-              </div>
-            )}
-
-            <h2>Your details</h2>
-
-            <label className="register-field">
-              Your name *
-              <input
-                type="text"
-                value={name}
-                placeholder="The name others will see"
-                onChange={(e) => setName(e.target.value)}
-              />
-              {attempted && nameMissing && (
-                <span className="validation-error">
-                  Please enter a name.
-                </span>
-              )}
-            </label>
-
-            <label className="register-field">
-              Your email *
-              <input
-                type="email"
-                value={email}
-                placeholder="you@example.com"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {attempted && emailInvalid && (
-                <span className="validation-error">
-                  This is where your match is sent, so it needs to be
-                  right.
-                </span>
-              )}
-            </label>
-
-            <h2>Your wishlist</h2>
-            <p>
-              Ideas for whoever draws your name. Only they will see it.
-              Give them enough to buy from: a size, a color, an author,
-              a shop. Vague is harder to shop for than nothing at all.
-            </p>
-
-            <label className="register-field">
-              <span className="visually-hidden">Your wishlist</span>
-              <textarea
-                rows={5}
-                value={wishlist}
-                placeholder={WISHLIST_PLACEHOLDER}
-                onChange={(e) => setWishlist(e.target.value)}
-              />
-            </label>
-
-            <h2>Anything else worth knowing</h2>
-            <p>
-              Sizes, colors you like, or things to steer clear of.
-              Optional, and often more useful than the wishlist.
-            </p>
-
-            <label className="register-field">
-              <span className="visually-hidden">
-                Anything else worth knowing
-              </span>
-              <textarea
-                rows={4}
-                value={preferences}
-                placeholder={PREFERENCES_PLACEHOLDER}
-                onChange={(e) => setPreferences(e.target.value)}
-              />
-            </label>
-
-            <div className="register-actions">
-              <button
-                type="button"
-                className="landing-cta register-submit"
-                onClick={join}
-                disabled={!registrationOpen}
-              >
-                Confirm Registration
-              </button>
-
-              {/* Nobody has to join because a link arrived. This leaves
-                  without registering, and the link still works later. */}
-              <button
-                type="button"
-                className="register-cancel"
-                onClick={() => navigate("/")}
-              >
-                Cancel
-              </button>
-            </div>
-
-            <p className="register-after">
-              Once registration closes on{" "}
-              {formatDate(registrationDeadline)} you can come back and
-              say who you would rather not be matched with, right up
-              until the draw on {formatDate(drawDate)}. Not sure?{" "}
-              <a href="#/faq">The questions people ask</a> covers how
-              this works.
-            </p>
           </>
         )}
       </main>
