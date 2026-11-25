@@ -80,7 +80,7 @@ To check the rules on your own machine before trusting them:
 ```
 
 Every check raises on failure, so a non-zero exit means a promise is
-broken. There are 43, and they cover the claims worth doubting: that
+broken. There are 64, and they cover the claims worth doubting: that
 one participant cannot see another's choices, that an organizer-set
 restriction stays hidden from the person it is about, that no organizer
 view contains an assignment before or after the draw, and that a
@@ -105,6 +105,31 @@ and the second pinger that covers its blind spot, is written out in
 It is worth knowing that this makes an unattended draw depend on a cron
 job staying green. If you would rather not carry that, the Pro plan is
 the thing that removes the failure mode rather than working around it.
+
+## Joining from the shared link
+
+The app has one registration link for everybody, and the FAQ says so.
+The schema did not: `registration_view` wants a token that only
+`create_exchange` hands out, so only people the organizer had already
+listed could ever appear. `0005` adds the two functions that make the
+link work as described.
+
+`exchange_preview(code)` is what a stranger holding the code may see:
+the name, the dates, the budget, and whether registration is open.
+No names, no count, nothing about anybody already in it.
+
+`join_exchange(code, name, email, ...)` registers them and returns the
+token that is theirs from then on. An address the organizer already
+listed claims that row rather than making a second one, so the wishlist
+lands where the organizer expects it.
+
+**An address that has already registered is refused.** Matching on
+email is how an invited person gets recognised, but it would also mean
+anybody holding the code and a guess at a colleague's address could be
+handed that colleague's token, and with it their wishlist, their
+restrictions, and eventually the name they drew. Refusing costs a real
+person one message to the organizer; not refusing costs somebody their
+privacy, quietly. There is a test that fails if the check is removed.
 
 ## Anonymous messaging
 
