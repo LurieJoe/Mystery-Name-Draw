@@ -77,10 +77,6 @@ export default function CreatedStep() {
 
     <hr />
 
-    <hr />
-
-    <div className="tips-panel">
-
     {managementLink && (
       <div className="management-link">
         <h3>Your way back in</h3>
@@ -115,6 +111,8 @@ export default function CreatedStep() {
       </div>
     )}
 
+    <div className="tips-panel">
+      <div className="tips-text">
     <h3>Tips for a Successful Gift Exchange</h3>
 
     <div className="tips-grid">
@@ -144,6 +142,18 @@ export default function CreatedStep() {
     </div>
 
     </div>
+      </div>
+
+      {/* Decorative, so no alt text: it says nothing the tips do
+          not. Hidden on a narrow screen, where it would push the
+          buttons below the fold to no purpose. */}
+      <img
+        className="tips-art"
+        src="/images/pigeon-messenger.png"
+        alt=""
+        width={700}
+        height={581}
+      />
   
 
       </div>

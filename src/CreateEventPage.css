@@ -269,14 +269,19 @@
     text-align: left;
   }
 
-  .wizard-navigation {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    width: 68%;
-  
-    margin-top: 3rem;
-  }
+.wizard-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+
+  /* Full width, so "center" means the center of the card. At 68% the
+     buttons sat a third of the way left on a wide screen and ran off
+     the edge on a phone. */
+  width: 100%;
+
+  margin-top: 3rem;
+}
   
 .back-button,
 .continue-button {
@@ -1377,4 +1382,46 @@
   background: #ffffff;
   font-size: 0.9rem;
   overflow-wrap: anywhere;
+}
+
+/* --- Tips, with the pigeon in the space the two columns leave --- */
+
+.tips-panel {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.tips-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tips-art {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+}
+
+/* Below this the tips are one column and the art would only push the
+   buttons further down the page. */
+@media (max-width: 900px) {
+  .tips-art {
+    display: none;
+  }
+}
+
+/* Two pill buttons with 2rem of padding each do not fit side by side on
+   a narrow phone, so let them take a line each. */
+@media (max-width: 480px) {
+  .wizard-navigation {
+    gap: 0.75rem;
+  }
+
+  .back-button,
+  .continue-button {
+    flex: 1 1 100%;
+    padding: 1rem 1.25rem;
+  }
 }
