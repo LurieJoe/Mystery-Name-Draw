@@ -32,7 +32,18 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "No Supabase project configured yet. Nothing to keep awake."
+            echo "SUPABASE_URL or SUPABASE_ANON_KEY is not set."
+            echo "Add them under Settings -> Secrets and variables -> Actions."
+
+            # Pressing Run workflow is somebody asking whether this
+            # works, and a green tick that only means "nothing was
+            # configured" answers the wrong question. On the schedule it
+            # stays quiet, so a project that does not exist yet does not
+            # send an email every three days.
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              exit 1
+            fi
+
             exit 0
           fi
 

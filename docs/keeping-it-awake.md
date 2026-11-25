@@ -24,13 +24,22 @@ Neither can take the other down, which is the point of having both.
 
 ## About the key
 
-Both pingers need the **anon** key. That key is meant to be public: it
-is already in the JavaScript every visitor downloads, and on its own it
-can reach nothing but the functions in `0002` and `0004`, every one of
-which demands a token it does not have.
+Both pingers need the **publishable** key, the one that starts
+`sb_publishable_`. Supabase used to call this the anon key and the
+older name still appears in places, including the environment variable
+name below; they are the same thing, and the legacy keys are being
+retired in early 2027.
 
-The **service role** key is the opposite, and must never be pasted into
-a cron service, a repository secret, or anything a browser can see.
+It is meant to be public: it is already in the JavaScript every visitor
+downloads, and on its own it reaches nothing but the functions in
+`0002` and `0004`, every one of which demands a token it does not have.
+Supabase's own note says a publishable key is browser-safe when row
+level security is on, which here it is, with no policies at all, so
+that key cannot read a single row directly.
+
+The **secret** key, `sb_secret_`, is the opposite. It bypasses every
+check in this schema and must never be pasted into a cron service, a
+repository secret, or anything a browser can see.
 
 ## 0. Push first
 
@@ -70,15 +79,15 @@ secrets are missing.
    `relation "exchanges" already exists`. One paste of all four also
    beats four separate ones for the same reason: fewer chances for the
    editor to be holding something you did not mean to run.
-3. From Project Settings → API, copy the **Project URL** and the
-   **anon public** key.
+3. Copy the **Project URL** from Project Settings → API, and the
+   **publishable** key from Project Settings → API Keys.
 
 Confirm it all arrived, substituting your two values:
 
 ```
 curl -X POST "https://YOUR-REF.supabase.co/rest/v1/rpc/ping" \
-  -H "apikey: YOUR-ANON-KEY" \
-  -H "Authorization: Bearer YOUR-ANON-KEY" \
+  -H "apikey: YOUR-PUBLISHABLE-KEY" \
+  -H "Authorization: Bearer YOUR-PUBLISHABLE-KEY" \
   -H "Content-Type: application/json" \
   --data '{}'
 ```
@@ -95,7 +104,7 @@ In the repository: **Settings → Secrets and variables → Actions → New
 repository secret**. Add both, named exactly:
 
 - `SUPABASE_URL` — `https://YOUR-REF.supabase.co`
-- `SUPABASE_ANON_KEY` — the anon public key
+- `SUPABASE_ANON_KEY` — the publishable key, `sb_publishable_...`
 
 Then **Actions → Keep Supabase awake → Run workflow** to try it now
 rather than waiting three days. A green tick means it reached the
@@ -111,8 +120,8 @@ card.
 - **URL** `https://YOUR-REF.supabase.co/rest/v1/rpc/ping`
 - **Method** POST
 - **Headers**
-  - `apikey: YOUR-ANON-KEY`
-  - `Authorization: Bearer YOUR-ANON-KEY`
+  - `apikey: YOUR-PUBLISHABLE-KEY`
+  - `Authorization: Bearer YOUR-PUBLISHABLE-KEY`
   - `Content-Type: application/json`
 - **Body** `{}`
 - **Schedule** every 3 days
