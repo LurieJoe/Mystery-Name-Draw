@@ -33,6 +33,16 @@ type Drawable = {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
+/*
+ * What the scheduler proves it is with. Deliberately not the service
+ * key: that would mean the thing stored in the database to trigger a
+ * draw is also a key to the whole database. This one can do exactly
+ * one thing, and that thing is idempotent - it draws what is already
+ * due and nothing else - so a leak is an annoyance rather than an
+ * incident.
+ */
+const DRAW_SECRET = Deno.env.get("DRAW_SECRET") ?? "";
+
 /** Postgres, through PostgREST, as the service role. */
 async function rpc<T>(name: string, args: Record<string, unknown>) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
@@ -93,16 +103,44 @@ function explainFailure(
   );
 }
 
+/*
+ * Compared in constant time. A timing attack across the public
+ * internet against a 256-bit token is not a realistic threat, but a
+ * comparison that returns early on the first wrong byte is the kind
+ * of thing that is free to get right and awkward to explain later.
+ */
+function secretsMatch(offered: string, expected: string): boolean {
+  if (offered.length !== expected.length) {
+    return false;
+  }
+
+  let difference = 0;
+
+  for (let i = 0; i < offered.length; i += 1) {
+    difference |= offered.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+
+  return difference === 0;
+}
+
 Deno.serve(async (request) => {
   /*
    * Only the scheduler. Drawing is not destructive on its own, but the
    * draw date is part of the promise this app makes, and an endpoint
    * anybody can poke is one somebody can use to find out which
    * exchanges exist.
+   *
+   * Accepted on either header. Supabase's own guidance is that
+   * service-to-service callers put the key on apikey, and sending the
+   * right credential on the wrong header is the most common cause of
+   * a 401 nobody can explain, so both are read rather than making
+   * that a thing to get right at three in the morning in December.
    */
-  const offered = request.headers.get("Authorization") ?? "";
+  const offered =
+    request.headers.get("apikey") ??
+    (request.headers.get("Authorization") ?? "").replace(/^Bearer /, "");
 
-  if (!SERVICE_KEY || offered !== `Bearer ${SERVICE_KEY}`) {
+  if (!DRAW_SECRET || !secretsMatch(offered, DRAW_SECRET)) {
     return new Response(JSON.stringify({ error: "Not authorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },

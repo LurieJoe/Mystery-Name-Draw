@@ -39,3 +39,7 @@ src/**/*.js
 
 # Local Supabase values; see .env.example
 .env.local
+
+# Supabase CLI scratch: project ref, pooler URLs, CLI version.
+# Regenerated on every link and deploy.
+supabase/.temp/

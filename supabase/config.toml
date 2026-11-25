@@ -1,0 +1,17 @@
+# Supabase project settings the CLI reads when deploying.
+#
+# Deliberately minimal: this file is committed, so nothing secret
+# belongs in it. The draw token lives in Edge Function secrets and in
+# Vault, neither of which is a file in this repository.
+
+project_id = "xcayjyvmyjlccaphoyvw"
+
+[functions.run-draws]
+# Off because this function is called by the scheduler rather than by
+# a signed-in person, so there is no user JWT to verify. Leaving it on
+# would reject the cron job before the function ever ran.
+#
+# Nothing is left unguarded by this: run-draws checks the DRAW_SECRET
+# itself, in constant time, on either the apikey or Authorization
+# header, and returns 401 without it.
+verify_jwt = false
