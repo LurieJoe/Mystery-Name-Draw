@@ -75,6 +75,27 @@ check("something that is not a date is left alone",
   formatEmailDate("soon") === "soon");
 check("and neither is an empty one", formatEmailDate("") === "");
 
+// The three facts an invitation carries sit on their own lines, so
+// somebody reading on a phone can glance at them rather than parse a
+// sentence. Pinned, because the natural thing to write is a sentence.
+{
+  const body = invitationEmail({
+    ...personal, organizerName: "Dana", registrationDeadline: "December 11",
+    drawDate: "December 16", budget: "$25",
+  }).body;
+
+  check(
+    "an invitation puts each fact on its own line",
+    body.includes("Register by: December 11\nDraw date: December 16\nBudget: $25")
+  );
+
+  check(
+    "and not run together in a sentence",
+    !body.includes("The draw is on December 16. Budget")
+  );
+}
+
+
 for (const [name, email] of all) {
   check(`${name} has a subject`, email.subject.trim().length > 0);
   check(`${name} names the exchange in its subject`,

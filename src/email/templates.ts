@@ -165,8 +165,13 @@ export function invitationEmail(
           `what you write is a wishlist for whoever draws your name. ` +
           `They see it; you never find out who they are.`,
         ``,
-        `Register by ${details.registrationDeadline}. The draw is on ` +
-          `${details.drawDate}. Budget: ${details.budget}.`,
+        // Three separate facts, so three lines. Run together in a
+        // sentence they are something to parse; stacked they are
+        // something to glance at, which is what somebody does with an
+        // invitation on a phone.
+        `Register by: ${details.registrationDeadline}`,
+        `Draw date: ${details.drawDate}`,
+        `Budget: ${details.budget}`,
         ``,
         PERSONAL_LINK_WARNING,
       ],
