@@ -17,9 +17,13 @@ name: Keep Supabase awake
 
 on:
   schedule:
-    # 09:17 UTC every third day. Not on the hour: scheduled jobs pile up
-    # there and GitHub drops the overflow.
-    - cron: "17 9 */3 * *"
+    # Daily, not every third day. Supabase's own guidance is that a few
+    # requests *each day* over the previous week keep a project awake,
+    # and they do not publish the threshold, so a three-day gap is a
+    # guess with the whole app riding on it. A request a day costs
+    # nothing. Not on the hour: scheduled jobs pile up there and GitHub
+    # drops the overflow.
+    - cron: "17 9 * * *"
   workflow_dispatch:
 
 jobs:

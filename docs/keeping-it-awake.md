@@ -17,7 +17,7 @@ Two pingers, because one is a single point of failure:
 
 | | Runs on | Fails if |
 | --- | --- | --- |
-| GitHub Actions | This repo, every 3 days | You stop committing for 60 days, and GitHub disables the schedule |
+| GitHub Actions | This repo, daily at 09:17 UTC | You stop committing for 60 days, and GitHub disables the schedule |
 | An external cron | Somebody else's machine | That service lapses |
 
 Neither can take the other down, which is the point of having both.
@@ -124,11 +124,21 @@ card.
   - `Authorization: Bearer YOUR-PUBLISHABLE-KEY`
   - `Content-Type: application/json`
 - **Body** `{}`
-- **Schedule** every 3 days
+- **Save responses in job history** on. The response is
+  `{"awake": true, ...}` and holds nothing private, and when something
+  breaks you will want to see what came back.
+- **Schedule** every day at 21:00, about twelve hours from the
+  GitHub one, so the two pings are spread rather than together
 - **Notify on failure** on, to whatever address you read
 
-Set it to a different day from the GitHub one if the service lets you
-choose, so a bad day for one is not a bad day for both.
+Daily rather than every few days: Supabase's guidance is that a few
+requests *each day* over the previous week keep a project awake, and
+they do not publish the actual threshold. A wider gap is a guess with
+the whole app riding on it, and a request a day costs nothing.
+
+The header name is literally `apikey`: lowercase, no space. A form that
+lets you type `API Key` will happily send a header nothing is looking
+for.
 
 ## What failure looks like
 
