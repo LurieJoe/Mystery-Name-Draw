@@ -8,6 +8,8 @@ export default function CreatedStep() {
     setCurrentStep,
     copyLink,
     registrationLink,
+    allowOpenJoin,
+    changeOpenJoin,
   } = useExchangeContext();
 
   return (
@@ -55,13 +57,16 @@ export default function CreatedStep() {
         <label className="checkbox-inline">
       <input
         type="checkbox"
-        defaultChecked
+        checked={allowOpenJoin}
+        onChange={(e) => void changeOpenJoin(e.target.checked)}
       />
       Allow participants to invite others
     </label>
 
     <p className="helper-text">
-      Participants may share the registration link and invite additional people to join the exchange.
+      {allowOpenJoin
+        ? "Anyone with the registration link can join, so participants can pass it on."
+        : "Only the people you list can join. Anyone else following the link is told it is invitation only."}
     </p>
     </div>
     </div>

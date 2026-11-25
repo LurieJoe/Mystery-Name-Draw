@@ -7,7 +7,7 @@
  * workflow, or anywhere a browser can reach.
  */
 
-import { createRpc, type RpcCaller } from "./rpc";
+import { createRpc, type RpcCaller } from "./rpc.js";
 
 declare const __SUPABASE_URL__: string | undefined;
 declare const __SUPABASE_ANON_KEY__: string | undefined;

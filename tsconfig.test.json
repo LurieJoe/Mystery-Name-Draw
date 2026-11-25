@@ -16,6 +16,8 @@
     "src/exchange/restrictionNotices.ts",
     "src/exchange/types.ts",
     "src/router.ts",
-    "src/api/rpc.ts"
+    "src/api/rpc.ts",
+    "src/exchange/remote.ts",
+    "src/api/config.ts"
   ]
 }

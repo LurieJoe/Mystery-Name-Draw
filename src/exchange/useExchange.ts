@@ -14,6 +14,17 @@ import {
   removalOwners,
 } from "./restrictionNotices";
 import { routeUrl } from "../router";
+import { hasDatabase } from "../api/config";
+import {
+  createExchangeRemotely,
+  currentTimeZone,
+  fromOrganizerView,
+  organizerView,
+  rememberOrganizer,
+  rememberedOrganizer,
+  setOpenJoinRemotely,
+  toCreatePayload,
+} from "./remote";
 import {
   createInviteeId,
   isValidEmail,
@@ -46,6 +57,16 @@ export function useExchange() {
    * shut it from the page where they copy it.
    */
   const [allowOpenJoin, setAllowOpenJoin] = useState(true);
+
+  /*
+   * Set once the exchange exists in the database. Until then this is
+   * all in one browser, which is what it was before there was a
+   * database at all.
+   */
+  const [organizerToken, setOrganizerToken] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(false);
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
 const [currency, setCurrency] = useState("USD");
@@ -900,6 +921,159 @@ const [inviteEmail, setInviteEmail] = useState("");
       ? "Draw date"
       : "No reminders";
 
+  /**
+   * Create the exchange for real.
+   *
+   * Until this call there is nothing anywhere but this browser, which
+   * is why a registration link used to work only on the machine that
+   * made it. The code comes back from the database rather than being
+   * invented here, so the link and the row cannot disagree.
+   *
+   * A build with no database configured still works the way it always
+   * did: an exchange that lives in this tab. Saying nothing and doing
+   * nothing would be worse than either.
+   */
+  const createExchange = async () => {
+    if (!hasDatabase) {
+      setEventCode(generateEventCode());
+      return { ok: true as const, stored: false };
+    }
+
+    setSaving(true);
+    setSaveError(null);
+
+    try {
+      const created = await createExchangeRemotely(
+        toCreatePayload(buildExchangeSnapshot(), currentTimeZone())
+      );
+
+      setEventCode(created.eventCode);
+      setOrganizerToken(created.organizerToken);
+      rememberOrganizer({
+        eventCode: created.eventCode,
+        token: created.organizerToken,
+      });
+
+      // The ids the database gave each invitee replace the ones made
+      // up here, so restrictions and registrations line up with rows
+      // that exist rather than with local inventions.
+      setInvitees((previousInvitees) =>
+        previousInvitees.map((invitee) => {
+          const match = created.invitees.find(
+            (row) =>
+              row.email.toLowerCase() === invitee.email.toLowerCase()
+          );
+
+          return match ? { ...invitee, id: match.id } : invitee;
+        })
+      );
+
+      return { ok: true as const, stored: true };
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong creating the exchange.";
+
+      setSaveError(message);
+      return { ok: false as const, message };
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /**
+   * Come back to an exchange this browser made.
+   *
+   * Only the organizer's token can do this, and it is kept in local
+   * storage, which a cleared browser or a different device does not
+   * have. That is a real limit and the reason a management link needs
+   * to exist.
+   */
+  const restoreExchange = async () => {
+    if (!hasDatabase) {
+      return false;
+    }
+
+    const remembered = rememberedOrganizer();
+
+    if (!remembered) {
+      return false;
+    }
+
+    setRestoring(true);
+
+    try {
+      const restored = fromOrganizerView(
+        await organizerView(remembered.token)
+      );
+
+      setEventName(restored.eventName);
+      setEventCode(restored.eventCode);
+      setGiftBudget(restored.giftBudget);
+      setCurrency(restored.currency);
+      setNoGiftLimit(restored.noGiftLimit);
+      setRegistrationDeadline(restored.registrationDeadline);
+      setDrawDate(restored.drawDate);
+      setAllowOpenJoin(restored.allowOpenJoin);
+      setRemindBeforeRegistrationDeadline(
+        restored.remindBeforeRegistrationDeadline
+      );
+      setRemindBeforeDrawDate(restored.remindBeforeDrawDate);
+      setOrganizerName(restored.organizerName);
+      setOrganizerEmail(restored.organizerEmail);
+      setIncludeOrganizer(restored.includeOrganizer);
+      setInvitees(restored.invitees);
+      setRestrictions(
+        restored.restrictions.map((restriction) => ({
+          ownerId: restriction.ownerId,
+          otherId: restriction.otherId,
+          direction: restriction.direction as RestrictionDirection,
+        }))
+      );
+      setOrganizerToken(remembered.token);
+
+      return true;
+    } catch {
+      // A token for an exchange that no longer exists, or a project
+      // that is asleep. Starting fresh beats a page stuck on an error
+      // about something the person never asked for.
+      return false;
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  /**
+   * Who the registration link works for.
+   *
+   * Changed from the page where the organizer copies that link, which
+   * is where the thought occurs. The screen follows immediately and
+   * the database catches up; if it refuses, the screen goes back,
+   * because a checkbox that shows one thing while the exchange does
+   * another is worse than a checkbox that will not move.
+   */
+  const changeOpenJoin = async (allowed: boolean) => {
+    const previous = allowOpenJoin;
+
+    setAllowOpenJoin(allowed);
+
+    if (!hasDatabase || !organizerToken) {
+      return;
+    }
+
+    try {
+      await setOpenJoinRemotely(organizerToken, allowed);
+    } catch (error) {
+      setAllowOpenJoin(previous);
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "That could not be changed just now."
+      );
+    }
+  };
+
   const registrationLink = routeUrl(`/event/${eventCode}`);
 
   // One source for both the on-screen preview and the copy/email/text
@@ -1063,6 +1237,14 @@ const addInvitee = () => {
     markPendingAsInvited,
     allowOpenJoin,
     setAllowOpenJoin,
+    changeOpenJoin,
+    createExchange,
+    restoreExchange,
+    organizerToken,
+    saving,
+    saveError,
+    restoring,
+    hasDatabase,
     registerParticipant,
     updateRegistration,
     withdrawRegistration,

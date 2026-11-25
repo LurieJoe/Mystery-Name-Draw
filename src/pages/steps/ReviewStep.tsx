@@ -5,8 +5,6 @@ export default function ReviewStep() {
   const {
     eventName,
     setCurrentStep,
-    eventCode,
-    setEventCode,
     includeOrganizer,
     emailSubject,
     setEmailSubject,
@@ -14,12 +12,14 @@ export default function ReviewStep() {
     drawDate,
     formatDate,
     organizerParticipant,
-    generateEventCode,
     giftBudgetLabel,
     reminderSummary,
     invitees,
     activeRestrictions,
     formValid,
+    createExchange,
+    saving,
+    saveError,
   } = useExchangeContext();
 
   return (
@@ -133,6 +133,12 @@ export default function ReviewStep() {
         </p>
       )}
 
+      {saveError && (
+        <p className="validation-error">
+          {saveError} Nothing was saved, so you can try again.
+        </p>
+      )}
+
       <div className="wizard-navigation">
 
         <button
@@ -146,21 +152,25 @@ export default function ReviewStep() {
         <button
       type="button"
       className="continue-button"
-      disabled={!formValid}
-      onClick={() => {
-        if (!eventCode) {
-          setEventCode(generateEventCode());
-        }
-
+      disabled={!formValid || saving}
+      onClick={async () => {
         if (!emailSubject.trim()) {
           setEmailSubject(
             `You're Invited to Join ${eventName || "This Gift Exchange"}`
           );
         }
-        setCurrentStep(3);
+
+        // The event code now comes back from the database, so the step
+        // only advances once there is something to advance to: a link
+        // for an exchange that was never saved is a link to nothing.
+        const result = await createExchange();
+
+        if (result.ok) {
+          setCurrentStep(3);
+        }
       }}
     >
-      Create Gift Exchange
+      {saving ? "Creating\u2026" : "Create Gift Exchange"}
     </button>
 
       </div>

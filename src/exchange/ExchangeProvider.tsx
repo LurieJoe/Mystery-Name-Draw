@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { ExchangeContext } from "./context";
 import { useExchange } from "./useExchange";
 
@@ -10,6 +10,20 @@ import { useExchange } from "./useExchange";
  */
 export function ExchangeProvider({ children }: { children: ReactNode }) {
   const exchange = useExchange();
+  const restored = useRef(false);
+
+  // Once, on load, whichever route the person landed on: if this
+  // browser made an exchange, it should still be here afterwards.
+  // Before this, a reload lost everything, which is the whole reason
+  // the database exists.
+  useEffect(() => {
+    if (restored.current) {
+      return;
+    }
+
+    restored.current = true;
+    void exchange.restoreExchange();
+  }, [exchange]);
 
   return (
     <ExchangeContext.Provider value={exchange}>

@@ -26,6 +26,7 @@ import {
 import { ORGANIZER_ID, type Restriction } from "../exchange/types.js";
 import { shouldScrollToTop } from "../router.js";
 import { createRpc, RpcError } from "../api/rpc.js";
+import { fromOrganizerView, toCreatePayload } from "../exchange/remote.js";
 import {
   csvNamesForEditing,
   flipSurnameFirst,
@@ -741,6 +742,94 @@ console.log("\n8. Reading a pasted list");
 
   check("a non-JSON failure does not crash the parser", gatewayError instanceof RpcError);
   check("and reports its status", (gatewayError as RpcError).status === 502);
+}
+
+{
+  console.log("\n14. Between the app's shape and the database's");
+
+  const payload = toCreatePayload(
+    {
+      eventName: "  Office Secret Santa  ",
+      drawDate: "2026-12-16",
+      registrationDeadline: "2026-12-11",
+      giftBudget: " 25 ",
+      currency: "USD",
+      noGiftLimit: false,
+      remindBeforeRegistrationDeadline: true,
+      remindBeforeDrawDate: false,
+      organizer: { name: " Joe ", email: " joe@example.com ", participating: true },
+      invitees: [
+        { name: " Rowan ", email: " rowan@example.com " },
+        { name: "No address", email: "   " },
+      ],
+    },
+    "America/New_York"
+  );
+
+  check("what people type gets trimmed on the way out", payload.name === "Office Secret Santa" && payload.giftBudget === "25");
+  check("and so do the organizer's own fields", payload.organizer.email === "joe@example.com");
+  check(
+    "a half-typed invitee with no address is not sent",
+    payload.invitees.length === 1 && payload.invitees[0].email === "rowan@example.com",
+    JSON.stringify(payload.invitees)
+  );
+  check("the time zone travels with the exchange", payload.timeZone === "America/New_York");
+
+  // Coming back the other way.
+  const restored = fromOrganizerView({
+    exchange: {
+      name: "Office Secret Santa",
+      event_code: "ABC123",
+      gift_budget: "25",
+      currency: "USD",
+      no_gift_limit: false,
+      registration_deadline: "2026-12-11",
+      draw_date: "2026-12-16",
+      allow_open_join: false,
+      remind_before_registration_deadline: true,
+      remind_before_draw_date: false,
+      organizer_name: "Joe",
+      organizer_email: "joe@example.com",
+      organizer_participates: true,
+    },
+    invitees: [
+      { id: "org", name: "Joe", email: "joe@example.com", status: "Registered", is_organizer: true },
+      { id: "a", name: "Rowan", email: "rowan@example.com", status: "Registered", wishlist: "A book" },
+    ],
+    restrictions: [
+      { ownerId: "a", otherId: "b", direction: "give" },
+      { ownerId: "b", otherId: "a", direction: "give", setByOrganizer: true },
+    ],
+  });
+
+  check("the exchange comes back", restored.eventName === "Office Secret Santa" && restored.eventCode === "ABC123");
+  check("including whether it is invitation only", restored.allowOpenJoin === false);
+  check(
+    "the organizer is not listed among the invitees as well as in their own fields",
+    restored.invitees.length === 1 && restored.invitees[0].id === "a",
+    JSON.stringify(restored.invitees.map((i) => i.id))
+  );
+  check("what somebody wrote survives the round trip", restored.invitees[0].wishlist === "A book");
+
+  // The one that matters: a restriction the organizer set for somebody
+  // is honoured by the draw and must never appear on that person's own
+  // list, and this state is that list.
+  check(
+    "an organizer-set restriction does not come back as the person's own",
+    restored.restrictions.length === 1 && restored.restrictions[0].ownerId === "a",
+    JSON.stringify(restored.restrictions)
+  );
+
+  // A date column can arrive with a time on it depending on the driver.
+  check(
+    "a date is taken as a date however it arrives",
+    fromOrganizerView({ exchange: { draw_date: "2026-12-16T00:00:00+00:00" } }).drawDate === "2026-12-16"
+  );
+
+  check(
+    "an empty answer does not throw",
+    fromOrganizerView({}).eventName === "" && fromOrganizerView({}).invitees.length === 0
+  );
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
