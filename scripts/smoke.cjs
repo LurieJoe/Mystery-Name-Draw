@@ -329,6 +329,48 @@ check(
   ["Registration is closed"]
 );
 
+// An organizer who sets the draw a day after the deadline leaves no
+// restriction window. Neither screen may promise one.
+const noWindow = {
+  registrationDeadline: "2026-12-10",
+  drawDate: "2026-12-11",
+};
+
+check(
+  "RegisteredView when the dates leave no restriction window",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: {
+          ...registrationView,
+          exchange: { ...registrationView.exchange, ...noWindow },
+        },
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  ["too soon after", "matched at random", "Dana Whitlock"],
+  // The explanation and the checkboxes both have to go: describing
+  // how restrictions work and then saying they are off reads as a
+  // fault with the page.
+  ["preferences, not guarantees", "I would rather not buy for", "Mina Okafor"]
+);
+
+check(
+  "JoinForm when the dates leave no restriction window",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(JoinForm, {
+        preview: { ...exchangePreview, ...noWindow },
+        onJoin: () => {},
+        onCancel: () => {},
+      })
+    ),
+  ["too soon after", "matched at random"],
+  ["you can come back and say who you would rather not"]
+);
+
 // Without settings to reach a database, the page says so rather than
 // blaming the link the reader was sent.
 check(

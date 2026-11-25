@@ -1,3 +1,4 @@
+import { restrictionWindow } from "../exchange/restrictionWindow";
 import { useState } from "react";
 import { formatDate, giftBudgetLabel } from "../exchange/format";
 import { isValidEmail } from "../exchange/types";
@@ -44,6 +45,11 @@ export default function JoinForm({
   const [wishlist, setWishlist] = useState("");
   const [preferences, setPreferences] = useState("");
   const [attempted, setAttempted] = useState(false);
+
+  const restrictionsWindow = restrictionWindow(
+    preview.registrationDeadline,
+    preview.drawDate
+  );
 
   const nameMissing = !name.trim();
   const emailInvalid = !isValidEmail(email);
@@ -208,12 +214,27 @@ export default function JoinForm({
       </div>
 
       <p className="register-after">
-        Once registration closes on{" "}
-        {formatDate(preview.registrationDeadline)} you can come back
-        and say who you would rather not be matched with, right up
-        until the draw on {formatDate(preview.drawDate)}. Not sure?{" "}
-        <a href="#/faq">The questions people ask</a> covers how this
-        works.
+        {restrictionsWindow?.usable ? (
+          <>
+            Once registration closes on{" "}
+            {formatDate(preview.registrationDeadline)} you can come
+            back and say who you would rather not be matched with,
+            right up until the draw on{" "}
+            {formatDate(preview.drawDate)}.{" "}
+          </>
+        ) : (
+          /* The organizer set the draw too soon after the deadline
+             for a restriction window to exist. Promising one here
+             would be a promise this exchange cannot keep. */
+          <>
+            This exchange draws on{" "}
+            {formatDate(preview.drawDate)}, too soon after
+            registration closes for restrictions, so everyone is
+            matched at random.{" "}
+          </>
+        )}
+        Not sure? <a href="#/faq">The questions people ask</a> covers
+        how this works.
       </p>
     </>
   );

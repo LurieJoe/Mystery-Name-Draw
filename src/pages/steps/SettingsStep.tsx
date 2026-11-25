@@ -1,3 +1,4 @@
+import { restrictionWindow } from "../../exchange/restrictionWindow";
 import { useExchangeContext } from "../../exchange/context";
 
 /** Step 1: name, dates, budget, reminders, and organizer details. */
@@ -39,6 +40,10 @@ export default function SettingsStep() {
     showOrganizerErrors,
     setOrganizerTouched,
   } = useExchangeContext();
+
+  /* How long people actually get to set restrictions, which is not
+     the gap between the two dates: see restrictionWindow. */
+  const restrictionsWindow = restrictionWindow(registrationDeadline, drawDate);
 
   return (
     <>
@@ -149,6 +154,15 @@ export default function SettingsStep() {
       />
       </label>
 
+
+    </div>
+
+
+    </div>
+
+    {/* Outside the date row on purpose. Inside it, these share a
+        column with one date input and wrap to a 260px ribbon that
+        is taller than the field it describes. */}
       {registrationDeadlineInPast ? (
       <p className="validation-error">
         This draw date is less than 5 days away.
@@ -159,12 +173,25 @@ export default function SettingsStep() {
       <p className="validation-error">
         Registration deadline must occur on or before the draw date.
       </p>
+    ) : restrictionsWindow && !restrictionsWindow.usable ? (
+      /* Not an error: these dates are allowed, and an organizer who
+         wants a fast turnaround should get one. But the screens
+         participants see promise a restriction window, so they have
+         to be told it will not happen rather than finding out by
+         coming back to an empty page. */
+      <p className="helper-text date-note">
+        {restrictionsWindow.days === 0
+          ? "Drawing on the registration deadline leaves no time to set restrictions, so this exchange will not use them."
+          : "With one day between the deadline and the draw, there is no time to set restrictions: people are told restrictions have opened on the morning of the draw itself. This exchange will not use them."}{" "}
+        Move the draw date back by a day or two to turn restrictions on.
+      </p>
+    ) : restrictionsWindow && restrictionsWindow.tight ? (
+      <p className="helper-text date-note">
+        This leaves {restrictionsWindow.days} days to set restrictions. That works,
+        but anybody who does not read their email most days will miss
+        the window. Four days or more is comfortable.
+      </p>
     ) : null}
-
-    </div>
-
-
-    </div>
 
       <h3>Gift Budget</h3>
 

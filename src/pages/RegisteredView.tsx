@@ -1,3 +1,4 @@
+import { restrictionWindow } from "../exchange/restrictionWindow";
 import { useState } from "react";
 import { formatDate, giftBudgetLabel } from "../exchange/format";
 import type { RestrictionDirection } from "../exchange/types";
@@ -52,6 +53,11 @@ export default function RegisteredView({
   const [wishlist, setWishlist] = useState(me.wishlist ?? "");
   const [preferences, setPreferences] = useState(me.preferences ?? "");
   const [saved, setSaved] = useState(false);
+
+  const restrictionsWindow = restrictionWindow(
+    exchange.registrationDeadline,
+    exchange.drawDate
+  );
 
   const hasRestriction = (
     otherId: string,
@@ -197,6 +203,22 @@ export default function RegisteredView({
       </div>
 
       <h2>Who you would rather not be matched with</h2>
+
+      {!restrictionsWindow?.usable ? (
+        /* No window at all: the draw follows the deadline too closely.
+           Explaining how restrictions work and then saying they are
+           unavailable would read as a fault with this page rather
+           than a choice the organizer made. */
+        <p className="register-empty">
+          {exchange.name || "This exchange"} draws on{" "}
+          {formatDate(exchange.drawDate)}, which is too soon after
+          registration closes for anyone to set restrictions, so
+          everyone is matched at random. If that matters to you, ask{" "}
+          {exchange.organizerName || "the organizer"} to move the draw
+          date back a day or two.
+        </p>
+      ) : (
+        <>
       <p>
         These are preferences, not guarantees. The draw honors every
         one it can, but enough of them together can make a valid draw
@@ -240,6 +262,8 @@ export default function RegisteredView({
             {restrictionList("receive")}
           </section>
         </div>
+      )}
+        </>
       )}
 
       <h2>What happens next</h2>

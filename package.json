@@ -8,11 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "npm run smoke --silent && node scripts/render-preview.cjs",
-    "test:draw": "tsc -p tsconfig.test.json && node .tmp-test/draw/assignment.test.js",
+    "test:draw": "tsc -p tsconfig.test.json && node .tmp-test/draw/assignment.test.js && npm run test:window --silent",
     "smoke": "tsc -p tsconfig.smoke.json && node scripts/smoke.cjs",
     "check": "tsc -b && npm run check:css && npm run check:rpc && npm run test:draw && npm run smoke",
     "check:css": "node scripts/check-css.cjs",
-    "check:rpc": "node scripts/check-rpc.cjs"
+    "check:rpc": "node scripts/check-rpc.cjs",
+    "test:window": "node .tmp-test/exchange/restrictionWindow.test.js"
   },
   "dependencies": {
     "react": "^19.3.1",

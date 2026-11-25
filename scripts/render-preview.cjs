@@ -108,6 +108,23 @@ const Page = isStep
 const { ExchangeContext } = require(`${OUT}/exchange/context.js`);
 const { useExchange } = require(`${OUT}/exchange/useExchange.js`);
 
+/*
+ * Any further arguments override the fixture, as key=value. The dates
+ * matter most: several warnings only appear for date combinations the
+ * default fixture deliberately avoids.
+ *
+ *   node scripts/render-preview.cjs SettingsStep 1 drawDate=2026-12-11
+ */
+const overrides = Object.fromEntries(
+  process.argv
+    .slice(4)
+    .filter((arg) => arg.includes("="))
+    .map((arg) => {
+      const at = arg.indexOf("=");
+      return [arg.slice(0, at), arg.slice(at + 1)];
+    })
+);
+
 function Harness() {
   const exchange = useExchange();
 
@@ -150,6 +167,7 @@ function Harness() {
           { id: "b", name: "Mina Okafor", email: "mina@example.com", status: "Invited" },
           { id: "c", name: "Theo Barnes", email: "theo@example.com", status: "Invite Pending" },
         ],
+        ...overrides,
       },
     },
     // The register styles are scoped under .register-page, which lives
