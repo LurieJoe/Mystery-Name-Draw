@@ -62,6 +62,10 @@ done
 for suite in "$HERE"/tests/*.sql; do
   echo
   echo "== $(basename "$suite") =="
+  # Passes are printed as notices; anything else is a failure and has
+  # to survive. Piping through a filter that only kept NOTICE lines
+  # meant a suite could abort on an error and look like it had simply
+  # run fewer checks.
   psql "$DB_URL" -v ON_ERROR_STOP=1 -f "$suite" 2>&1 \
-    | sed -n 's/^psql:.*NOTICE:  //p'
+    | sed -e 's/^psql:.*NOTICE:  //' -e '/^[A-Z]* *$/d'
 done
