@@ -1,6 +1,7 @@
 import {
   MANAGEMENT_LINK_WARNING,
   PERSONAL_LINK_WARNING,
+  REMINDERS_NOTE,
   drawFailedEmail,
   drawReminderEmail,
   drawResultEmail,
@@ -82,6 +83,33 @@ for (const [name, email] of toOrganizer) {
     email.body.includes(MANAGEMENT_LINK_WARNING));
   check(`${name} signs off from Joe`,
     email.body.includes("Joe"));
+}
+
+/*
+ * Only the emails somebody can actually switch off offer to switch
+ * them off. Telling a person they can stop the email that tells them
+ * who they drew would be a promise this app does not keep.
+ */
+const SWITCHABLE = new Set([
+  "registration reminder", "registration closed", "draw reminder",
+]);
+
+for (const [name, email] of all) {
+  const offers = email.body.includes(REMINDERS_NOTE);
+
+  check(
+    SWITCHABLE.has(name)
+      ? `${name} says how to turn reminders off`
+      : `${name} does not offer to stop an email that arrives anyway`,
+    offers === SWITCHABLE.has(name)
+  );
+}
+
+for (const [name, email] of all) {
+  if (!email.body.includes(REMINDERS_NOTE)) continue;
+
+  check(`${name} says what still arrives`,
+    /draw happens/.test(email.body) && /sends you a message/.test(email.body));
 }
 
 /*

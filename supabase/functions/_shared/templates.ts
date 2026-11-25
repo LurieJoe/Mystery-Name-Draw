@@ -63,6 +63,28 @@ export const PERSONAL_LINK_WARNING =
   "change or delete anything there. So if you forward this email or " +
   "paste the link somewhere, you are handing all of that over.";
 
+/**
+ * What opting out does and does not stop.
+ *
+ * Said on the emails somebody can turn off, and on the page where
+ * they turn them off, in the same words both times. The point is that
+ * "unsubscribe" normally means silence, and here it does not: the two
+ * emails they registered in order to receive still arrive, and
+ * somebody who expects total silence would otherwise be surprised by
+ * the one that matters most.
+ */
+export const REMINDERS_NOTE =
+  "Do not want nudges like this one? Turn reminders off on your " +
+  "page. You will still be told when the draw happens and you have " +
+  "a name to buy for, and when somebody in the exchange sends you a " +
+  "message, because those are the ones you joined for.";
+
+/** The same, for the screen where the choice is made. */
+export const REMINDERS_OFF_CONFIRMATION =
+  "Reminders are off. You will still hear from us twice: when the " +
+  "draw happens and you have somebody to buy for, and when somebody " +
+  "sends you a message. Deadline nudges and updates stay off.";
+
 /** The same idea for the organizer, whose link does more. */
 export const MANAGEMENT_LINK_WARNING =
   "This link is how you manage this exchange, and it is the only way " +
@@ -133,6 +155,8 @@ export function registrationReminderEmail(
           `and nothing happens.`,
         ``,
         PERSONAL_LINK_WARNING,
+        ``,
+        REMINDERS_NOTE,
       ],
       PARTICIPANT_SIGNOFF
     ),
@@ -168,6 +192,8 @@ export function registrationClosedEmail(
           `make a draw impossible.`,
         ``,
         PERSONAL_LINK_WARNING,
+        ``,
+        REMINDERS_NOTE,
       ],
       PARTICIPANT_SIGNOFF
     ),
@@ -192,6 +218,8 @@ export function drawReminderEmail(
         details.link,
         ``,
         PERSONAL_LINK_WARNING,
+        ``,
+        REMINDERS_NOTE,
       ],
       PARTICIPANT_SIGNOFF
     ),
