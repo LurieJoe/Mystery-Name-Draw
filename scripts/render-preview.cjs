@@ -116,6 +116,7 @@ function Harness() {
         // Matching codes, or RegisterPage shows its "no exchange here"
         // notice instead of the form.
         eventCode: "ABC123",
+        managementLink: "https://mysterynamedraw.com/#/manage/" + "a".repeat(64),
         giftBudgetLabel: "$25 USD",
         drawDate: "2026-12-16",
         registrationDeadline: "2026-12-11",

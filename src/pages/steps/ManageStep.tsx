@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useExchangeContext } from "../../exchange/context";
 
 /** Step 5: registration status, event code, and templates. */
@@ -10,7 +11,10 @@ export default function ManageStep() {
     setRegistrationOpen,
     generateEventCode,
     exportExchange,
+    managementLink,
   } = useExchangeContext();
+
+  const [linkCopied, setLinkCopied] = useState(false);
 
   return (
       <div className="wizard-card">
@@ -95,6 +99,20 @@ export default function ManageStep() {
       >
         Save as Template
       </button>
+
+      {managementLink && (
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => {
+            void navigator.clipboard?.writeText(managementLink);
+            setLinkCopied(true);
+            setTimeout(() => setLinkCopied(false), 2000);
+          }}
+        >
+          {linkCopied ? "\u2713 Copied!" : "Copy Management Link"}
+        </button>
+      )}
     </div>
     </div>
 

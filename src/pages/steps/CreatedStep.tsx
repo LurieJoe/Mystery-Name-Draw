@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useExchangeContext } from "../../exchange/context";
 
 /** Step 3: confirmation and the registration link. */
@@ -10,7 +11,10 @@ export default function CreatedStep() {
     registrationLink,
     allowOpenJoin,
     changeOpenJoin,
+    managementLink,
   } = useExchangeContext();
+
+  const [managementCopied, setManagementCopied] = useState(false);
 
   return (
     <>
@@ -76,6 +80,40 @@ export default function CreatedStep() {
     <hr />
 
     <div className="tips-panel">
+
+    {managementLink && (
+      <div className="management-link">
+        <h3>Your way back in</h3>
+
+        <p>
+          This link opens this exchange on any device, and it is the
+          only thing that does. Save it somewhere you will find it
+          again. It is not emailed to you.
+        </p>
+
+        <div className="management-link-row">
+          <code>{managementLink}</code>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => {
+              void navigator.clipboard?.writeText(managementLink);
+              setManagementCopied(true);
+              setTimeout(() => setManagementCopied(false), 2000);
+            }}
+          >
+            {managementCopied ? "\u2713 Copied!" : "Copy"}
+          </button>
+        </div>
+
+        <p className="helper-text">
+          Treat it like a password: whoever opens it can manage this
+          exchange, rename it, remove people, and change the dates.
+          They still cannot see who drew whom, because nobody can.
+        </p>
+      </div>
+    )}
 
     <h3>Tips for a Successful Gift Exchange</h3>
 

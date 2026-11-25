@@ -990,12 +990,14 @@ const [inviteEmail, setInviteEmail] = useState("");
    * have. That is a real limit and the reason a management link needs
    * to exist.
    */
-  const restoreExchange = async () => {
+  const restoreExchange = async (tokenFromLink?: string) => {
     if (!hasDatabase) {
       return false;
     }
 
-    const remembered = rememberedOrganizer();
+    const remembered = tokenFromLink
+      ? { eventCode: "", token: tokenFromLink }
+      : rememberedOrganizer();
 
     if (!remembered) {
       return false;
@@ -1032,6 +1034,13 @@ const [inviteEmail, setInviteEmail] = useState("");
         }))
       );
       setOrganizerToken(remembered.token);
+
+      // Arriving by link counts as this browser knowing the exchange
+      // from now on, so the next visit needs no link.
+      rememberOrganizer({
+        eventCode: restored.eventCode,
+        token: remembered.token,
+      });
 
       return true;
     } catch {
@@ -1075,6 +1084,15 @@ const [inviteEmail, setInviteEmail] = useState("");
   };
 
   const registrationLink = routeUrl(`/event/${eventCode}`);
+
+  /*
+   * The way back in from anywhere. Empty until the exchange exists,
+   * and empty in a build with no database, where there is nothing to
+   * come back to.
+   */
+  const managementLink = organizerToken
+    ? routeUrl(`/manage/${organizerToken}`)
+    : "";
 
   // One source for both the on-screen preview and the copy/email/text
   // versions, so the wording cannot drift apart.
@@ -1241,6 +1259,7 @@ const addInvitee = () => {
     createExchange,
     restoreExchange,
     organizerToken,
+    managementLink,
     saving,
     saveError,
     restoring,

@@ -88,6 +88,21 @@ export function routeUrl(route: string) {
   return `${base}/#${route}`;
 }
 
+/**
+ * The organizer's token in /manage/TOKEN, or null.
+ *
+ * This is the one URL that is a credential: whoever opens it manages
+ * the exchange. It is read once, kept in this browser, and taken out
+ * of the address bar straight away, so it stops sitting in history and
+ * over the shoulder of whoever is next to you. The link itself still
+ * works, which is the point of having it.
+ */
+export function matchManageToken(route: string): string | null {
+  const match = route.match(/^\/manage\/([A-Za-z0-9]{32,128})\/?$/);
+
+  return match ? match[1] : null;
+}
+
 /** The event code in /event/CODE, or null for any other route. */
 export function matchEventCode(route: string): string | null {
   const match = route.match(/^\/event\/([A-Za-z0-9]+)\/?$/);

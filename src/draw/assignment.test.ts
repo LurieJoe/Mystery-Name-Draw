@@ -24,7 +24,7 @@ import {
   removalOwners,
 } from "../exchange/restrictionNotices.js";
 import { ORGANIZER_ID, type Restriction } from "../exchange/types.js";
-import { shouldScrollToTop } from "../router.js";
+import { matchManageToken, shouldScrollToTop } from "../router.js";
 import { createRpc, RpcError } from "../api/rpc.js";
 import { fromOrganizerView, toCreatePayload } from "../exchange/remote.js";
 import {
@@ -830,6 +830,26 @@ console.log("\n8. Reading a pasted list");
     "an empty answer does not throw",
     fromOrganizerView({}).eventName === "" && fromOrganizerView({}).invitees.length === 0
   );
+}
+
+{
+  console.log("\n15. The management link");
+
+  const token = "a".repeat(64);
+
+  check("a management route yields its token", matchManageToken(`/manage/${token}`) === token);
+  check("a trailing slash is fine", matchManageToken(`/manage/${token}/`) === token);
+  check("other routes are not management routes", matchManageToken("/create") === null);
+  check("nor is the registration route", matchManageToken("/event/ABC123") === null);
+
+  // The shape is a guard, not a check of the token itself: only the
+  // database can say whether one is real. It keeps obvious rubbish
+  // from being sent, and keeps a short or odd path from being treated
+  // as a credential at all.
+  check("something far too short is not taken for a token", matchManageToken("/manage/abc") === null);
+  check("nor is a path with a slash in the middle", matchManageToken(`/manage/${token}/extra`) === null);
+  check("nor one with characters a hex token cannot contain", matchManageToken(`/manage/${"a".repeat(60)}..//`) === null);
+  check("an empty route is not one either", matchManageToken("/") === null);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);
