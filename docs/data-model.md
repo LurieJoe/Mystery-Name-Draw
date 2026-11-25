@@ -98,9 +98,9 @@ link would error.
 Two ways out. Pay for the Pro plan, which is never paused, or keep the
 project awake. A scheduled GitHub Action that reads one row every few
 days costs nothing and uses the CI you already have, which is why
-`.github/workflows/keep-supabase-awake.yml` exists. It does nothing
-until the two repository secrets are set, so it is harmless to commit
-now.
+`.github/workflows/keep-supabase-awake.yml` exists. Setting that up,
+and the second pinger that covers its blind spot, is written out in
+`docs/keeping-it-awake.md`.
 
 It is worth knowing that this makes an unattended draw depend on a cron
 job staying green. If you would rather not carry that, the Pro plan is

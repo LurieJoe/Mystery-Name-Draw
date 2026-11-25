@@ -26,7 +26,7 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Read one row
+      - name: Knock on the database
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -36,24 +36,27 @@ jobs:
             exit 0
           fi
 
-          # A function call, not a table read: the tables deny anon by
-          # design, so a table read would 401 and prove nothing.
-          code=$(curl -sS -o /tmp/out.txt -w '%{http_code}' \
-            -X POST "$SUPABASE_URL/rest/v1/rpc/registration_view" \
+          # ping() exists for this. It touches no table and returns
+          # nobody's data, so the only thing it can tell you is whether
+          # the database answered, which is the only thing being asked.
+          code=$(curl -sS --max-time 30 -o /tmp/out.txt -w '%{http_code}' \
+            -X POST "$SUPABASE_URL/rest/v1/rpc/ping" \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             -H "Content-Type: application/json" \
-            --data '{"p_invitee_token":"keepalive-not-a-real-token"}')
+            --data '{}')
 
           echo "HTTP $code"
+          cat /tmp/out.txt
 
-          # The token is deliberately wrong, so the database is reached
-          # and answers. Anything in the 200s or 400s means it is awake;
-          # a 5xx or a refused connection means it is not.
-          if [ "$code" -ge 500 ] || [ "$code" -eq 000 ]; then
-            echo "Supabase did not answer. It may be paused."
-            cat /tmp/out.txt
+          # A paused project does not answer at all, so anything other
+          # than a healthy 200 with the answer in it is worth an email.
+          if [ "$code" != "200" ] || ! grep -q '"awake"' /tmp/out.txt; then
+            echo
+            echo "Supabase did not answer as expected. The project may be"
+            echo "paused, or the key may be wrong. Open the dashboard."
             exit 1
           fi
 
+          echo
           echo "Project is awake."
