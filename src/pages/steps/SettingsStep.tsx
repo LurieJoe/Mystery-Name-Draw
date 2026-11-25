@@ -240,7 +240,7 @@ export default function SettingsStep() {
 
     {/* Optional, and only meaningful alongside an amount, so it goes
         away with the amount it describes. */}
-    <div className="register-field budget-note">
+    <div className="budget-note">
       <label htmlFor="gift-budget-note">
         Second way of saying it (optional)
       </label>

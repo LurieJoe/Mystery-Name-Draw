@@ -1555,3 +1555,49 @@
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
+
+/* -------------------------------------------------------------- */
+/* The budget's second line.                                      */
+/*                                                                */
+/* Colours stated for both themes, as every other input on this   */
+/* screen does. Without them the field matches no rule at all and */
+/* falls through to the browser's own default, which renders dark */
+/* against a light page for anyone whose system is set that way.  */
+/* -------------------------------------------------------------- */
+
+.budget-note {
+  margin-top: 1rem;
+}
+
+.budget-note label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.budget-note input[type="text"] {
+  width: 100%;
+  max-width: 320px;
+  height: 48px;
+}
+
+.budget-note .helper-text {
+  margin-top: 0.5rem;
+}
+
+[data-theme="light"] .budget-note input[type="text"] {
+  color: #1e293b;
+  background: white;
+}
+
+[data-theme="dark"] .budget-note input[type="text"] {
+  color: #f3f4f6;
+  background: #111827;
+}
+
+/* Disabled by "No Gift Limit", and it has to look it: the note is
+   only ever a gloss on an amount. */
+.budget-note input[type="text"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
