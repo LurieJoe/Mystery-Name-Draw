@@ -212,6 +212,8 @@ export type RestoredExchange = {
   organizerInviteeId: string | null;
   /** The database's answer, which is the one that decides who may join. */
   registrationOpen: boolean;
+  /** Whether the two ends of an assignment may write to each other. */
+  messagingEnabled: boolean;
 };
 
 const str = (value: unknown, fallback = "") =>
@@ -295,6 +297,7 @@ export function fromOrganizerView(
     organizerInviteeId,
 
     registrationOpen: bool(view.registrationOpen, true),
+    messagingEnabled: bool(exchange.messaging_enabled, true),
   };
 }
 
@@ -448,5 +451,15 @@ export async function updateExchangeRemotely(
   return rpc<Record<string, unknown>>("update_exchange", {
     p_organizer_token: organizerToken,
     p_payload: payload,
+  });
+}
+
+export async function setMessagingEnabledRemotely(
+  organizerToken: string,
+  enabled: boolean
+) {
+  return rpc<Record<string, unknown>>("set_messaging_enabled", {
+    p_organizer_token: organizerToken,
+    p_enabled: enabled,
   });
 }

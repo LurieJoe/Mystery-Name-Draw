@@ -89,7 +89,11 @@ const STEPS = [
   [
     5,
     "ManageStep",
-    ["Manage Exchange", "Who the registration link works for"],
+    [
+      "Manage Exchange",
+      "Who the registration link works for",
+      "Messages between participants",
+    ],
   ],
   [6, "ValidationStep", "Not enough participants"],
 ];
@@ -239,6 +243,47 @@ for (const [name, needles, forbidden] of [
     forbidden
   );
 }
+
+// The organizer's one lever over messaging. Off for everybody or not
+// at all: a per-person mute would single somebody out, and the
+// organizer is the only person who can see every pairing.
+const MessagingSetting = require(`${OUT}/pages/steps/MessagingSetting.js`).default;
+
+function messaging(enabled) {
+  return () =>
+    renderToStaticMarkup(
+      React.createElement(
+        ExchangeContext.Provider,
+        {
+          value: {
+            messagingEnabled: enabled,
+            changeMessagingEnabled: async () => ({ ok: true }),
+          },
+        },
+        React.createElement(MessagingSetting)
+      )
+    );
+}
+
+check(
+  "messaging on says what people can do",
+  messaging(true),
+  [
+    "Nobody learns who their own giver is",
+    // The box has to agree with the setting, not just the words
+    // underneath it.
+    '<input type="checkbox" checked=""/>',
+  ],
+  // Switching it off is not the same as deleting what was written.
+  ["Messaging is off"]
+);
+
+check(
+  "and switching it off says what happens to what was already sent",
+  messaging(false),
+  ["Messaging is off for everyone", "stays readable", '<input type="checkbox"/>'],
+  ['<input type="checkbox" checked=""/>']
+);
 
 // Editing an exchange that exists. The button used to say Create and
 // mean it, which from "Edit Exchange" on the manage screen built a

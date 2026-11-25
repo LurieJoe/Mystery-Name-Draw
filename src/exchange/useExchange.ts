@@ -30,6 +30,7 @@ import {
   removeInviteeRemotely,
   sendInvitationsRemotely,
   setOrganizerRestrictionRemotely,
+  setMessagingEnabledRemotely,
   setRegistrationOpenRemotely,
   updateExchangeRemotely,
   updateInviteeRemotely,
@@ -87,6 +88,11 @@ const [currentStep, setCurrentStep] = useState(1);
 const [currency, setCurrency] = useState("USD");
 const [eventCode, setEventCode] = useState("");
 const [registrationOpen, setRegistrationOpen] = useState(true);
+
+  // On by default, as the column is. The organizer can switch it off
+  // for the whole exchange, which is blunt on purpose: a per-person
+  // mute would be a way of telling one person apart from the rest.
+  const [messagingEnabled, setMessagingEnabled] = useState(true);
 const [includeOrganizer, setIncludeOrganizer] =
   useState(true);
 const [organizerTouched, setOrganizerTouched] = useState(false);
@@ -508,6 +514,43 @@ const [inviteEmail, setInviteEmail] = useState("");
       ...previousNotices,
       removalNotice(owners, records.length, giverName, receiverName),
     ]);
+  };
+
+  /**
+   * Let the two ends of an assignment write to each other, or stop it.
+   *
+   * Switching it off leaves every message that has already been sent
+   * readable. It closes the way in, not the record: deleting what
+   * people wrote to each other is a different and much larger thing
+   * than deciding the channel should not have been open.
+   */
+  const changeMessagingEnabled = async (enabled: boolean) => {
+    if (!hasDatabase || !organizerToken) {
+      setMessagingEnabled(enabled);
+      return { ok: true as const };
+    }
+
+    const previous = messagingEnabled;
+
+    setMessagingEnabled(enabled);
+    setSaveError(null);
+
+    try {
+      await setMessagingEnabledRemotely(organizerToken, enabled);
+
+      return { ok: true as const };
+    } catch (error) {
+      setMessagingEnabled(previous);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "That couldn't be changed just now.";
+
+      setSaveError(message);
+
+      return { ok: false as const, message };
+    }
   };
 
   /**
@@ -1334,6 +1377,7 @@ const [inviteEmail, setInviteEmail] = useState("");
       // had passed left the database saying closed and this screen
       // saying open.
       setRegistrationOpen(restored.registrationOpen);
+      setMessagingEnabled(restored.messagingEnabled);
       setRestrictions(
         restored.restrictions.map((restriction) => ({
           ownerId: restriction.ownerId,
@@ -1645,6 +1689,8 @@ const addInvitee = async () => {
     removePairing,
     removeInvitee,
     invitationCounts,
+    messagingEnabled,
+    changeMessagingEnabled,
     changeRegistrationOpen,
     changeEventCode,
     saveExchange,

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MessagingSetting from "./MessagingSetting";
 import OpenJoinSetting from "./OpenJoinSetting";
 import SendInvitations from "./SendInvitations";
 import { useExchangeContext } from "../../exchange/context";
@@ -35,6 +36,10 @@ export default function ManageStep() {
         <h3>Who the registration link works for</h3>
 
         <OpenJoinSetting />
+
+        <h3>Messages between participants</h3>
+
+        <MessagingSetting />
 
         <hr />
 
