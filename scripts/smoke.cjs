@@ -68,7 +68,19 @@ const STEPS = [
   [
     1,
     "SettingsStep",
-    ["Gift Exchange Settings", "Step 1 of 3", "Your Name"],
+    [
+      "Gift Exchange Settings",
+      "Step 1 of 3",
+      "Your Name",
+      // Every currency the dropdown offers needs a symbol in two
+      // other places, so the list itself is worth pinning.
+      "USD ($)",
+      "CAD ($)",
+      "GBP (£)",
+      "EUR (€)",
+      "AUD ($)",
+      "BRL (R$)",
+    ],
     // Required-field messages wait until the organizer has typed.
     ["Required because you are in the exchange"],
   ],

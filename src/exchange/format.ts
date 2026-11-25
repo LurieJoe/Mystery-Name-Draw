@@ -14,6 +14,7 @@ export const currencySymbols: Record<string, string> = {
   GBP: "£",
   EUR: "€",
   AUD: "$",
+  BRL: "R$",
 };
 
 /**

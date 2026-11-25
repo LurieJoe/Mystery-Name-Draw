@@ -444,6 +444,18 @@ begin
   perform assert('and an empty budget reads as Not set',
     gift_budget_label(v_exchange_id) = 'Not set');
 
+  -- Every currency the settings screen offers has a symbol here, or
+  -- the invitation prints the amount with nothing in front of it.
+  update exchanges set gift_budget = '50' where id = v_exchange_id;
+
+  update exchanges set currency = 'BRL' where id = v_exchange_id;
+  perform assert('the Brazilian real has its symbol',
+    gift_budget_label(v_exchange_id) = 'R$50 BRL');
+
+  update exchanges set currency = 'EUR' where id = v_exchange_id;
+  perform assert('and so do the others',
+    gift_budget_label(v_exchange_id) = '€50 EUR');
+
   raise notice '';
   raise notice 'All inviting checks passed.';
 end;
