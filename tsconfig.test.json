@@ -20,6 +20,8 @@
     "src/exchange/remote.ts",
     "src/api/config.ts",
     "src/exchange/restrictionWindow.ts",
-    "src/exchange/restrictionWindow.test.ts"
+    "src/exchange/restrictionWindow.test.ts",
+    "src/email/templates.ts",
+    "src/email/templates.test.ts"
   ]
 }

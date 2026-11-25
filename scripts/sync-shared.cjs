@@ -25,6 +25,10 @@ const COPIES = [
     from: "src/draw/assignment.ts",
     to: "supabase/functions/_shared/assignment.ts",
   },
+  {
+    from: "src/email/templates.ts",
+    to: "supabase/functions/_shared/templates.ts",
+  },
 ];
 
 const BANNER = (from) =>
