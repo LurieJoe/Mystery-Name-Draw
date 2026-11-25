@@ -20,6 +20,9 @@ import {
   clearRestrictionRemotely,
   fetchAssignment,
   fetchRegistration,
+  fetchThread,
+  markThreadRead,
+  sendMessageRemotely,
   forgetInvitee,
   joinExchange,
   previewExchange,
@@ -34,6 +37,8 @@ import type {
   Assignment,
   ExchangePreview,
   RegistrationView,
+  Thread,
+  ThreadRole,
 } from "./registration.js";
 
 export type RegistrationState =
@@ -92,6 +97,15 @@ export function useRegistration(eventCode: string) {
    * than on every visit by everybody.
    */
   const [assignment, setAssignment] = useState<Assignment | null>(null);
+
+  /*
+   * Both threads, keyed by which side of them this person is on.
+   * Somebody is usually in two: writing to the person they drew, and
+   * writing to whoever drew them.
+   */
+  const [threads, setThreads] = useState<
+    Partial<Record<ThreadRole, Thread>>
+  >({});
 
   const state: RegistrationState =
     !hasDatabase
@@ -183,6 +197,31 @@ export function useRegistration(eventCode: string) {
       .catch(() => {
         // The page is still useful without it, and the email the
         // person followed to get here says what it was for.
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [drawn, eventCode]);
+
+  useEffect(() => {
+    if (!drawn) return;
+
+    const token = rememberedInvitee(eventCode);
+
+    if (!token) return;
+
+    let alive = true;
+
+    void Promise.all([
+      fetchThread(token, "giver"),
+      fetchThread(token, "receiver"),
+    ])
+      .then(([giver, receiver]) => {
+        if (alive) setThreads({ giver, receiver });
+      })
+      .catch(() => {
+        // The rest of the page still works without them.
       });
 
     return () => {
@@ -284,6 +323,36 @@ export function useRegistration(eventCode: string) {
     [act, eventCode]
   );
 
+  const sendMessage = useCallback(
+    (as: ThreadRole, body: string) =>
+      act(async () => {
+        const token = rememberedInvitee(eventCode);
+
+        if (!token) throw new Error(LOST_TOKEN);
+
+        const thread = await sendMessageRemotely(token, as, body);
+
+        setThreads((previous) => ({ ...previous, [as]: thread }));
+      }),
+    [act, eventCode]
+  );
+
+  /*
+   * Marking read is deliberately fire-and-forget. It decides whether
+   * a notification goes out later, not what is on screen, and a
+   * failure should not interrupt somebody who is reading.
+   */
+  const readThread = useCallback(
+    (as: ThreadRole) => {
+      const token = rememberedInvitee(eventCode);
+
+      if (!token) return;
+
+      void markThreadRead(token, as).catch(() => {});
+    },
+    [eventCode]
+  );
+
   const withdraw = useCallback(
     () =>
       act(async () => {
@@ -315,6 +384,9 @@ export function useRegistration(eventCode: string) {
     save,
     toggleRestriction,
     setReminders,
+    threads,
+    sendMessage,
+    readThread,
     withdraw,
   };
 }

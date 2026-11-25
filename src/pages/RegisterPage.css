@@ -260,3 +260,111 @@
 .assignment-note {
   white-space: pre-wrap;
 }
+
+/* -------------------------------------------------------------- */
+/* Messages between the two ends of one assignment.               */
+/*                                                                */
+/* Two of these sit on the page, so each one is boxed: without a   */
+/* frame the second thread reads as a continuation of the first,   */
+/* which is exactly the confusion that would make somebody send   */
+/* a hint to the wrong person.                                    */
+/* -------------------------------------------------------------- */
+
+.register-page .thread {
+  margin: 0 0 1.75rem;
+  padding: 1.25rem 1.5rem;
+
+  border: 1px solid var(--border);
+  border-radius: 14px;
+
+  background: #fbfbfc;
+}
+
+.register-page .thread h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.thread-messages {
+  margin: 1rem 0 1.25rem;
+  padding: 0;
+  list-style: none;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.thread-messages li {
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  max-width: 85%;
+}
+
+/* Yours lean right and carry the accent; theirs stay left and plain.
+   Shape and color both, so the thread still reads for anybody who
+   cannot tell the two tints apart. */
+.thread-messages li.thread-you {
+  align-self: flex-end;
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  border-bottom-right-radius: 4px;
+}
+
+.thread-messages li.thread-them {
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.thread-who {
+  margin: 0 0 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.thread-when {
+  font-weight: 400;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.thread-body {
+  margin: 0;
+  /* Somebody typing a wishlist in a message will use line breaks,
+     and they are part of what they wrote. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.register-page .thread-compose {
+  margin-bottom: 0.75rem;
+}
+
+.thread-send {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.thread-send button {
+  padding: 0.6rem 1.4rem;
+}
+
+@media (max-width: 480px) {
+  .register-page .thread {
+    padding: 1rem 1.1rem;
+  }
+
+  .thread-messages li {
+    max-width: 100%;
+  }
+}

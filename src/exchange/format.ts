@@ -52,3 +52,32 @@ export function giftBudgetLabel(budget: {
     budget.currency
   }`;
 }
+
+/**
+ * When a message was sent, written the way a chat writes it.
+ *
+ * Unlike formatDate above, this one hands the whole string to the
+ * Date constructor on purpose: a message carries a full timestamp
+ * with a zone, so there is nothing to misread.
+ */
+export function formatMessageTime(at: string): string {
+  const when = new Date(at);
+
+  if (Number.isNaN(when.getTime())) return "";
+
+  const clock = when.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  if (when.toDateString() === new Date().toDateString()) {
+    return clock;
+  }
+
+  const day = when.toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+  });
+
+  return `${day}, ${clock}`;
+}

@@ -180,6 +180,75 @@ export async function fetchAssignment(
   });
 }
 
+// --------------------------------------------------------------------
+// Messages
+//
+// Two threads, and which one you are in changes what you are told.
+// As the giver you are writing to somebody you know, so you see their
+// name. As the receiver you are writing to whoever drew you, and that
+// person stays "Your Giver" forever - the whole point of the app is
+// that you never find out.
+// --------------------------------------------------------------------
+
+export type ThreadRole = "giver" | "receiver";
+
+export type ThreadMessage = {
+  id: string;
+  /** Which side of the thread this sits on, for styling. */
+  from: "you" | "them";
+  /** What the sender is called: "You", a name, or "Your Giver". */
+  fromLabel: string;
+  body: string;
+  at: string;
+};
+
+export type Thread = {
+  /** False before the draw: nobody to talk to yet. */
+  available: boolean;
+  /**
+   * Whether the organizer has left messaging switched on. Absent on a
+   * database that predates 0015, and read as true there, so the screen
+   * behaves exactly as it did before the migration runs.
+   */
+  canSend?: boolean;
+  /** Their name if you drew them, null if they drew you. */
+  withName?: string | null;
+  withLabel?: string;
+  messages: ThreadMessage[];
+};
+
+export async function fetchThread(
+  inviteeToken: string,
+  as: ThreadRole
+): Promise<Thread> {
+  return rpc<Thread>("my_thread", {
+    p_invitee_token: inviteeToken,
+    p_as: as,
+  });
+}
+
+export async function sendMessageRemotely(
+  inviteeToken: string,
+  as: ThreadRole,
+  body: string
+): Promise<Thread> {
+  return rpc<Thread>("send_message", {
+    p_invitee_token: inviteeToken,
+    p_as: as,
+    p_body: body,
+  });
+}
+
+export async function markThreadRead(
+  inviteeToken: string,
+  as: ThreadRole
+): Promise<void> {
+  await rpc<unknown>("mark_thread_read", {
+    p_invitee_token: inviteeToken,
+    p_as: as,
+  });
+}
+
 export async function setRemindersRemotely(
   inviteeToken: string,
   wanted: boolean

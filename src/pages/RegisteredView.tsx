@@ -1,3 +1,4 @@
+import MessageThread from "./MessageThread";
 import { restrictionWindow } from "../exchange/restrictionWindow";
 import { useState } from "react";
 import { REMINDERS_OFF_CONFIRMATION } from "../email/templates";
@@ -6,6 +7,8 @@ import type { RestrictionDirection } from "../exchange/types";
 import type {
   Assignment,
   RegistrationView,
+  Thread,
+  ThreadRole,
 } from "../exchange/registration";
 import "./RegisterPage.css";
 
@@ -31,15 +34,19 @@ const PREFERENCES_PLACEHOLDER =
 export default function RegisteredView({
   view,
   assignment,
+  threads,
   busy,
   error,
   onSave,
   onToggleRestriction,
   onSetReminders,
+  onSendMessage,
+  onReadThread,
   onWithdraw,
 }: {
   view: RegistrationView;
   assignment?: Assignment | null;
+  threads?: Partial<Record<ThreadRole, Thread>>;
   busy?: boolean;
   error?: string | null;
   onSave: (fields: {
@@ -53,6 +60,8 @@ export default function RegisteredView({
     on: boolean
   ) => void;
   onSetReminders: (wanted: boolean) => void;
+  onSendMessage?: (as: ThreadRole, body: string) => void;
+  onReadThread?: (as: ThreadRole) => void;
   onWithdraw: () => void;
 }) {
   const { me, others, myRestrictions, exchange } = view;
@@ -61,6 +70,19 @@ export default function RegisteredView({
   const [wishlist, setWishlist] = useState(me.wishlist ?? "");
   const [preferences, setPreferences] = useState(me.preferences ?? "");
   const [saved, setSaved] = useState(false);
+
+  /*
+   * Busy is a fact about the page, not about one thread, so sending
+   * in either one would otherwise put "Sending..." on both buttons.
+   * Remembering which one was used narrows it to the right button; it
+   * needs no clearing, since busy going false ends it either way.
+   */
+  const [sendingAs, setSendingAs] = useState<ThreadRole | null>(null);
+
+  const sendIn = (as: ThreadRole) => (body: string) => {
+    setSendingAs(as);
+    onSendMessage?.(as, body);
+  };
 
   const restrictionsWindow = restrictionWindow(
     exchange.registrationDeadline,
@@ -175,6 +197,35 @@ export default function RegisteredView({
             </>
           )}
         </section>
+      )}
+
+      {exchange.drawn && (threads?.giver?.available ||
+        threads?.receiver?.available) && (
+        <>
+          <h2>Messages</h2>
+          <p className="helper-text">
+            Two separate conversations, and neither one tells anybody
+            who drew whom.
+          </p>
+
+          <MessageThread
+            as="giver"
+            thread={threads?.giver}
+            busy={busy && sendingAs === "giver"}
+            onSend={sendIn("giver")}
+            onRead={() => onReadThread?.("giver")}
+          />
+
+          <MessageThread
+            as="receiver"
+            thread={threads?.receiver}
+            busy={busy && sendingAs === "receiver"}
+            onSend={sendIn("receiver")}
+            onRead={() => onReadThread?.("receiver")}
+          />
+
+          <hr />
+        </>
       )}
 
       <h2>Your wishlist and preferences</h2>

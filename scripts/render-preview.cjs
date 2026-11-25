@@ -120,11 +120,53 @@ const REGISTRATION_PROPS = {
           restrictionsOpen: false,
         }
       : registrationView,
+    threads: afterTheDraw
+      ? {
+          giver: {
+            available: true,
+            withName: "Teo Vasquez",
+            withLabel: "Teo Vasquez",
+            messages: [
+              {
+                id: "m1",
+                from: "you",
+                fromLabel: "You",
+                body: "Any colors you'd rather avoid?",
+                at: "2026-12-14T15:04:00Z",
+              },
+              {
+                id: "m2",
+                from: "them",
+                fromLabel: "Teo Vasquez",
+                body:
+                  "Nothing orange, please. And the chopping board can be any size.",
+                at: "2026-12-14T16:20:00Z",
+              },
+            ],
+          },
+          receiver: {
+            available: true,
+            withName: null,
+            withLabel: "Your Giver",
+            messages: [
+              {
+                id: "m3",
+                from: "them",
+                fromLabel: "Your Giver",
+                body: "Is the bakery voucher still a good idea?",
+                at: "2026-12-14T17:00:00Z",
+              },
+            ],
+          },
+        }
+      : {},
     busy: false,
     error: null,
     onSave: () => {},
     onToggleRestriction: () => {},
     onSetReminders: () => {},
+    onSendMessage: () => {},
+    onReadThread: () => {},
     onWithdraw: () => {},
   },
   JoinForm: {

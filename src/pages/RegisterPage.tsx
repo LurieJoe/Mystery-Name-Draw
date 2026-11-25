@@ -25,6 +25,7 @@ export default function RegisterPage({
   const {
     state,
     assignment,
+    threads,
     busy,
     error,
     retry,
@@ -32,6 +33,8 @@ export default function RegisterPage({
     save,
     toggleRestriction,
     setReminders,
+    sendMessage,
+    readThread,
     withdraw,
   } = useRegistration(eventCode);
 
@@ -56,11 +59,14 @@ export default function RegisterPage({
           <RegisteredView
             view={state.view}
             assignment={assignment}
+            threads={threads}
             busy={busy}
             error={error}
             onSave={save}
             onToggleRestriction={toggleRestriction}
             onSetReminders={setReminders}
+            onSendMessage={sendMessage}
+            onReadThread={readThread}
             onWithdraw={withdraw}
           />
         )}

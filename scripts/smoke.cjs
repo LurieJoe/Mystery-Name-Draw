@@ -245,6 +245,7 @@ const {
 } = require("./fixtures/registration.cjs");
 
 const JoinForm = require(`${OUT}/pages/JoinForm.js`).default;
+const MessageThread = require(`${OUT}/pages/MessageThread.js`).default;
 
 check(
   "RegisteredView (coming back to your own page)",
@@ -386,6 +387,129 @@ check(
     ),
   ["The draw has happened"],
   ["You're buying for"]
+);
+
+// Messaging. Two threads on one page, and the whole point of the app
+// rests on the second one never naming anybody: a receiver writes to
+// "Your Giver" and that is all they are ever told. These checks exist
+// to fail if a name ever reaches that half of the screen.
+const giverThread = {
+  available: true,
+  withName: "Teo Vasquez",
+  withLabel: "Teo Vasquez",
+  messages: [
+    {
+      id: "m1",
+      from: "you",
+      fromLabel: "You",
+      body: "Any colors you'd rather avoid?",
+      at: "2026-12-14T15:04:00Z",
+    },
+    {
+      id: "m2",
+      from: "them",
+      fromLabel: "Teo Vasquez",
+      body: "Nothing orange, please.",
+      at: "2026-12-14T16:20:00Z",
+    },
+  ],
+};
+
+const receiverThread = {
+  available: true,
+  withName: null,
+  withLabel: "Your Giver",
+  messages: [
+    {
+      id: "m3",
+      from: "them",
+      fromLabel: "Your Giver",
+      body: "Is the bakery voucher still a good idea?",
+      at: "2026-12-14T17:00:00Z",
+    },
+  ],
+};
+
+check(
+  "both threads appear once the draw has run",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: drawnView,
+        assignment: { name: "Teo Vasquez" },
+        threads: { giver: giverThread, receiver: receiverThread },
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onSetReminders: () => {},
+        onSendMessage: () => {},
+        onReadThread: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  [
+    "Messages with Teo Vasquez",
+    "Messages with your giver",
+    "Nothing orange, please.",
+    "Is the bakery voucher still a good idea?",
+    // The giver's half says plainly that writing does not give them away.
+    "nothing you send here changes that",
+  ],
+  // Nothing anywhere may hint at who the giver is.
+  ["Your Giver is", "your giver is"]
+);
+
+check(
+  "the half you write to your giver in never names a person",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(MessageThread, {
+        as: "receiver",
+        thread: receiverThread,
+        onSend: () => {},
+        onRead: () => {},
+      })
+    ),
+  ["Messages with your giver", "Write to your giver", "Your Giver"],
+  // The one name in the fixture must not appear on this side at all.
+  ["Teo Vasquez"]
+);
+
+check(
+  "an organizer who switched messaging off takes the composer with it",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(MessageThread, {
+        as: "giver",
+        thread: { ...giverThread, canSend: false },
+        onSend: () => {},
+        onRead: () => {},
+      })
+    ),
+  // The conversation stays readable; only the way in closes.
+  ["Nothing orange, please.", "Messages are switched off"],
+  ["Write to Teo Vasquez", ">Send<"]
+);
+
+check(
+  "and there are no threads to show before the draw",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: registrationView,
+        threads: {
+          giver: { available: false, messages: [] },
+          receiver: { available: false, messages: [] },
+        },
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onSetReminders: () => {},
+        onSendMessage: () => {},
+        onReadThread: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  [],
+  ["Messages with", "Write to your giver"]
 );
 
 // An organizer who sets the draw a day after the deadline leaves no

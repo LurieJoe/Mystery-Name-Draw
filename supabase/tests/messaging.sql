@@ -205,7 +205,20 @@ begin
     perform assert('switching messaging off stops it', true);
   end;
 
+  -- And the page is told, so it can take the composer away rather than
+  -- offering a Send button that is going to raise.
+  perform assert('a thread reports that messaging is off',
+    (my_thread(v_joe_token, 'giver') ->> 'canSend')::boolean = false
+    and (my_thread(v_evelyn_token, 'receiver') ->> 'canSend')::boolean = false);
+
+  perform assert('and the conversation is still readable',
+    jsonb_array_length(my_thread(v_joe_token, 'giver') -> 'messages') = 2);
+
   perform set_messaging_enabled(v_organizer_token, true);
+
+  perform assert('and it reports it is on again',
+    (my_thread(v_joe_token, 'giver') ->> 'canSend')::boolean);
+
   perform send_message(v_joe_token, 'giver', 'Thanks, that helps.');
   perform assert('and switching it back on restores it',
     jsonb_array_length(my_thread(v_joe_token, 'giver') -> 'messages') = 3);
