@@ -279,11 +279,11 @@ const LOST_TOKEN =
 function messageFor(caught: unknown): string {
   if (caught instanceof RpcError) {
     if (caught.unreachable) {
-      return "Could not reach Mystery Name Draw just now. Check your connection and try again.";
+      return "Couldn't reach Mystery Name Draw just now. Check your connection and try again.";
     }
 
     if (caught.code === NOT_FOUND) {
-      return "That exchange could not be found. Check the link and try again.";
+      return "That exchange couldn't be found. Check the link and try again.";
     }
 
     return caught.message;

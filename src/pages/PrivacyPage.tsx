@@ -13,27 +13,27 @@ export default function PrivacyPage() {
 
         <p className="content-lede">
           A plain-language account of what this site does with your
-          information. It is short, because the site does very little.
+          information. It's short, because the site does very little.
         </p>
 
         <h2>The short version</h2>
         <p>
-          There are no accounts and no passwords. There is no
+          There are no accounts and no passwords. There's no
           advertising, no tracking, and no analytics. Nothing you type is
           sold or shared with anyone.
         </p>
 
-        <h2>What is stored today</h2>
+        <h2>What's stored today</h2>
         <p>
           Nothing. At the moment Mystery Name Draw runs entirely in your
           browser: an exchange you build lives in that browser tab and is
-          gone when you close it. Nothing is sent to us, because there is
+          gone when you close it. Nothing is sent to us, because there's
           nowhere yet to send it.
         </p>
         <p>
           This will change when participant registration arrives. When it
           does, this page will be updated before the feature goes live,
-          and it will say exactly what is kept and for how long.
+          and it'll say exactly what's kept and for how long.
         </p>
 
         <h2>What will be stored, once registration works</h2>
@@ -53,8 +53,8 @@ export default function PrivacyPage() {
           </li>
         </ul>
         <p>
-          That is all of it. There is no reason for this site to know
-          anything else about you, so it will not ask.
+          That's all of it. There's no reason for this site to know
+          anything else about you, so it won't ask.
         </p>
 
         <h2>Email</h2>
@@ -70,19 +70,19 @@ export default function PrivacyPage() {
         <p>
           The site is served by GitHub Pages. Like any web host, GitHub
           records standard request information such as IP addresses in
-          its own server logs. That is outside our control and is covered
-          by GitHub&rsquo;s privacy policy.
+          its own server logs. That's outside our control and is covered
+          by GitHub's privacy policy.
         </p>
 
         <h2>Removing your information</h2>
         <p>
-          Once there is something to remove, you will be able to ask for
-          it. Until then there is nothing held about you. Either way,
+          Once there's something to remove, you'll be able to ask for
+          it. Until then there's nothing held about you. Either way,
           email{" "}
           <a href="mailto:contact@mysterynamedraw.com">
             contact@mysterynamedraw.com
           </a>{" "}
-          and we will sort it out.
+          and we'll sort it out.
         </p>
 
         <p className="content-updated">

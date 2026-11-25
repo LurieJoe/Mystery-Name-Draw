@@ -7,7 +7,7 @@ import "./LandingPage.css";
 const STEPS = [
   {
     title: "Set the details",
-    body: "Name it, choose a draw date and a budget, and say whether you are taking part.",
+    body: "Name it, choose a draw date and a budget, and say whether you're taking part.",
   },
   {
     title: "Share one link",
@@ -26,10 +26,10 @@ const DIFFERENCES = [
   },
   {
     title: "Problems surface before the draw",
-    body: "If restrictions make a draw impossible, you are told which people are blocking it and what to change, rather than finding out on the day.",
+    body: "If restrictions make a draw impossible, you're told which people are blocking it and what to change, rather than finding out on the day.",
   },
   {
-    title: "It is not only for gifts",
+    title: "It isn't only for gifts",
     body: "A book swap, an office Secret Santa, a teacher pairing students, or deciding who reviews whose work.",
   },
   {

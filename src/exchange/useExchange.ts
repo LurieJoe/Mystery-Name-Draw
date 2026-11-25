@@ -749,7 +749,7 @@ const [inviteEmail, setInviteEmail] = useState("");
       );
     } catch {
       alert(
-        "That file could not be imported. It should be a Mystery Name Draw JSON file."
+        "That file couldn't be imported. It should be a Mystery Name Draw JSON file."
       );
     }
   };
@@ -957,7 +957,7 @@ const [inviteEmail, setInviteEmail] = useState("");
       setSaveError(
         error instanceof Error
           ? error.message
-          : "That could not be changed just now."
+          : "That couldn't be changed just now."
       );
     }
   };
@@ -989,7 +989,7 @@ const [inviteEmail, setInviteEmail] = useState("");
   ];
 
   const registrationNote =
-    "When you register, you can add your gift preferences and set your own name draw restrictions: anyone you would rather not give to or receive from.";
+    "When you register, you can add your gift preferences and set your own name draw restrictions: anyone you'd rather not give to or receive from.";
 
   const reminderNote =
     !remindBeforeRegistrationDeadline && !remindBeforeDrawDate

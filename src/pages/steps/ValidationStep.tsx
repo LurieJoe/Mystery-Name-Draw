@@ -84,24 +84,24 @@ export default function ValidationStep() {
             </p>
 
             <p className="helper-text">
-              Assignments are not shown here. Nobody sees who drew whom,
+              Assignments aren't shown here. Nobody sees who drew whom,
               including you.
             </p>
           </div>
         ) : (
           <div className="draw-status draw-status-blocked">
-            <h3>This draw cannot be completed</h3>
+            <h3>This draw can't be completed</h3>
 
             <p>
               {drawCheck.availableReceiverIds.length === 0
                 ? `${formatNames(
                     drawCheck.blockedGiverIds
-                  )} cannot be matched to anyone.`
+                  )} can't be matched to anyone.`
                 : `${formatNames(
                     drawCheck.blockedGiverIds
                   )} can only be matched to ${formatNames(
                     drawCheck.availableReceiverIds
-                  )}, which is not enough to go round.`}
+                  )}, which isn't enough to go round.`}
             </p>
 
             {removalSuggestion?.status === "remove" ? (
@@ -109,7 +109,7 @@ export default function ValidationStep() {
                 <p>
                   {removalSuggestion.size === 1
                     ? "Removing any one of these restrictions would fix it:"
-                    : `Removing a single restriction will not be enough here. At least ${removalSuggestion.size} have to go, for example:`}
+                    : `Removing a single restriction won't be enough here. At least ${removalSuggestion.size} have to go, for example:`}
                 </p>
 
                 <div className="removal-options">
@@ -169,10 +169,10 @@ export default function ValidationStep() {
 
         {overrideNotices.length > 0 && (
           <div className="override-notices">
-            <h3>Restrictions you have removed</h3>
+            <h3>Restrictions you've removed</h3>
 
             <p className="helper-text">
-              Mystery Name Draw does not tell participants when their
+              Mystery Name Draw doesn't tell participants when their
               restriction is removed. Please let them know yourself.
             </p>
 

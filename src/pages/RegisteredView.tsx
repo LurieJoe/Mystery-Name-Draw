@@ -91,10 +91,10 @@ export default function RegisteredView({
 
   return (
     <>
-      <h1>You are in</h1>
+      <h1>You're in</h1>
 
       <p className="content-lede">
-        Thanks, {me.name || name}. You are registered for{" "}
+        Thanks, {me.name || name}. You're registered for{" "}
         {exchange.name || "this exchange"}.
       </p>
 
@@ -127,7 +127,7 @@ export default function RegisteredView({
 
       <h2>Your wishlist and preferences</h2>
       <p>
-        Only the person who draws your name sees these. You will not
+        Only the person who draws your name sees these. You won't
         know who that is, and they have no way to tell you. Change
         these as often as you like, up to the draw on{" "}
         {formatDate(exchange.drawDate)}.
@@ -146,7 +146,7 @@ export default function RegisteredView({
         Your email
         <input type="email" value={me.email} readOnly />
         <span className="register-hint">
-          This is how the exchange knows you, so it cannot be changed
+          This is how the exchange knows you, so it can't be changed
           here. Ask {exchange.organizerName || "the organizer"} if it
           is wrong.
         </span>
@@ -155,9 +155,9 @@ export default function RegisteredView({
       <label className="register-field">
         Your wishlist
         <span className="register-hint">
-          A few things you would actually like, with enough detail to
+          A few things you'd actually like, with enough detail to
           buy from: a size, a color, an author, a shop. Vague is harder
-          to shop for than nothing at all. Say if you would rather not
+          to shop for than nothing at all. Say if you'd rather not
           receive something, too.
         </span>
         <textarea
@@ -171,7 +171,7 @@ export default function RegisteredView({
       <label className="register-field">
         Anything else worth knowing
         <span className="register-hint">
-          Allergies, things you already have, or anything you would
+          Allergies, things you already have, or anything you'd
           rather avoid. Often more useful than the wishlist.
         </span>
         <textarea
@@ -202,7 +202,7 @@ export default function RegisteredView({
         )}
       </div>
 
-      <h2>Who you would rather not be matched with</h2>
+      <h2>Who you'd rather not be matched with</h2>
 
       {!restrictionsWindow?.usable ? (
         /* No window at all: the draw follows the deadline too closely.
@@ -228,9 +228,9 @@ export default function RegisteredView({
       </p>
       <p>
         They work in one direction: not wanting to buy for someone is a
-        different thing from not wanting them to buy for you. They are
-        your own choices and do not appear on anyone else&rsquo;s list,
-        though the organizer can see them, since they are the one who
+        different thing from not wanting them to buy for you. They're
+        your own choices and don't appear on anyone else's list,
+        though the organizer can see them, since they're the one who
         has to sort it out.
       </p>
 
@@ -247,7 +247,7 @@ export default function RegisteredView({
         </p>
       ) : others.length === 0 ? (
         <p className="register-empty">
-          You are the only person registered so far, so there is nobody
+          You're the only person registered so far, so there's nobody
           to set a restriction against.
         </p>
       ) : (
@@ -277,7 +277,7 @@ export default function RegisteredView({
           once, honoring every restriction that has been set.
         </li>
         <li>
-          You are emailed the one name you are buying for. Nobody sees
+          You're emailed the one name you're buying for. Nobody sees
           the full set of matches, including whoever organized the
           exchange.
         </li>

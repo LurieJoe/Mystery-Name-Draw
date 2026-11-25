@@ -181,14 +181,14 @@ export default function SettingsStep() {
          coming back to an empty page. */
       <p className="helper-text date-note">
         {restrictionsWindow.days === 0
-          ? "Drawing on the registration deadline leaves no time to set restrictions, so this exchange will not use them."
-          : "With one day between the deadline and the draw, there is no time to set restrictions: people are told restrictions have opened on the morning of the draw itself. This exchange will not use them."}{" "}
+          ? "Drawing on the registration deadline leaves no time to set restrictions, so this exchange won't use them."
+          : "With one day between the deadline and the draw, there's no time to set restrictions: people are told restrictions have opened on the morning of the draw itself. This exchange won't use them."}{" "}
         Move the draw date back by a day or two to turn restrictions on.
       </p>
     ) : restrictionsWindow && restrictionsWindow.tight ? (
       <p className="helper-text date-note">
         This leaves {restrictionsWindow.days} days to set restrictions. That works,
-        but anybody who does not read their email most days will miss
+        but anybody who doesn't read their email most days will miss
         the window. Four days or more is comfortable.
       </p>
     ) : null}
@@ -276,7 +276,7 @@ export default function SettingsStep() {
 
       <p className="helper-text">
         Used to contact you about this exchange, and to enter you in the
-        draw if you are taking part.
+        draw if you're taking part.
       </p>
 
       <div className="organizer-fields">
@@ -293,7 +293,7 @@ export default function SettingsStep() {
           />
           {showOrganizerErrors && organizerNameMissing && (
             <span className="validation-error">
-              Required because you are in the exchange.
+              Required because you're in the exchange.
             </span>
           )}
         </label>
@@ -333,9 +333,9 @@ export default function SettingsStep() {
       <p className="helper-text">
         {includeOrganizer
           ? organizerName.trim()
-            ? "You are in the draw and may be assigned someone to buy for."
+            ? "You're in the draw and may be assigned someone to buy for."
             : "Enter your name above to be added to the participant list."
-          : "You are organizing only, and will not be assigned anyone."}
+          : "You're organizing only, and won't be assigned anyone."}
       </p>
 
       {!formValid && (

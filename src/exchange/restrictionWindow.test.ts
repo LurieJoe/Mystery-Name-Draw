@@ -41,7 +41,7 @@ check(
 );
 
 check(
-  "one day is not a window: the notice and the draw are the same moment",
+  "one day isn't a window: the notice and the draw are the same moment",
   restrictionWindow("2026-12-10", "2026-12-11"),
   { days: 1, usable: false, tight: false }
 );
@@ -74,9 +74,9 @@ check(
   { days: 7, usable: true, tight: false }
 );
 
-check("an empty deadline is not a window", restrictionWindow("", "2026-12-15"), null);
-check("an empty draw date is not a window", restrictionWindow("2026-12-10", ""), null);
-check("a malformed date is not a window", restrictionWindow("Dec 10", "2026-12-15"), null);
+check("an empty deadline isn't a window", restrictionWindow("", "2026-12-15"), null);
+check("an empty draw date isn't a window", restrictionWindow("2026-12-10", ""), null);
+check("a malformed date isn't a window", restrictionWindow("Dec 10", "2026-12-15"), null);
 
 console.log(
   failed === 0

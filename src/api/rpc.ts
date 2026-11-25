@@ -83,7 +83,7 @@ export function createRpc(config: {
       // Offline, DNS, CORS, or a project that has been paused and is
       // answering nothing at all.
       throw new RpcError(
-        "Could not reach the exchange. Check your connection and try again.",
+        "Couldn't reach the exchange. Check your connection and try again.",
         0,
         { message: String(cause) }
       );

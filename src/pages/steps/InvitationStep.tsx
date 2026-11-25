@@ -198,9 +198,9 @@ export default function InvitationStep() {
 
         <p className="helper-text">
           These are{" "}
-          {nameForInvitee(restrictionEditorId)}&rsquo;s own choices, and
+          {nameForInvitee(restrictionEditorId)}'s own choices, and
           they appear on this list only. Each one works in a single
-          direction, so blocking a gift one way does not block the other
+          direction, so blocking a gift one way doesn't block the other
           way.
         </p>
 
@@ -212,10 +212,10 @@ export default function InvitationStep() {
           <div className="restriction-sections">
 
             <div className="restriction-section">
-              <h4>Won&rsquo;t give to</h4>
+              <h4>Won't give to</h4>
 
               <p className="helper-text">
-                {nameForInvitee(restrictionEditorId)} will not be
+                {nameForInvitee(restrictionEditorId)} won't be
                 assigned to buy for anyone checked here.
               </p>
 
@@ -246,7 +246,7 @@ export default function InvitationStep() {
             </div>
 
             <div className="restriction-section">
-              <h4>Won&rsquo;t receive from</h4>
+              <h4>Won't receive from</h4>
 
               <p className="helper-text">
                 Nobody checked here will be assigned to buy for{" "}
@@ -343,13 +343,13 @@ export default function InvitationStep() {
 
                 {willNotGiveTo.length > 0 && (
                   <p>
-                    Won&rsquo;t give to: {willNotGiveTo.join(", ")}
+                    Won't give to: {willNotGiveTo.join(", ")}
                   </p>
                 )}
 
                 {willNotReceiveFrom.length > 0 && (
                   <p>
-                    Won&rsquo;t receive from:{" "}
+                    Won't receive from:{" "}
                     {willNotReceiveFrom.join(", ")}
                   </p>
                 )}
@@ -503,7 +503,7 @@ export default function InvitationStep() {
 
         <p className="email-preview-link">{registrationLink}</p>
 
-        <p>We hope you&rsquo;ll join us!</p>
+        <p>We hope you'll join us!</p>
       </div>
 
     </div>

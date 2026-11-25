@@ -73,7 +73,7 @@ export default function RegisterPage({
 
         {state.kind === "missing" && (
           <>
-            <h1>That link did not open anything</h1>
+            <h1>That link didn't open anything</h1>
 
             <p className="content-lede">
               Invitation code <strong>{eventCode}</strong>
@@ -93,7 +93,7 @@ export default function RegisterPage({
 
         {state.kind === "unreachable" && (
           <>
-            <h1>Could not reach Mystery Name Draw</h1>
+            <h1>Couldn't reach Mystery Name Draw</h1>
 
             <p className="content-lede">
               Invitation code <strong>{eventCode}</strong>
@@ -128,8 +128,8 @@ export default function RegisterPage({
               <h2>Not connected to a database</h2>
               <p>
                 This copy of Mystery Name Draw was built without the
-                settings it needs to look an exchange up, so it cannot
-                open this link. That is something to fix where the site
+                settings it needs to look an exchange up, so it can't
+                open this link. That's something to fix where the site
                 is built, not on this page.
               </p>
             </div>

@@ -70,7 +70,7 @@ export default function CreatedStep() {
     <p className="helper-text">
       {allowOpenJoin
         ? "Anyone with the registration link can join, so participants can pass it on."
-        : "Only the people you list can join. Anyone else following the link is told it is invitation only."}
+        : "Only the people you list can join. Anyone else following the link is told it's invitation only."}
     </p>
     </div>
     </div>
@@ -82,9 +82,9 @@ export default function CreatedStep() {
         <h3>Your way back in</h3>
 
         <p>
-          This link opens this exchange on any device, and it is the
-          only thing that does. Save it somewhere you will find it
-          again. It is not emailed to you.
+          This link opens this exchange on any device, and it's the
+          only thing that does. Save it somewhere you'll find it
+          again. It isn't emailed to you.
         </p>
 
         <div className="management-link-row">
@@ -106,7 +106,7 @@ export default function CreatedStep() {
         <p className="helper-text">
           Treat it like a password: whoever opens it can manage this
           exchange, rename it, remove people, and change the dates.
-          They still cannot see who drew whom, because nobody can.
+          They still can't see who drew whom, because nobody can.
         </p>
       </div>
     )}

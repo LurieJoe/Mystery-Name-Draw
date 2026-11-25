@@ -69,7 +69,7 @@ export default function JoinForm({
       <h1>Join {preview.name || "this gift exchange"}</h1>
 
       <p className="content-lede">
-        No account and no password. Fill this in and you are done.
+        No account and no password. Fill this in and you're done.
       </p>
 
       <dl className="register-facts">
@@ -103,7 +103,7 @@ export default function JoinForm({
                   preview.registrationDeadline
                 )}.`}{" "}
             Ask {preview.organizerName || "the organizer"} whether
-            there is still room.
+            there's still room.
           </p>
         </div>
       )}
@@ -114,7 +114,7 @@ export default function JoinForm({
         <div className="register-notice">
           <h2>This one is invitation only</h2>
           <p>
-            {preview.organizerName || "The organizer"} chose who is in
+            {preview.organizerName || "The organizer"} chose who's in
             this exchange, so use the email address your invitation was
             sent to. Any other address is turned away.
           </p>
@@ -159,7 +159,7 @@ export default function JoinForm({
 
       <h2>Your wishlist</h2>
       <p>
-        Ideas for whoever draws your name. Only they will see it. Give
+        Ideas for whoever draws your name. Only they'll see it. Give
         them enough to buy from: a size, a color, an author, a shop.
         Vague is harder to shop for than nothing at all.
       </p>
@@ -218,7 +218,7 @@ export default function JoinForm({
           <>
             Once registration closes on{" "}
             {formatDate(preview.registrationDeadline)} you can come
-            back and say who you would rather not be matched with,
+            back and say who you'd rather not be matched with,
             right up until the draw on{" "}
             {formatDate(preview.drawDate)}.{" "}
           </>

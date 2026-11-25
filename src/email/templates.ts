@@ -58,7 +58,7 @@ export const PERSONAL_LINK_WARNING =
   "This link is yours alone. Anyone who opens it lands on your page, " +
   "where they can see the name you drew, read your wishlist, and " +
   "change or delete anything there. So if you forward this email or " +
-  "paste the link somewhere, you are handing all of that over.";
+  "paste the link somewhere, you're handing all of that over.";
 
 /**
  * What opting out does and does not stop.
@@ -71,22 +71,22 @@ export const PERSONAL_LINK_WARNING =
  * the one that matters most.
  */
 export const REMINDERS_NOTE =
-  "Do not want nudges like this one? Turn reminders off on your " +
-  "page. You will still be told when the draw happens and you have " +
-  "a name to buy for, and when somebody in the exchange sends you a " +
-  "message, because those are the ones you joined for.";
+  "Not interested in nudges like this one? Turn reminders off on " +
+  "your page. We'll still tell you when the draw happens and you " +
+  "have a name to buy for, and when somebody in the exchange sends " +
+  "you a message, because those are the ones you joined for.";
 
 /** The same, for the screen where the choice is made. */
 export const REMINDERS_OFF_CONFIRMATION =
-  "Reminders are off. You will still hear from us twice: when the " +
-  "draw happens and you have somebody to buy for, and when somebody " +
-  "sends you a message. Deadline nudges and updates stay off.";
+  "Reminders are off. We'll still email you when the draw happens " +
+  "and you have somebody to buy for, and when somebody sends you " +
+  "message. Deadline nudges and updates stay off.";
 
 /** The same idea for the organizer, whose link does more. */
 export const MANAGEMENT_LINK_WARNING =
-  "This link is how you manage this exchange, and it is the only way " +
+  "This link is how you manage this exchange, and it's the only way " +
   "in. Whoever opens it can rename the exchange, remove people, and " +
-  "change the dates. They still cannot see who drew whom, because " +
+  "change the dates. They still can't see who drew whom, because " +
   "nobody can.";
 
 function compose(lines: string[], signoff: string[]): string {
@@ -113,14 +113,14 @@ export function invitationEmail(
         `Hi ${details.name},`,
         ``,
         `${details.organizerName} is running a gift exchange called ` +
-          `${details.exchangeName}, and you are in it.`,
+          `${details.exchangeName}, and you're in it.`,
         ``,
         `Register here:`,
         details.link,
         ``,
-        `It takes a minute, there is no account and no password, and ` +
+        `It takes a minute, there's no account and no password, and ` +
           `what you write is a wishlist for whoever draws your name. ` +
-          `They see it; you never find out who they are.`,
+          `They see it; you never find out who they're.`,
         ``,
         `Register by ${details.registrationDeadline}. The draw is on ` +
           `${details.drawDate}. Budget: ${details.budget}.`,
@@ -143,12 +143,12 @@ export function registrationReminderEmail(
         `Hi ${details.name},`,
         ``,
         `Registration for ${details.exchangeName} closes on ` +
-          `${details.registrationDeadline}, and you are not in yet.`,
+          `${details.registrationDeadline}, and you aren't in yet.`,
         ``,
         `Takes a minute:`,
         details.link,
         ``,
-        `If you would rather sit this one out, you can ignore this ` +
+        `If you'd rather sit this one out, you can ignore this ` +
           `and nothing happens.`,
         ``,
         PERSONAL_LINK_WARNING,
@@ -180,8 +180,8 @@ export function registrationClosedEmail(
           `${details.people} people taking part. The draw is on ` +
           `${details.drawDate}.`,
         ``,
-        `Until then you can say who you would rather not be matched ` +
-          `with. Now that the list is final, it is worth a look:`,
+        `Until then you can say who you'd rather not be matched ` +
+          `with. Now that the list is final, it's worth a look:`,
         details.link,
         ``,
         `These are preferences rather than guarantees. The draw ` +
@@ -210,7 +210,7 @@ export function drawReminderEmail(
         `${details.exchangeName} draws on ${details.drawDate}. After ` +
           `that, everyone has a name and nothing can be changed.`,
         ``,
-        `Worth a last look at your wishlist, and at who you would ` +
+        `Worth a last look at your wishlist, and at who you'd ` +
           `rather not be matched with:`,
         details.link,
         ``,
@@ -237,12 +237,12 @@ export function drawResultEmail(details: Personal): Email {
         `Open your page to see who:`,
         details.link,
         ``,
-        `The name is not in this email on purpose. Email gets ` +
+        `The name isn't in this email on purpose. Email gets ` +
           `forwarded, searched, and left open on screens, and this ` +
-          `is the one thing in the exchange that is supposed to stay ` +
+          `is the one thing in the exchange that's supposed to stay ` +
           `between you and the app.`,
         ``,
-        `While you are there you can read their wishlist, see what ` +
+        `While you're there you can read their wishlist, see what ` +
           `they would rather not receive, and send them a message ` +
           `without either of you knowing who the other is.`,
         ``,
@@ -274,8 +274,8 @@ export function messageWaitingEmail(details: Personal): Email {
         details.link,
         ``,
         `Messages stay anonymous in both directions. Replying does ` +
-          `not tell them who you are, and theirs does not tell you ` +
-          `who they are.`,
+          `not tell them who you're, and theirs doesn't tell you ` +
+          `who they're.`,
         ``,
         PERSONAL_LINK_WARNING,
       ],
@@ -309,13 +309,13 @@ export function rollCallEmail(details: {
           `${details.registered} of the ${details.invited} people you ` +
           `invited registered.`,
         missing > 0
-          ? `\n${missing} did not, and will not be in the draw. If ` +
-            `that is a surprise, you can reopen registration from ` +
+          ? `\n${missing} didn't, and won't be in the draw. If ` +
+            `that's a surprise, you can reopen registration from ` +
             `your management page and tell them to try again.`
           : `\nEverybody you invited is in.`,
         ``,
         `The draw runs on ${details.drawDate}, in the morning. You ` +
-          `do not have to do anything to make it happen.`,
+          `don't have to do anything to make it happen.`,
         ``,
         `Your management page:`,
         details.link,
@@ -340,19 +340,19 @@ export function drawFailedEmail(details: {
   reason: string;
 }): Email {
   return {
-    subject: `${details.exchangeName} could not be drawn`,
+    subject: `${details.exchangeName} couldn't be drawn`,
     body: compose(
       [
         `Hi ${details.organizerName},`,
         ``,
         `The draw for ${details.exchangeName} ran this morning and ` +
-          `could not produce a valid result.`,
+          `couldn't produce a valid result.`,
         ``,
         details.reason,
         ``,
         `Nothing has been sent to anybody, and nobody has been ` +
           `matched. The draw will try again every hour, so fixing ` +
-          `the cause is all that is needed - there is no button to ` +
+          `the cause is all that's needed - there's no button to ` +
           `press afterwards.`,
         ``,
         `Your management page:`,

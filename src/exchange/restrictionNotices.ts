@@ -100,7 +100,7 @@ export function removalNotice(
   if (owners.participants.length === 0) {
     return (
       `Removed the restriction you set yourself. ${consequence} ` +
-      "Nobody else set this one, so there is nobody to tell."
+      "Nobody else set this one, so there's nobody to tell."
     );
   }
 

@@ -38,9 +38,9 @@ const PURPOSES: Purpose[] = [
     id: "exchange",
     title: "Everyone draws a name",
     blurb:
-      "A gift exchange, a book swap, or a card exchange you are sorting out on the spot. Everyone gives to one person, and nobody draws themselves.",
+      "A gift exchange, a book swap, or a card exchange you're sorting out on the spot. Everyone gives to one person, and nobody draws themselves.",
     mechanism: "assign",
-    namesHeading: "Who is taking part?",
+    namesHeading: "Who's taking part?",
     placeholder: "Rowan\nMina\nTheo\nNadia",
     line: (from, to) => `${from} gives to ${to}`,
     groupNoun: "Group",
@@ -76,7 +76,7 @@ const PURPOSES: Purpose[] = [
     blurb:
       "Group work, stations, or teams. Pick how many people you want in each group, and the sizes come out even.",
     mechanism: "groups",
-    namesHeading: "Who is being grouped?",
+    namesHeading: "Who's being grouped?",
     placeholder: "Rowan\nMina\nTheo\nNadia",
     line: (from, to) => `${from} and ${to}`,
     groupNoun: "Group",
@@ -110,7 +110,7 @@ export default function QuickDrawPage() {
       if (!outcome.ok) {
         setResult({
           kind: "error",
-          message: "That could not be drawn. Try again.",
+          message: "That couldn't be drawn. Try again.",
         });
         return;
       }
@@ -417,7 +417,7 @@ export default function QuickDrawPage() {
           </>
         )}
 
-        <h2>What Quick Draw does not do</h2>
+        <h2>What Quick Draw doesn't do</h2>
         <p>
           A Quick Draw happens here, in this browser. Nothing is sent
           anywhere, nothing is kept on our end, and the result is gone
@@ -427,7 +427,7 @@ export default function QuickDrawPage() {
         </p>
         <p>
           It also means <strong>you</strong> see the whole draw, which is
-          the point when you are reading assignments out in a room. If
+          the point when you're reading assignments out in a room. If
           the draw needs to stay a secret from the person running it,{" "}
           <a href="#/create">set up a gift exchange</a> instead: invited
           people get their own name privately, and even the organizer

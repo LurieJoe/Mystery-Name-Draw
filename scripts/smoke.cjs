@@ -260,7 +260,7 @@ check(
       })
     ),
   [
-    "You are in",
+    "You're in",
     // What was saved is what is shown: the fields are seeded from the
     // registration, not left blank for the person to retype.
     "A book about engines",

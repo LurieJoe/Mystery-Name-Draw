@@ -223,7 +223,7 @@ console.log("\n3. Impossible fixture");
 
   if (suggestion.status === "remove") {
     check(
-      "one removal is not enough here",
+      "one removal isn't enough here",
       suggestion.size === 2,
       `size ${suggestion.size}`
     );
@@ -407,7 +407,7 @@ console.log("\n8. Reading a pasted list");
 
   const dupes = parseNames("Chris\nChris\nChristine\nchris");
   check(
-    "repeats are numbered, and a longer name is not mistaken for one",
+    "repeats are numbered, and a longer name isn't mistaken for one",
     dupes.map((p) => p.name).join("|") ===
       "Chris|Chris (2)|Christine|chris (3)",
     dupes.map((p) => p.name).join("|")
@@ -438,13 +438,13 @@ console.log("\n8. Reading a pasted list");
   );
 
   check(
-    "a name that merely looks like a heading is kept when it is not first",
+    "a name that merely looks like a heading is kept when it isn't first",
     parseCsvNames("Rowan\nName\nMina").join("|") === "Rowan|Name|Mina",
     parseCsvNames("Rowan\nName\nMina").join("|")
   );
 
   check(
-    "CRLF line endings do not produce empty rows",
+    "CRLF line endings don't produce empty rows",
     parseCsvNames("Name\r\nRowan\r\nMina\r\n").join("|") === "Rowan|Mina",
     parseCsvNames("Name\r\nRowan\r\nMina\r\n").join("|")
   );
@@ -457,7 +457,7 @@ console.log("\n8. Reading a pasted list");
   );
 
   check(
-    "a leading byte order mark does not stick to the first name",
+    "a leading byte order mark doesn't stick to the first name",
     parseCsvNames("\uFEFFRowan\nMina")[0] === "Rowan",
     parseCsvNames("\uFEFFRowan\nMina")[0]
   );
@@ -473,7 +473,7 @@ console.log("\n8. Reading a pasted list");
   );
 
   check(
-    "what is written reads back unchanged",
+    "what's written reads back unchanged",
     parseCsvNames(written).join("|") === 'Hale, Rowan|Rowan "Ro"|Mina',
     parseCsvNames(written).join("|")
   );
@@ -488,7 +488,7 @@ console.log("\n8. Reading a pasted list");
 }
 
 {
-  console.log("\n10. A surname-first cell is not two students");
+  console.log("\n10. A surname-first cell isn't two students");
 
   check(
     "a surname-first name is flipped",
@@ -558,7 +558,7 @@ console.log("\n8. Reading a pasted list");
 
   const notice = removalNotice(organizerOnly, 1, "Rowan", "Mina");
   check(
-    "and the organizer is not told to notify themselves",
+    "and the organizer isn't told to notify themselves",
     !notice.includes("Please let") && notice.includes("nobody to tell"),
     notice
   );
@@ -580,13 +580,13 @@ console.log("\n8. Reading a pasted list");
   const both = removalOwners([give("a", "b"), give(ORGANIZER_ID, "b")], nameOf);
   const bothNotice = removalNotice(both, 2, "Rowan", "Mina");
   check(
-    "when both set it, the participant is named and the organizer is not",
+    "when both set it, the participant is named and the organizer isn't",
     bothNotice.includes("Please let Rowan know") && !bothNotice.includes("Joe"),
     bothNotice
   );
 
   check(
-    "the confirmation says it is yours when only you set it",
+    "the confirmation says it's yours when only you set it",
     removalConfirmation(organizerOnly, 1, "Rowan", "Mina").includes(
       "Rowan could then be assigned to buy for Mina"
     )
@@ -621,7 +621,7 @@ console.log("\n8. Reading a pasted list");
     shouldScrollToTop("how-it-works", "/quick")
   );
   check(
-    "clicking the link for the page you are on does nothing",
+    "clicking the link for the page you're on does nothing",
     !shouldScrollToTop("/quick", "/quick")
   );
   check(
@@ -668,8 +668,8 @@ console.log("\n8. Reading a pasted list");
   const result = await rpc<{ awake: boolean }>("ping");
 
   check("a call reaches the function it names", seenUrl === "https://example.supabase.co/rest/v1/rpc/ping", seenUrl);
-  check("a trailing slash on the url does not double up", !seenUrl.includes("//rest"));
-  check("it is a POST", seenInit.method === "POST");
+  check("a trailing slash on the url doesn't double up", !seenUrl.includes("//rest"));
+  check("it's a POST", seenInit.method === "POST");
 
   const headers = seenInit.headers as Record<string, string>;
   check("the key goes in the apikey header, spelled exactly", headers.apikey === "sb_publishable_test");
@@ -701,7 +701,7 @@ console.log("\n8. Reading a pasted list");
     String((refused as RpcError).message)
   );
   check("with the sqlstate for code that wants to branch on it", (refused as RpcError).code === "P0002");
-  check("a refusal is not unreachable", !(refused as RpcError).unreachable);
+  check("a refusal isn't unreachable", !(refused as RpcError).unreachable);
 
   // Nothing answering at all: offline, or a paused project.
   const dead = createRpc({
@@ -722,7 +722,7 @@ console.log("\n8. Reading a pasted list");
   check("nothing answering is told apart from being refused", (unreachable as RpcError).unreachable);
   check(
     "and says something a person can act on",
-    (unreachable as RpcError).message.includes("Could not reach"),
+    (unreachable as RpcError).message.includes("Couldn't reach"),
     (unreachable as RpcError).message
   );
 
@@ -740,7 +740,7 @@ console.log("\n8. Reading a pasted list");
     gatewayError = error;
   }
 
-  check("a non-JSON failure does not crash the parser", gatewayError instanceof RpcError);
+  check("a non-JSON failure doesn't crash the parser", gatewayError instanceof RpcError);
   check("and reports its status", (gatewayError as RpcError).status === 502);
 }
 
@@ -769,7 +769,7 @@ console.log("\n8. Reading a pasted list");
   check("what people type gets trimmed on the way out", payload.name === "Office Secret Santa" && payload.giftBudget === "25");
   check("and so do the organizer's own fields", payload.organizer.email === "joe@example.com");
   check(
-    "a half-typed invitee with no address is not sent",
+    "a half-typed invitee with no address isn't sent",
     payload.invitees.length === 1 && payload.invitees[0].email === "rowan@example.com",
     JSON.stringify(payload.invitees)
   );
@@ -803,9 +803,9 @@ console.log("\n8. Reading a pasted list");
   });
 
   check("the exchange comes back", restored.eventName === "Office Secret Santa" && restored.eventCode === "ABC123");
-  check("including whether it is invitation only", restored.allowOpenJoin === false);
+  check("including whether it's invitation only", restored.allowOpenJoin === false);
   check(
-    "the organizer is not listed among the invitees as well as in their own fields",
+    "the organizer isn't listed among the invitees as well as in their own fields",
     restored.invitees.length === 1 && restored.invitees[0].id === "a",
     JSON.stringify(restored.invitees.map((i) => i.id))
   );
@@ -815,7 +815,7 @@ console.log("\n8. Reading a pasted list");
   // is honoured by the draw and must never appear on that person's own
   // list, and this state is that list.
   check(
-    "an organizer-set restriction does not come back as the person's own",
+    "an organizer-set restriction doesn't come back as the person's own",
     restored.restrictions.length === 1 && restored.restrictions[0].ownerId === "a",
     JSON.stringify(restored.restrictions)
   );
@@ -827,7 +827,7 @@ console.log("\n8. Reading a pasted list");
   );
 
   check(
-    "an empty answer does not throw",
+    "an empty answer doesn't throw",
     fromOrganizerView({}).eventName === "" && fromOrganizerView({}).invitees.length === 0
   );
 }
@@ -839,17 +839,17 @@ console.log("\n8. Reading a pasted list");
 
   check("a management route yields its token", matchManageToken(`/manage/${token}`) === token);
   check("a trailing slash is fine", matchManageToken(`/manage/${token}/`) === token);
-  check("other routes are not management routes", matchManageToken("/create") === null);
+  check("other routes aren't management routes", matchManageToken("/create") === null);
   check("nor is the registration route", matchManageToken("/event/ABC123") === null);
 
   // The shape is a guard, not a check of the token itself: only the
   // database can say whether one is real. It keeps obvious rubbish
   // from being sent, and keeps a short or odd path from being treated
   // as a credential at all.
-  check("something far too short is not taken for a token", matchManageToken("/manage/abc") === null);
+  check("something far too short isn't taken for a token", matchManageToken("/manage/abc") === null);
   check("nor is a path with a slash in the middle", matchManageToken(`/manage/${token}/extra`) === null);
-  check("nor one with characters a hex token cannot contain", matchManageToken(`/manage/${"a".repeat(60)}..//`) === null);
-  check("an empty route is not one either", matchManageToken("/") === null);
+  check("nor one with characters a hex token can't contain", matchManageToken(`/manage/${"a".repeat(60)}..//`) === null);
+  check("an empty route isn't one either", matchManageToken("/") === null);
 }
 
 console.log(`\n${passed} passed, ${failed} failed`);

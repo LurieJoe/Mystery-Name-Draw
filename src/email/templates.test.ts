@@ -100,7 +100,7 @@ for (const [name, email] of all) {
   check(
     SWITCHABLE.has(name)
       ? `${name} says how to turn reminders off`
-      : `${name} does not offer to stop an email that arrives anyway`,
+      : `${name} doesn't offer to stop an email that arrives anyway`,
     offers === SWITCHABLE.has(name)
   );
 }
@@ -137,7 +137,7 @@ for (const [name, email] of all) {
  * checks the template was not later given a way to.
  */
 check(
-  "the draw result email cannot name who you drew",
+  "the draw result email can't name who you drew",
   drawResultEmail.length === 1 &&
     !JSON.stringify(drawResultEmail(personal)).includes("Mina")
 );
