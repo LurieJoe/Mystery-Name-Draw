@@ -90,6 +90,7 @@ const REGISTRATION_PROPS = {
     error: null,
     onSave: () => {},
     onToggleRestriction: () => {},
+    onSetReminders: () => {},
     onWithdraw: () => {},
   },
   JoinForm: {

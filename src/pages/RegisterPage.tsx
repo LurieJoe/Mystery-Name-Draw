@@ -30,6 +30,7 @@ export default function RegisterPage({
     join,
     save,
     toggleRestriction,
+    setReminders,
     withdraw,
   } = useRegistration(eventCode);
 
@@ -57,6 +58,7 @@ export default function RegisterPage({
             error={error}
             onSave={save}
             onToggleRestriction={toggleRestriction}
+            onSetReminders={setReminders}
             onWithdraw={withdraw}
           />
         )}

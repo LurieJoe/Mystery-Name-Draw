@@ -150,6 +150,23 @@ export async function clearRestrictionRemotely(
   });
 }
 
+/**
+ * Turn the nudges on or off.
+ *
+ * Opting out stops the reminders and nothing else: the email saying
+ * somebody has a name to buy for, and the one saying a message is
+ * waiting, still arrive. Those are the two they registered for.
+ */
+export async function setRemindersRemotely(
+  inviteeToken: string,
+  wanted: boolean
+): Promise<RegistrationView> {
+  return rpc<RegistrationView>("set_my_reminders", {
+    p_invitee_token: inviteeToken,
+    p_wanted: wanted,
+  });
+}
+
 export async function withdrawRemotely(
   inviteeToken: string
 ): Promise<void> {

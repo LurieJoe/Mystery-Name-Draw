@@ -256,6 +256,8 @@ check(
         error: null,
         onSave: () => {},
         onToggleRestriction: () => {},
+    onSetReminders: () => {},
+        onSetReminders: () => {},
         onWithdraw: () => {},
       })
     ),
@@ -270,6 +272,9 @@ check(
     // need one of them set aside.
     "preferences, not guarantees",
     "Cancel my registration",
+    // The emails tell people to turn reminders off on their page, so
+    // the page has to offer it.
+    "Send me reminders about deadlines and the draw",
     "I would rather not buy for",
     "I would rather not receive from",
     "Mina Okafor",
@@ -347,6 +352,8 @@ check(
         },
         onSave: () => {},
         onToggleRestriction: () => {},
+    onSetReminders: () => {},
+        onSetReminders: () => {},
         onWithdraw: () => {},
       })
     ),

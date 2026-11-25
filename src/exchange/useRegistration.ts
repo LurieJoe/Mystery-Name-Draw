@@ -25,6 +25,7 @@ import {
   rememberInvitee,
   rememberedInvitee,
   saveRegistration,
+  setRemindersRemotely,
   setRestrictionRemotely,
   withdrawRemotely,
 } from "./registration.js";
@@ -231,6 +232,24 @@ export function useRegistration(eventCode: string) {
     [act, eventCode]
   );
 
+  const setReminders = useCallback(
+    (wanted: boolean) =>
+      act(async () => {
+        const token = rememberedInvitee(eventCode);
+
+        if (!token) throw new Error(LOST_TOKEN);
+
+        setLoaded({
+          code: eventCode,
+          state: {
+            kind: "registered",
+            view: await setRemindersRemotely(token, wanted),
+          },
+        });
+      }),
+    [act, eventCode]
+  );
+
   const withdraw = useCallback(
     () =>
       act(async () => {
@@ -260,6 +279,7 @@ export function useRegistration(eventCode: string) {
     join,
     save,
     toggleRestriction,
+    setReminders,
     withdraw,
   };
 }

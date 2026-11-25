@@ -1,5 +1,6 @@
 import { restrictionWindow } from "../exchange/restrictionWindow";
 import { useState } from "react";
+import { REMINDERS_OFF_CONFIRMATION } from "../email/templates";
 import { formatDate, giftBudgetLabel } from "../exchange/format";
 import type { RestrictionDirection } from "../exchange/types";
 import type { RegistrationView } from "../exchange/registration";
@@ -30,6 +31,7 @@ export default function RegisteredView({
   error,
   onSave,
   onToggleRestriction,
+  onSetReminders,
   onWithdraw,
 }: {
   view: RegistrationView;
@@ -45,6 +47,7 @@ export default function RegisteredView({
     direction: RestrictionDirection,
     on: boolean
   ) => void;
+  onSetReminders: (wanted: boolean) => void;
   onWithdraw: () => void;
 }) {
   const { me, others, myRestrictions, exchange } = view;
@@ -289,6 +292,30 @@ export default function RegisteredView({
         you press the button. More in the{" "}
         <a href="#/faq">questions people ask</a>.
       </p>
+
+      <h2>Email</h2>
+      <p>
+        We'll email you when the draw happens and you have somebody to
+        buy for, and when somebody in the exchange sends you a
+        message. Those two always arrive. The rest are nudges, and
+        they're yours to switch off.
+      </p>
+
+      <label className="register-check">
+        <input
+          type="checkbox"
+          checked={!me.unsubscribed}
+          disabled={busy}
+          onChange={(e) => onSetReminders(e.target.checked)}
+        />
+        Send me reminders about deadlines and the draw
+      </label>
+
+      {me.unsubscribed && (
+        <p className="register-empty" role="status">
+          {REMINDERS_OFF_CONFIRMATION}
+        </p>
+      )}
 
       <div className="register-withdraw">
         <h2>Changed your mind?</h2>

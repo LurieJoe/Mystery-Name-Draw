@@ -50,15 +50,19 @@ const SITE_URL =
   Deno.env.get("SITE_URL") ?? "https://mysterynamedraw.com";
 
 /*
- * Replies go somewhere a person reads.
+ * Sent from an address that accepts replies.
  *
  * People answer these: asking what the budget was, saying they got
- * the wrong name, asking to be taken out. A reply to noreply@ goes
- * nowhere, and somebody who writes one believes they have been
- * ignored rather than unheard.
+ * the wrong name, asking to be taken out. noreply@ sends those into
+ * nothing, and somebody who writes one believes they have been
+ * ignored rather than unheard. Filters read "noreply" as a bulk-mail
+ * signal too, which a brand-new domain can do without.
+ *
+ * No separate Reply-To, because this one is a real mailbox. A
+ * Reply-To is only worth having when it points somewhere the From
+ * does not.
  */
-const FROM = "Mystery Name Draw <noreply@mysterynamedraw.com>";
-const REPLY_TO = "contact@mysterynamedraw.com";
+const FROM = "Mystery Name Draw <hello@mysterynamedraw.com>";
 
 async function rpc<T>(name: string, args: Record<string, unknown>) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
@@ -176,7 +180,6 @@ async function send(row: Claimed, email: Email): Promise<string> {
     body: JSON.stringify({
       from: FROM,
       to: [row.to],
-      reply_to: REPLY_TO,
       subject: email.subject,
       text: email.body,
     }),
