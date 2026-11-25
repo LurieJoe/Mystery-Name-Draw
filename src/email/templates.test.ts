@@ -3,6 +3,7 @@ import {
   PERSONAL_LINK_WARNING,
   REMINDERS_NOTE,
   drawFailedEmail,
+  formatEmailDate,
   drawReminderEmail,
   drawResultEmail,
   invitationEmail,
@@ -63,6 +64,16 @@ const toOrganizer: [string, Email][] = [
 const all = [...toParticipants, ...toOrganizer];
 
 console.log("\nEmail templates:\n");
+
+check("a date is spelled out, not 12/16/2026",
+  formatEmailDate("2026-12-16") === "December 16, 2026");
+check("a single-digit day has no leading zero",
+  formatEmailDate("2026-12-05") === "December 5, 2026");
+check("January is not off by one",
+  formatEmailDate("2027-01-01") === "January 1, 2027");
+check("something that is not a date is left alone",
+  formatEmailDate("soon") === "soon");
+check("and neither is an empty one", formatEmailDate("") === "");
 
 for (const [name, email] of all) {
   check(`${name} has a subject`, email.subject.trim().length > 0);

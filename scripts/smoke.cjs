@@ -371,6 +371,25 @@ check(
   ["you can come back and say who you would rather not"]
 );
 
+const { matchInviteeToken } = require(`${OUT}/router.js`);
+
+// The token in a personal link is matched the same way as the
+// management one, and the shapes that must not match matter as much
+// as the shape that must.
+check(
+  "a personal link's token is recognized",
+  () =>
+    JSON.stringify([
+      matchInviteeToken("/me/" + "a".repeat(64)),
+      matchInviteeToken("/me/" + "a".repeat(64) + "/"),
+      matchInviteeToken("/me/short"),
+      matchInviteeToken("/me/" + "a".repeat(64) + "/extra"),
+      matchInviteeToken("/event/ABC123"),
+      matchInviteeToken("/me/" + "a".repeat(64) + "?x=1"),
+    ]),
+  [`"${"a".repeat(64)}","${"a".repeat(64)}",null,null,null,null`]
+);
+
 // Without settings to reach a database, the page says so rather than
 // blaming the link the reader was sent.
 check(

@@ -12,6 +12,33 @@
 
 export type Email = { subject: string; body: string };
 
+const MONTHS = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/**
+ * A date as an email should write it.
+ *
+ * Not toLocaleDateString, which the app uses on screen: that reads
+ * the locale of whatever is rendering, and in an Edge Function that
+ * is a server in Virginia rather than the person holding the phone.
+ * "12/16/2026" also means two different days depending on who is
+ * reading it, and a draw date is exactly the wrong thing to be
+ * ambiguous about.
+ */
+export function formatEmailDate(iso: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec((iso ?? "").trim());
+
+  if (!match) {
+    return iso ?? "";
+  }
+
+  const [, year, month, day] = match;
+
+  return `${MONTHS[Number(month) - 1]} ${Number(day)}, ${year}`;
+}
+
 export type Personal = {
   /** What they are called, as they typed it. */
   name: string;

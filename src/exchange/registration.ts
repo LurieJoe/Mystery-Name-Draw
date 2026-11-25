@@ -48,6 +48,8 @@ export type RegisteredPerson = {
 /** One person's own view: themselves, the names, and their choices. */
 export type RegistrationView = {
   exchange: {
+    /** So a link that carries only a token can tell where it landed. */
+    eventCode: string;
     name: string;
     giftBudget: string | null;
     currency: string;

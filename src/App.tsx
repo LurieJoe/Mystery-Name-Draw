@@ -5,12 +5,14 @@ import LandingPage from "./pages/LandingPage";
 import OrganizerPage from "./pages/OrganizerPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import QuickDrawPage from "./pages/QuickDrawPage";
+import PersonalLinkPage from "./pages/PersonalLinkPage";
 import RegisterPage from "./pages/RegisterPage";
-import { matchEventCode, usePath } from "./router";
+import { matchEventCode, matchInviteeToken, usePath } from "./router";
 
 function App() {
   const route = usePath();
   const eventCode = matchEventCode(route);
+  const inviteeToken = matchInviteeToken(route);
 
   // The provider wraps every route, not just the wizard: navigating away
   // and back would otherwise unmount it and lose a part-built exchange.
@@ -18,6 +20,8 @@ function App() {
     <ExchangeProvider>
       {eventCode ? (
         <RegisterPage eventCode={eventCode} />
+      ) : inviteeToken ? (
+        <PersonalLinkPage token={inviteeToken} />
       ) : route === "/create" ? (
         <OrganizerPage />
       ) : route === "/quick" ? (

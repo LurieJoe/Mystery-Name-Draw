@@ -72,6 +72,11 @@ begin
     registration_view(v_email_token) -> 'me' ->> 'wishlist'
       = 'A good notebook');
 
+  -- A link from an email carries a token and nothing else, so the
+  -- page it opens needs the code to know where it landed.
+  perform assert('and saying which exchange it is, for a link that knows only a token',
+    registration_view(v_email_token) -> 'exchange' ->> 'eventCode' = v_code);
+
   -- ------------------------------------------------------------------
   -- And the same doors
   -- ------------------------------------------------------------------

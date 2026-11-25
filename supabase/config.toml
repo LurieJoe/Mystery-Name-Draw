@@ -15,3 +15,8 @@ project_id = "xcayjyvmyjlccaphoyvw"
 # itself, in constant time, on either the apikey or Authorization
 # header, and returns 401 without it.
 verify_jwt = false
+
+[functions.send-notifications]
+# Same reasoning as run-draws: called by the scheduler, not by a
+# signed-in person, and it checks DRAW_SECRET itself.
+verify_jwt = false

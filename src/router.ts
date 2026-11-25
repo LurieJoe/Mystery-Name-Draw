@@ -104,6 +104,21 @@ export function matchManageToken(route: string): string | null {
 }
 
 /** The event code in /event/CODE, or null for any other route. */
+/**
+ * The token in a personal link from an email.
+ *
+ * Matched the same way as the management token, and treated the same
+ * way once matched: stored, then stripped out of the address bar. A
+ * credential in a URL is a credential in browser history, in a
+ * screenshot, and in whatever the person pastes into a group chat
+ * when they mean to share the site.
+ */
+export function matchInviteeToken(route: string): string | null {
+  const match = route.match(/^\/me\/([A-Za-z0-9]{32,128})\/?$/);
+
+  return match ? match[1] : null;
+}
+
 export function matchEventCode(route: string): string | null {
   const match = route.match(/^\/event\/([A-Za-z0-9]+)\/?$/);
 
