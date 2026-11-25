@@ -157,6 +157,29 @@ export async function clearRestrictionRemotely(
  * somebody has a name to buy for, and the one saying a message is
  * waiting, still arrive. Those are the two they registered for.
  */
+/**
+ * The one name you are buying for, and what they wrote.
+ *
+ * Null until the draw has run. Deliberately a separate call rather
+ * than part of registration_view: that view is fetched on every visit
+ * and by people who have not been drawn for yet, and the assignment
+ * is the one thing in this app that should be read only when it is
+ * actually being looked at.
+ */
+export type Assignment = {
+  name: string | null;
+  wishlist?: string | null;
+  preferences?: string | null;
+};
+
+export async function fetchAssignment(
+  inviteeToken: string
+): Promise<Assignment> {
+  return rpc<Assignment>("my_assignment", {
+    p_invitee_token: inviteeToken,
+  });
+}
+
 export async function setRemindersRemotely(
   inviteeToken: string,
   wanted: boolean

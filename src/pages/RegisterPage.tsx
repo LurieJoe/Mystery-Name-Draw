@@ -24,6 +24,7 @@ export default function RegisterPage({
 }) {
   const {
     state,
+    assignment,
     busy,
     error,
     retry,
@@ -54,6 +55,7 @@ export default function RegisterPage({
         {state.kind === "registered" && (
           <RegisteredView
             view={state.view}
+            assignment={assignment}
             busy={busy}
             error={error}
             onSave={save}

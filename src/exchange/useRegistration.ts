@@ -18,6 +18,7 @@ import { RpcError } from "../api/rpc.js";
 import type { RestrictionDirection } from "./types.js";
 import {
   clearRestrictionRemotely,
+  fetchAssignment,
   fetchRegistration,
   forgetInvitee,
   joinExchange,
@@ -30,6 +31,7 @@ import {
   withdrawRemotely,
 } from "./registration.js";
 import type {
+  Assignment,
   ExchangePreview,
   RegistrationView,
 } from "./registration.js";
@@ -83,6 +85,13 @@ export function useRegistration(eventCode: string) {
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /*
+   * Fetched only once the exchange says it has been drawn, so the
+   * assignment is read when somebody is actually looking at it rather
+   * than on every visit by everybody.
+   */
+  const [assignment, setAssignment] = useState<Assignment | null>(null);
 
   const state: RegistrationState =
     !hasDatabase
@@ -155,6 +164,31 @@ export function useRegistration(eventCode: string) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const drawn = state.kind === "registered" && state.view.exchange.drawn;
+
+  useEffect(() => {
+    if (!drawn) return;
+
+    const token = rememberedInvitee(eventCode);
+
+    if (!token) return;
+
+    let alive = true;
+
+    void fetchAssignment(token)
+      .then((result) => {
+        if (alive) setAssignment(result);
+      })
+      .catch(() => {
+        // The page is still useful without it, and the email the
+        // person followed to get here says what it was for.
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, [drawn, eventCode]);
 
   /*
    * Asking again after a failure. Separate from load so that clearing
@@ -272,6 +306,7 @@ export function useRegistration(eventCode: string) {
 
   return {
     state,
+    assignment,
     busy,
     error,
     clearError: () => setError(null),

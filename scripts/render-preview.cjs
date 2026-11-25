@@ -83,9 +83,43 @@ const {
   registrationView,
 } = require("./fixtures/registration.cjs");
 
+const overrides = Object.fromEntries(
+  process.argv
+    // From 3, not 4: a wizard step has its number there, but a page
+    // like RegisteredView does not, and slicing past it dropped the
+    // override silently.
+    .slice(3)
+    .filter((arg) => arg.includes("="))
+    .map((arg) => {
+      const at = arg.indexOf("=");
+      return [arg.slice(0, at), arg.slice(at + 1)];
+    })
+);
+
+/*
+ * drawn=1 shows the page as it looks after the draw, which is the
+ * state the whole personal link exists for and the one the default
+ * fixture cannot be in.
+ */
+const afterTheDraw = overrides.drawn === "1";
+
 const REGISTRATION_PROPS = {
   RegisteredView: {
-    view: registrationView,
+    assignment: afterTheDraw
+      ? {
+          name: "Teo Vasquez",
+          wishlist:
+            "Anything with chili in it\nA decent chopping board",
+          preferences: "Allergic to shellfish",
+        }
+      : null,
+    view: afterTheDraw
+      ? {
+          ...registrationView,
+          exchange: { ...registrationView.exchange, drawn: true },
+          restrictionsOpen: false,
+        }
+      : registrationView,
     busy: false,
     error: null,
     onSave: () => {},
@@ -110,21 +144,12 @@ const { ExchangeContext } = require(`${OUT}/exchange/context.js`);
 const { useExchange } = require(`${OUT}/exchange/useExchange.js`);
 
 /*
- * Any further arguments override the fixture, as key=value. The dates
- * matter most: several warnings only appear for date combinations the
- * default fixture deliberately avoids.
+ * Further arguments override the fixture, as key=value. Defined
+ * above, because the registration props need them too.
  *
  *   node scripts/render-preview.cjs SettingsStep 1 drawDate=2026-12-11
+ *   node scripts/render-preview.cjs RegisteredView drawn=1
  */
-const overrides = Object.fromEntries(
-  process.argv
-    .slice(4)
-    .filter((arg) => arg.includes("="))
-    .map((arg) => {
-      const at = arg.indexOf("=");
-      return [arg.slice(0, at), arg.slice(at + 1)];
-    })
-);
 
 function Harness() {
   const exchange = useExchange();

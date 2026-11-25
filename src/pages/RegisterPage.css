@@ -230,3 +230,33 @@
 .register-page p + .register-field {
   margin-top: 1.5rem;
 }
+
+/* The one thing somebody opened the page for, so it comes before
+   their own wishlist rather than after it. */
+.assignment {
+  margin: 0 0 2.5rem;
+  padding: 1.5rem 1.75rem;
+
+  border: 1px solid #ddd6fe;
+  border-left: 4px solid #7c3aed;
+  border-radius: 14px;
+
+  background: #faf5ff;
+}
+
+.assignment h2 {
+  margin-top: 0;
+}
+
+.assignment-name {
+  margin: 0.25rem 0 1.25rem;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #5b21b6;
+  line-height: 1.2;
+}
+
+/* Wishlists are typed with line breaks and mean them. */
+.assignment-note {
+  white-space: pre-wrap;
+}

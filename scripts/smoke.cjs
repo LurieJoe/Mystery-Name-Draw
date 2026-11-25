@@ -334,6 +334,60 @@ check(
   ["Registration is closed"]
 );
 
+// After the draw, the page has to show the name. The email says
+// "open your page to see who" and puts the name nowhere else, so a
+// page that cannot answer that leaves the person with no way to find
+// out at all.
+const drawnView = {
+  ...registrationView,
+  exchange: { ...registrationView.exchange, drawn: true },
+  restrictionsOpen: false,
+};
+
+check(
+  "the page shows who you drew once the draw has run",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: drawnView,
+        assignment: {
+          name: "Teo Vasquez",
+          wishlist: "Anything with chili in it",
+          preferences: "Allergic to shellfish",
+        },
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onSetReminders: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  [
+    "You're buying for",
+    "Teo Vasquez",
+    "Anything with chili in it",
+    "Allergic to shellfish",
+  ],
+  // The page must not still claim the name arrives by email.
+  ["emailed the one name"]
+);
+
+check(
+  "and says so plainly while the name is still loading",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: drawnView,
+        assignment: null,
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onSetReminders: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  ["The draw has happened"],
+  ["You're buying for"]
+);
+
 // An organizer who sets the draw a day after the deadline leaves no
 // restriction window. Neither screen may promise one.
 const noWindow = {

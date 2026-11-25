@@ -3,7 +3,10 @@ import { useState } from "react";
 import { REMINDERS_OFF_CONFIRMATION } from "../email/templates";
 import { formatDate, giftBudgetLabel } from "../exchange/format";
 import type { RestrictionDirection } from "../exchange/types";
-import type { RegistrationView } from "../exchange/registration";
+import type {
+  Assignment,
+  RegistrationView,
+} from "../exchange/registration";
 import "./RegisterPage.css";
 
 const WISHLIST_PLACEHOLDER =
@@ -27,6 +30,7 @@ const PREFERENCES_PLACEHOLDER =
  */
 export default function RegisteredView({
   view,
+  assignment,
   busy,
   error,
   onSave,
@@ -35,6 +39,7 @@ export default function RegisteredView({
   onWithdraw,
 }: {
   view: RegistrationView;
+  assignment?: Assignment | null;
   busy?: boolean;
   error?: string | null;
   onSave: (fields: {
@@ -126,6 +131,50 @@ export default function RegisteredView({
         <p className="register-error" role="alert">
           {error}
         </p>
+      )}
+
+      {exchange.drawn && (
+        <section className="assignment">
+          {assignment?.name ? (
+            <>
+              <h2>You're buying for</h2>
+              <p className="assignment-name">{assignment.name}</p>
+
+              {assignment.wishlist ? (
+                <>
+                  <h3>What they asked for</h3>
+                  <p className="assignment-note">{assignment.wishlist}</p>
+                </>
+              ) : (
+                <p className="register-empty">
+                  {assignment.name} didn't leave a wishlist.
+                </p>
+              )}
+
+              {assignment.preferences && (
+                <>
+                  <h3>Worth knowing</h3>
+                  <p className="assignment-note">
+                    {assignment.preferences}
+                  </p>
+                </>
+              )}
+
+              <p className="helper-text">
+                They don't know it's you, and there's no way for them
+                to find out.
+              </p>
+            </>
+          ) : (
+            <>
+              <h2>The draw has happened</h2>
+              <p className="register-empty" role="status">
+                Fetching the name you drew. If it doesn't appear,
+                reload the page.
+              </p>
+            </>
+          )}
+        </section>
       )}
 
       <h2>Your wishlist and preferences</h2>
@@ -280,7 +329,9 @@ export default function RegisteredView({
           once, honoring every restriction that has been set.
         </li>
         <li>
-          You're emailed the one name you're buying for. Nobody sees
+          You're emailed to say the draw has happened, and this page
+          shows the one name you're buying for. The name isn't in the
+          email: it gets forwarded and left open on screens. Nobody sees
           the full set of matches, including whoever organized the
           exchange.
         </li>
