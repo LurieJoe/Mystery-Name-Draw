@@ -38,6 +38,14 @@ import {
  */
 export function useExchange() {
   const [eventName, setEventName] = useState("");
+
+  /*
+   * Whether the registration link works for anybody who has it, or
+   * only for the addresses the organizer listed. On by default: a
+   * shareable link is the point of having one, and the organizer can
+   * shut it from the page where they copy it.
+   */
+  const [allowOpenJoin, setAllowOpenJoin] = useState(true);
 const [copied, setCopied] = useState(false);
 const [currentStep, setCurrentStep] = useState(1);
 const [currency, setCurrency] = useState("USD");
@@ -607,6 +615,7 @@ const [inviteEmail, setInviteEmail] = useState("");
     noGiftLimit,
     remindBeforeRegistrationDeadline,
     remindBeforeDrawDate,
+    allowOpenJoin,
     organizer: {
       name: organizerName,
       email: organizerEmail,
@@ -742,6 +751,10 @@ const [inviteEmail, setInviteEmail] = useState("");
       flag(data.remindBeforeRegistrationDeadline, true)
     );
     setRemindBeforeDrawDate(flag(data.remindBeforeDrawDate, true));
+
+    // Exported with the template, so next year's exchange opens as
+    // closed or open the way last year's did.
+    setAllowOpenJoin(flag(data.allowOpenJoin, true));
 
     setOrganizerName(text(organizer.name));
     setOrganizerEmail(text(organizer.email));
@@ -1048,6 +1061,8 @@ const addInvitee = () => {
     restrictionsOwnedBy,
     restrictionCountFor,
     markPendingAsInvited,
+    allowOpenJoin,
+    setAllowOpenJoin,
     registerParticipant,
     updateRegistration,
     withdrawRegistration,

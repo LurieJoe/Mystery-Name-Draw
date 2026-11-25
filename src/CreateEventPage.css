@@ -735,12 +735,15 @@
 }
 .tips-grid {
   display: grid;
-  /* Two columns on a phone gave each tip about 160px, which wraps to
-     two words a line. One column below that. */
-  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  /* auto-fit with no ceiling made five columns on a wide screen, which
+     left one tip stranded on a row of its own. The max-width is the
+     ceiling: two columns on a desktop, one on a phone, and nothing in
+     between that reads as a mistake. */
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+  max-width: 46rem;
   justify-content: start;
   column-gap: 3rem;
-  row-gap: 1rem;
+  row-gap: 1.25rem;
 
   margin-top: 1rem;
 }

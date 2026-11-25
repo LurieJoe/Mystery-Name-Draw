@@ -135,6 +135,68 @@ begin
     (select count(*) from jsonb_array_elements(
       organizer_view(v_organizer_token) -> 'invitees')) = 2);
 
+  -- --------------------------------------------------------------
+  -- Invitation only
+  -- --------------------------------------------------------------
+
+  perform assert('an exchange is open to anyone by default',
+    (exchange_preview(v_code) ->> 'openToAnyone')::boolean);
+
+  declare
+    v_shut jsonb;
+    v_shut_code text;
+    v_shut_organizer text;
+    v_listed uuid;
+  begin
+    v_shut := create_exchange(jsonb_build_object(
+      'name', 'Family only',
+      'registrationDeadline', (current_date + 7)::text,
+      'drawDate', (current_date + 21)::text,
+      'timeZone', 'America/New_York',
+      'allowOpenJoin', false,
+      'organizer', jsonb_build_object(
+        'name', 'Dana', 'email', 'dana2@example.com', 'participating', false),
+      'invitees', jsonb_build_array(
+        jsonb_build_object('name', 'Mina', 'email', 'mina@example.com'))
+    ));
+
+    v_shut_code := v_shut ->> 'eventCode';
+    v_shut_organizer := v_shut ->> 'organizerToken';
+
+    perform assert('an invitation-only exchange says so in its preview',
+      not (exchange_preview(v_shut_code) ->> 'openToAnyone')::boolean);
+
+    perform assert('and still shows what it is, since invited people need that',
+      exchange_preview(v_shut_code) ->> 'name' = 'Family only');
+
+    begin
+      perform join_exchange(v_shut_code, 'Stranger', 'stranger@example.com', null, null);
+      perform assert('a stranger is turned away', false);
+    exception when insufficient_privilege then
+      perform assert('a stranger is turned away', true);
+    end;
+
+    perform assert('while an invited address still gets in',
+      length(join_exchange(v_shut_code, 'Mina', 'mina@example.com', null, null)
+             ->> 'inviteeToken') = 64);
+
+    -- The organizer changes their mind.
+    perform set_open_join(v_shut_organizer, true);
+
+    perform assert('opening it up lets the stranger in after all',
+      length(join_exchange(v_shut_code, 'Stranger', 'stranger@example.com', null, null)
+             ->> 'inviteeToken') = 64);
+
+    perform set_open_join(v_shut_organizer, false);
+
+    begin
+      perform join_exchange(v_shut_code, 'Another', 'another@example.com', null, null);
+      perform assert('and shutting it again turns the next one away', false);
+    exception when insufficient_privilege then
+      perform assert('and shutting it again turns the next one away', true);
+    end;
+  end;
+
   raise notice '';
   raise notice 'All joining checks passed.';
 end;
