@@ -87,12 +87,24 @@ function splitArgs(raw) {
 // What the browser asks for
 // --------------------------------------------------------------------
 
+/*
+ * The browser is not the only caller. The Edge Function talks to the
+ * same database over the same PostgREST, and its calls are the ones
+ * that run unattended at nine in the morning with nobody watching, so
+ * they are the ones that most need checking.
+ */
+const CALLER_DIRS = ["src", "supabase/functions"];
+
 function callsFromClient() {
-  const dir = path.join(ROOT, "src");
   const calls = [];
 
-  for (const file of walk(dir)) {
+  for (const file of CALLER_DIRS.flatMap((dir) =>
+    fs.existsSync(path.join(ROOT, dir)) ? walk(path.join(ROOT, dir)) : []
+  )) {
     if (!/\.tsx?$/.test(file)) continue;
+    // The generated copy of the draw algorithm makes no calls, and
+    // reading it twice would double every count.
+    if (file.includes("/_shared/")) continue;
 
     const source = fs.readFileSync(file, "utf8");
     const pattern =
