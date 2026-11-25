@@ -54,9 +54,22 @@ secrets are missing.
 
 1. Create a project at supabase.com. The free plan is the one being
    discussed here.
-2. Open the SQL editor and run, in order:
-   `supabase/migrations/0001_schema.sql`, `0002_functions.sql`,
-   `0003_messages.sql`, `0004_ping.sql`.
+2. Put all four migrations on the clipboard at once:
+
+   ```
+   cd "/Users/luriejoe/Developer/My Apps/Mystery Name Draw"
+   cat supabase/migrations/0001_schema.sql \
+       supabase/migrations/0002_functions.sql \
+       supabase/migrations/0003_messages.sql \
+       supabase/migrations/0004_ping.sql | pbcopy
+   ```
+
+   Clear the SQL editor first, then paste and run. The editor keeps
+   what was there before, so pasting after a previous script runs both
+   of them, and the second copy of 0001 fails with
+   `relation "exchanges" already exists`. One paste of all four also
+   beats four separate ones for the same reason: fewer chances for the
+   editor to be holding something you did not mean to run.
 3. From Project Settings → API, copy the **Project URL** and the
    **anon public** key.
 

@@ -21,11 +21,15 @@
 -- Helpers
 -- --------------------------------------------------------------------
 
+-- digest() and gen_random_bytes() come from pgcrypto, and Supabase
+-- installs that into an "extensions" schema rather than public. A
+-- search_path without it would find neither. A schema that does not
+-- exist is ignored, so naming it costs nothing anywhere else.
 create or replace function token_hash(p_token text)
 returns text
 language sql
 immutable
-set search_path = public, pg_temp
+set search_path = public, extensions, pg_temp
 as $$
   select encode(digest(coalesce(p_token, ''), 'sha256'), 'hex');
 $$;
@@ -38,7 +42,7 @@ create or replace function new_token()
 returns text
 language sql
 volatile
-set search_path = public, pg_temp
+set search_path = public, extensions, pg_temp
 as $$
   select encode(gen_random_bytes(32), 'hex');
 $$;

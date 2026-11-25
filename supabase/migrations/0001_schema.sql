@@ -11,6 +11,9 @@
 -- through the SECURITY DEFINER functions in 0002_functions.sql, which
 -- take a token, check it, and return only what that holder may see.
 
+-- Supabase already has this, installed into an "extensions" schema.
+-- On a bare Postgres it lands in public. Either way the functions that
+-- use it name both schemas in their search_path.
 create extension if not exists pgcrypto;
 
 -- --------------------------------------------------------------------
