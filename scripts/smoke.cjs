@@ -795,6 +795,58 @@ check(
   ["You're buying for"]
 );
 
+/*
+ * Arriving from an invitation, before registering.
+ *
+ * An invitation link always hands this browser a working token, and
+ * the page used to take that as proof of registration: it said
+ * "You're in" to somebody the database still had as Invited, who was
+ * therefore not in the draw. Several people read that, believed it,
+ * and closed the page.
+ */
+const invitedView = {
+  ...registrationView,
+  me: { ...registrationView.me, status: "Invited" },
+};
+
+check(
+  "somebody who has not registered yet is told so",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: invitedView,
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onSetReminders: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  [
+    "You're almost registered",
+    // The action, at the top, where they are already looking.
+    '<div class="register-now">',
+    "Register me",
+  ],
+  // The claim that started this.
+  ["You're in", "You're registered for"]
+);
+
+check(
+  "and somebody who has registered is not asked to again",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: registrationView,
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onSetReminders: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  ["You're in", "Save changes"],
+  ["You're almost registered", "register-now", "Register me"]
+);
+
 // Messaging. Two threads on one page, and the whole point of the app
 // rests on the second one never naming anybody: a receiver writes to
 // "Your Giver" and that is all they are ever told. These checks exist

@@ -368,3 +368,34 @@
     max-width: 100%;
   }
 }
+
+/* The one thing somebody arriving from an invitation has to do.
+   At the top, because the button at the foot of the page was below
+   everything else and people left thinking they were already in. */
+.register-page .register-now {
+  margin: 1.5rem 0 2rem;
+  padding: 1.5rem;
+
+  border: 1px solid var(--border);
+  border-left: 4px solid #4f46e5;
+  border-radius: 14px;
+
+  background: var(--bg);
+}
+
+.register-page .register-now .landing-cta {
+  padding: 1.05rem 2rem;
+  font-size: 1.05rem;
+  min-width: 14rem;
+}
+
+.register-page .register-now .helper-text {
+  margin: 0.9rem 0 0;
+}
+
+@media (max-width: 480px) {
+  .register-page .register-now .landing-cta {
+    width: 100%;
+    min-width: 0;
+  }
+}

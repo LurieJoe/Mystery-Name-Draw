@@ -66,6 +66,15 @@ export default function RegisteredView({
 }) {
   const { me, others, myRestrictions, exchange } = view;
 
+  /*
+   * Holding a working token is not the same as having registered.
+   * An invitation link always provides one, so this page used to
+   * greet somebody with "You're in" while the database still had them
+   * as Invited - and they are not in the draw until register_participant
+   * has run, which is what the button below does.
+   */
+  const registered = me.status === "Registered";
+
   const [name, setName] = useState(me.name ?? "");
   const [wishlist, setWishlist] = useState(me.wishlist ?? "");
   const [preferences, setPreferences] = useState(me.preferences ?? "");
@@ -121,12 +130,46 @@ export default function RegisteredView({
 
   return (
     <>
-      <h1>You're in</h1>
+      <h1>{registered ? "You're in" : "You're almost registered"}</h1>
 
       <p className="content-lede">
-        Thanks, {me.name || name}. You're registered for{" "}
-        {exchange.name || "this exchange"}.
+        {registered ? (
+          <>
+            Thanks, {me.name || name}. You're registered for{" "}
+            {exchange.name || "this exchange"}.
+          </>
+        ) : (
+          <>
+            Hi {me.name || name}. {exchange.organizerName || "The organizer"}{" "}
+            invited you to {exchange.name || "this exchange"}. One tap and
+            you're in.
+          </>
+        )}
       </p>
+
+      {/* At the top, because the button at the foot of this page was
+          below everything else and people left thinking they were
+          done. Same action, where they are already looking. */}
+      {!registered && (
+        <div className="register-now">
+          <button
+            type="button"
+            className="landing-cta"
+            disabled={busy}
+            onClick={() => {
+              onSave({ name, wishlist, preferences });
+              setSaved(true);
+            }}
+          >
+            {busy ? "Registering…" : "Register me"}
+          </button>
+
+          <p className="helper-text">
+            You can add a wishlist further down now, or come back and
+            add one any time before the draw.
+          </p>
+        </div>
+      )}
 
       <dl className="register-facts">
         <div>
@@ -296,7 +339,13 @@ export default function RegisteredView({
             setSaved(true);
           }}
         >
-          {busy ? "Saving…" : "Save changes"}
+          {busy
+            ? registered
+              ? "Saving…"
+              : "Registering…"
+            : registered
+            ? "Save changes"
+            : "Register me"}
         </button>
 
         {saved && !busy && !error && (

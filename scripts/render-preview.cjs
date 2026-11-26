@@ -113,7 +113,14 @@ const REGISTRATION_PROPS = {
           preferences: "Allergic to shellfish",
         }
       : null,
-    view: afterTheDraw
+    // invited=1 shows the page as somebody arriving from an
+    // invitation sees it, before they have registered.
+    view: overrides.invited === "1"
+      ? {
+          ...registrationView,
+          me: { ...registrationView.me, status: "Invited" },
+        }
+      : afterTheDraw
       ? {
           ...registrationView,
           exchange: { ...registrationView.exchange, drawn: true },
