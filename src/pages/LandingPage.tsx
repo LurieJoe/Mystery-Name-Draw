@@ -10,8 +10,8 @@ const STEPS = [
     body: "Name it, choose a draw date and a budget, and say whether you're taking part.",
   },
   {
-    title: "Share one link",
-    body: "Invitees register in seconds. No account, no app, and no password.",
+    title: "Send the invitations",
+    body: "Each person gets their own private link by email. Or share one link and let people join themselves.",
   },
   {
     title: "Names go out privately",
@@ -22,7 +22,7 @@ const STEPS = [
 const DIFFERENCES = [
   {
     title: "Restrictions that work in one direction",
-    body: "“Won’t give to” and “won’t receive from” are different things, and each person sets their own. Yours never appear on anyone else’s list.",
+    body: "“Won’t give to” and “won’t receive from” are different things. Anyone can set their own, and you can set them on somebody’s behalf. Neither kind shows up on anyone else’s list.",
   },
   {
     title: "Problems surface before the draw",
@@ -51,9 +51,11 @@ export default function LandingPage() {
             <h1>Draw names without making anyone sign up.</h1>
 
             <p className="landing-lede">
-              Set up a gift exchange, a book swap, or a classroom draw in
-              about two minutes. Share one link. Everyone finds out who
-              they have, privately.
+              Set up a gift exchange, a book swap, or a classroom draw
+              in about two minutes. Everyone adds a wishlist and can say
+              who they'd rather not draw &mdash; and you can set that for
+              them too. Each person gets their own link and finds out who
+              they drew, and even you won't know who has who.
             </p>
 
             <div className="landing-cta-row">
@@ -75,10 +77,6 @@ export default function LandingPage() {
               invite.
             </p>
 
-            <p className="landing-note landing-note-wip">
-              Early preview: you can build an exchange and check the
-              draw, but nothing is saved between visits yet.
-            </p>
           </div>
 
           <div className="landing-hero-art">

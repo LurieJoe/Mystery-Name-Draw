@@ -198,7 +198,25 @@ check(
 check(
   "LandingPage on its own",
   () => renderToStaticMarkup(React.createElement(LandingPage)),
-  ["How it works", "Start a Gift Exchange", "pigeon-messenger.png"]
+  [
+    "How it works",
+    "Start a Gift Exchange",
+    "pigeon-messenger.png",
+    // The pitch, pinned: each clause is a promise the app has to keep.
+    "even you won't know who has who",
+    "can say who they'd rather not draw",
+    "Send the invitations",
+  ],
+  // The old framing, from when the shared code was the only way in.
+  // Invitations have been the main path since November 2026.
+  [
+    "Share one link.",
+    "Everyone finds out who they have",
+    // Written before there was a database. It told visitors their
+    // work would not be saved, while a real exchange was running.
+    "Early preview",
+    "nothing is saved",
+  ]
 );
 
 for (const [step, name, needle, forbidden] of STEPS) {
