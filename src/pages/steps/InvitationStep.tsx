@@ -58,7 +58,14 @@ export default function InvitationStep() {
 
      <h3>Invitation List</h3>
  
-    <div className="invitee-entry-row">
+    {editingInviteeId !== null && (
+      <p className="editing-banner" role="status">
+        Editing <strong>{nameForInvitee(editingInviteeId)}</strong>.
+        Change what you need and choose Save Changes.
+      </p>
+    )}
+
+    <div className="invitee-entry-row" id="invitee-entry">
 
       <input
         ref={participantNameRef}
@@ -90,6 +97,20 @@ export default function InvitationStep() {
         : "Add Participant"
     }
       </button>
+
+      {editingInviteeId !== null && (
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => {
+            setEditingInviteeId(null);
+            setInviteName("");
+            setInviteEmail("");
+          }}
+        >
+          Cancel
+        </button>
+      )}
 
     </div>
 
@@ -128,6 +149,25 @@ export default function InvitationStep() {
                       setInviteName(participant.name);
                       setInviteEmail(participant.email);
                       setEditingInviteeId(participant.id);
+
+                      /*
+                       * Take them to the form, which is at the top of
+                       * a list that can run to a dozen people. Filling
+                       * it silently looked exactly like a button that
+                       * did nothing, and the obvious next move - add
+                       * the person again - makes two of them, and two
+                       * people buying for one.
+                       */
+                      setTimeout(() => {
+                        document
+                          .getElementById("invitee-entry")
+                          ?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center",
+                          });
+
+                        participantNameRef.current?.focus();
+                      }, 50);
                     }}
                   >
                     Edit

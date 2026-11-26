@@ -361,6 +361,36 @@ const restrictionEditor = {
     ownerId === "a" && otherId === "c" && direction === "give",
 };
 
+// Editing somebody fills the form at the top of the list. On a long
+// list that is out of sight, so the screen has to say whose details
+// are in it - otherwise the next move is to add the person again,
+// which makes two of them and two people buying for one.
+check(
+  "editing somebody says whose details are in the form",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(Harness, {
+        step: 4,
+        Component: InvitationStep,
+        extra: {
+          editingInviteeId: "a",
+          nameForInvitee: () => "Rowan Hale",
+        },
+      })
+    ),
+  [
+    // The banner itself, not just the words, which appear elsewhere
+    // on this screen: asserting on "Editing" alone passed with the
+    // banner deleted.
+    'class="editing-banner"',
+    "Change what you need",
+    "Rowan Hale",
+    "Save Changes",
+    "Cancel",
+  ],
+  ["Add Participant"]
+);
+
 check(
   "the invitation screen carries the button that actually sends them",
   () =>
