@@ -10,6 +10,7 @@ import {
   messageWaitingEmail,
   registrationClosedEmail,
   registrationReminderEmail,
+  invitationsSentEmail,
   rollCallEmail,
   type Email,
 } from "./templates.js";
@@ -51,6 +52,13 @@ const toParticipants: [string, Email][] = [
 ];
 
 const toOrganizer: [string, Email][] = [
+  ["invitations sent", invitationsSentEmail({
+    organizerName: "Dana", exchangeName: "Office Secret Santa", link: MANAGE,
+    recipients: [
+      { name: "Rowan", email: "rowan@example.com" },
+      { name: "Mina", email: "mina@example.com" },
+    ],
+  })],
   ["roll call", rollCallEmail({
     organizerName: "Dana", exchangeName: "Office Secret Santa", link: MANAGE,
     registered: 12, invited: 14, drawDate: "December 16",
@@ -74,6 +82,38 @@ check("January is not off by one",
 check("something that is not a date is left alone",
   formatEmailDate("soon") === "soon");
 check("and neither is an empty one", formatEmailDate("") === "");
+
+// The organizer's record of a send. It must name who it reached and
+// must not carry anybody's personal link, which is the one thing that
+// would turn a receipt into a way of opening somebody else's page.
+{
+  const body = invitationsSentEmail({
+    organizerName: "Dana", exchangeName: "Office Secret Santa", link: MANAGE,
+    recipients: [
+      { name: "Rowan", email: "rowan@example.com" },
+      { name: "Mina", email: "mina@example.com" },
+    ],
+  }).body;
+
+  check(
+    "the organizer's receipt names who it went to",
+    body.includes("Rowan - rowan@example.com") &&
+      body.includes("Mina - mina@example.com")
+  );
+
+  check(
+    "and counts them",
+    invitationsSentEmail({
+      organizerName: "Dana", exchangeName: "X", link: MANAGE,
+      recipients: [{ name: "Rowan", email: "rowan@example.com" }],
+    }).subject === "X: 1 person invited"
+  );
+
+  check(
+    "and carries no personal link, only the management one",
+    !body.includes("/me/") && body.includes(MANAGE)
+  );
+}
 
 // The three facts an invitation carries sit on their own lines, so
 // somebody reading on a phone can glance at them rather than parse a

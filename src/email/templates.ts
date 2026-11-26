@@ -344,6 +344,53 @@ export function messageWaitingEmail(details: Personal): Email {
 // --------------------------------------------------------------------
 
 /** Registration closed: who came, and who did not. */
+/**
+ * A record of invitations going out, to the organizer who sent them.
+ *
+ * Not a copy of the invitation. Each one carries the private link
+ * that opens that person's own page and shows who they drew, so
+ * forwarding one to anybody - the organizer included - would hand
+ * over somebody else's. This lists who it went to and nothing more.
+ */
+export function invitationsSentEmail(details: {
+  organizerName: string;
+  exchangeName: string;
+  link: string;
+  /** Who it went to this time, in the order they were sent. */
+  recipients: { name: string; email: string }[];
+}): Email {
+  const count = details.recipients.length;
+  const people = count === 1 ? "1 person" : `${count} people`;
+
+  return {
+    subject: `${details.exchangeName}: ${people} invited`,
+    body: compose(
+      [
+        `Hi ${details.organizerName},`,
+        ``,
+        `${people} ${count === 1 ? "has" : "have"} just been invited ` +
+          `to ${details.exchangeName}. Each one got a private link of ` +
+          `their own, so there's no code for them to type.`,
+        ``,
+        `Who it went to:`,
+        ...details.recipients.map(
+          (person) => `  ${person.name} - ${person.email}`
+        ),
+        ``,
+        `If an address looks wrong, fix it on your management page ` +
+          `and send again. They'll get a fresh link and the old one ` +
+          `stops working.`,
+        ``,
+        `Your management page:`,
+        details.link,
+        ``,
+        MANAGEMENT_LINK_WARNING,
+      ],
+      ORGANIZER_SIGNOFF
+    ),
+  };
+}
+
 export function rollCallEmail(details: {
   organizerName: string;
   exchangeName: string;

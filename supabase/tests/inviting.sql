@@ -114,6 +114,27 @@ begin
   perform assert('everybody on the list is invited',
     (v_sent ->> 'queued')::int = 3 and (v_sent ->> 'skipped')::int = 0);
 
+  -- A record for the organizer, naming who it reached.
+  perform assert('the organizer is told what went out',
+    exists (select 1 from notifications
+            where exchange_id = v_exchange_id
+              and kind = 'invitations_sent'
+              and invitee_id is null));
+
+  perform assert('and it names each person it went to',
+    (select jsonb_array_length(context -> 'recipients')
+     from notifications
+     where exchange_id = v_exchange_id and kind = 'invitations_sent'
+     order by created_at desc limit 1) = 3);
+
+  perform assert('by name and address, and nothing else',
+    (select context -> 'recipients' -> 0 ? 'name'
+        and context -> 'recipients' -> 0 ? 'email'
+        and not (context -> 'recipients' -> 0 ? 'token')
+     from notifications
+     where exchange_id = v_exchange_id and kind = 'invitations_sent'
+     order by created_at desc limit 1));
+
   perform assert('and the organizer is not emailed an invitation',
     not exists (
       select 1 from notifications n
@@ -140,6 +161,10 @@ begin
 
   perform assert('running it again sends nothing, because nobody is pending',
     (v_sent ->> 'queued')::int = 0);
+
+  perform assert('and the organizer is not told about a send that was not one',
+    (select count(*) from notifications
+     where exchange_id = v_exchange_id and kind = 'invitations_sent') = 1);
 
   perform assert('and there is still one invitation per person',
     (select count(*) from notifications

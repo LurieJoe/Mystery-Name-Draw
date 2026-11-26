@@ -18,6 +18,7 @@ import {
   drawResultEmail,
   formatEmailDate,
   invitationEmail,
+  invitationsSentEmail,
   messageWaitingEmail,
   registrationClosedEmail,
   registrationReminderEmail,
@@ -148,6 +149,16 @@ function render(row: Claimed): Email | null {
 
     case "message_waiting":
       return messageWaitingEmail(personal);
+
+    case "invitations_sent":
+      return invitationsSentEmail({
+        organizerName: row.organizerName,
+        exchangeName: row.exchangeName,
+        link,
+        recipients: Array.isArray(row.context.recipients)
+          ? (row.context.recipients as { name: string; email: string }[])
+          : [],
+      });
 
     case "registration_roll_call":
       return rollCallEmail({
