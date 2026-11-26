@@ -458,6 +458,13 @@ check(
 
 // Wrapped, because a panel that renders nothing is the point here and
 // the harness rightly treats an empty render as a broken one.
+/*
+ * Not covered here: the panel's failure message. It only appears
+ * after a click, and these checks render without one. Rendering the
+ * message markup by hand would pass whatever the component did, so
+ * there is no check rather than a check that cannot fail.
+ */
+
 check(
   "an exchange with nobody on the list offers nothing to send",
   () =>

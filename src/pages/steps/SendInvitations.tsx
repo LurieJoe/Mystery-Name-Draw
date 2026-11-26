@@ -19,6 +19,15 @@ export default function SendInvitations() {
     useExchangeContext();
 
   const [result, setResult] = useState<string | null>(null);
+
+  /*
+   * Kept here rather than read from the hook's saveError, which is
+   * only rendered on the review screen. A send that failed used to
+   * return silently from this panel: no message, no email, and no way
+   * for the organizer to tell the difference between "it worked" and
+   * "it didn't".
+   */
+  const [failure, setFailure] = useState<string | null>(null);
   const [confirmingResend, setConfirmingResend] = useState(false);
 
   if (!invitationCounts) return null;
@@ -34,11 +43,18 @@ export default function SendInvitations() {
 
   const send = async (resend: boolean) => {
     setResult(null);
+    setFailure(null);
     setConfirmingResend(false);
 
     const outcome = await sendInvitations(resend);
 
-    if (!outcome.ok) return;
+    if (!outcome.ok) {
+      setFailure(
+        outcome.message ?? "The invitations couldn't be sent just now."
+      );
+
+      return;
+    }
 
     /*
      * The timing belongs here, not only in the line above that
@@ -135,6 +151,12 @@ export default function SendInvitations() {
       {result && (
         <p className="invitation-result" role="status">
           {result}
+        </p>
+      )}
+
+      {failure && (
+        <p className="invitation-failure" role="alert">
+          {failure} Nothing was sent, so you can try again.
         </p>
       )}
     </div>

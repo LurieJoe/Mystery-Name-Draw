@@ -1619,3 +1619,24 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* A send that failed. Loud, because the alternative - which is what
+   this panel did - is an organizer who thinks the email went. */
+.invitation-failure {
+  margin: 1rem 0 0;
+  padding: 0.85rem 1rem;
+
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #dc2626;
+  border-radius: 10px;
+
+  color: #991b1b;
+  background: #fef2f2;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .invitation-failure {
+  color: #fecaca;
+  background: #450a0a;
+  border-color: #7f1d1d;
+}

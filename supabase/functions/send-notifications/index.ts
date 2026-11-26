@@ -64,6 +64,9 @@ const SITE_URL =
  */
 const FROM = "Mystery Name Draw <hello@mysterynamedraw.com>";
 
+/** Eight sends a second, under Resend's ten-a-second ceiling. */
+const SEND_INTERVAL_MS = 125;
+
 async function rpc<T>(name: string, args: Record<string, unknown>) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`, {
     method: "POST",
@@ -252,7 +255,24 @@ Deno.serve(async (request) => {
     );
   }
 
-  for (const row of due) {
+  for (const [index, row] of due.entries()) {
+    /*
+     * Paced, because Resend allows ten requests a second and refuses
+     * the rest with a 429. Twenty-six notifications went out in under
+     * two seconds on a real exchange and four of them were turned
+     * away: one person's invitation never arrived while their
+     * reminder did, which looked like a bug in invitations and was
+     * not. The failures were retried an hour later, so nothing was
+     * lost, but an hour is a long time to wonder.
+     *
+     * Eight a second rather than ten, because the limit is a ceiling
+     * and the clock on the far side is not ours. A full batch of
+     * fifty takes about six seconds.
+     */
+    if (index > 0) {
+      await new Promise((resolve) => setTimeout(resolve, SEND_INTERVAL_MS));
+    }
+
     try {
       const email = render(row);
 
