@@ -99,7 +99,14 @@ const STEPS = [
     // The old label promised an inviting feature that never existed.
     ["Allow participants to invite others"],
   ],
-  [4, "InvitationStep", "Invitation List"],
+  [
+    4,
+    "InvitationStep",
+    ["Invitation List", "Sharing the link yourself"],
+    // These buttons copy a message; they have never sent one. Said
+    // plainly, now that this screen also carries the button that does.
+    ["Email Invitation", "Text Invitation"],
+  ],
   [
     5,
     "ManageStep",
@@ -353,6 +360,24 @@ const restrictionEditor = {
   restrictionIsTheirs: (ownerId, otherId, direction) =>
     ownerId === "a" && otherId === "c" && direction === "give",
 };
+
+check(
+  "the invitation screen carries the button that actually sends them",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(Harness, {
+        step: 4,
+        Component: InvitationStep,
+        extra: {
+          invitationCounts: {
+            pending: 3, invited: 0, registered: 0, waiting: 0,
+          },
+          sendInvitations: async () => ({ ok: true, queued: 0, skipped: 0 }),
+        },
+      })
+    ),
+  ["Email 3 people", "Invitation List"]
+);
 
 check(
   "a participant's own restriction is shown, but not as the organizer's to undo",

@@ -3,6 +3,7 @@ import {
   INVITED,
   REGISTERED,
 } from "../../exchange/types";
+import SendInvitations from "./SendInvitations";
 import { useExchangeContext } from "../../exchange/context";
 
 /** Step 4: the invitation list, restrictions, and the email preview. */
@@ -390,6 +391,20 @@ export default function InvitationStep() {
       )}
     </div>
 
+      {/* The way to invite people, on the screen people come to in
+          order to invite people. It was on the two screens either
+          side of this one and not on this one, which is the screen
+          that is actually about invitations. */}
+      <SendInvitations />
+
+      <h3>Sharing the link yourself</h3>
+
+      <p className="helper-text">
+        If you'd rather send it your own way, here's the same
+        invitation to copy. The link below is shared by everyone, so
+        it's the one to use in a group chat.
+      </p>
+
       <h3>Registration Link</h3>
 
     <div className="signup-link">
@@ -427,11 +442,11 @@ export default function InvitationStep() {
         );
   
         alert(
-          "Invitation copied to clipboard. Paste it into your email application."
+          "Copied. Paste it into your email application."
         );
       }}
     >
-      Email Invitation
+      Copy for email
     </button>
 
     <button
@@ -443,11 +458,11 @@ export default function InvitationStep() {
         );
 
         alert(
-          "Invitation copied to your clipboard. Paste it into a text message."
+          "Copied. Paste it into a text message."
         );
       }}
     >
-      Text Invitation
+      Copy for a text message
     </button>
 
     </div>
