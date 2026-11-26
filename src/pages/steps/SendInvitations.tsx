@@ -40,10 +40,17 @@ export default function SendInvitations() {
 
     if (!outcome.ok) return;
 
+    /*
+     * The timing belongs here, not only in the line above that
+     * appears on a later visit. Queued is not sent: the sender runs
+     * once an hour, so somebody who clicks and then watches an empty
+     * inbox has no way of knowing whether it worked.
+     */
     setResult(
       outcome.queued === 0
         ? "Nothing to send: everybody is either already invited or waiting."
-        : `${people(outcome.queued)} will get an invitation.` +
+        : `${people(outcome.queued)} will get an invitation. Email goes ` +
+            `out hourly, so give it a little while.` +
             (outcome.skipped > 0
               ? ` ${people(outcome.skipped)} opted out of email and were left alone.`
               : "")
