@@ -265,6 +265,72 @@ for (const [name, needles, forbidden] of [
   );
 }
 
+// What the management link lands on. An organizer comes back to find
+// out who has registered, and used to walk four screens to do it.
+const ManageStep = require(`${OUT}/pages/steps/ManageStep.js`).default;
+
+const thirteen = [
+  // The organizer's own row carries "Organizer", not "Registered":
+  // they are in the draw by taking part, not by registering. A
+  // fixture that said Registered hid whether that was handled.
+  { id: "organizer", name: "Evelyn", email: "e@example.com", status: "Organizer" },
+  { id: "a", name: "Crys", email: "c@example.com", status: "Registered" },
+  { id: "b", name: "Sofia", email: "s@example.com", status: "Registered" },
+  { id: "c", name: "Marcio", email: "m@example.com", status: "Invited" },
+  { id: "d", name: "Paulo", email: "p@example.com", status: "Invited" },
+  { id: "e", name: "Eni", email: "en@example.com", status: "Invite Pending" },
+];
+
+check(
+  "the manage screen says who is in before anything else",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(Harness, {
+        step: 5,
+        Component: ManageStep,
+        extra: {
+          roster: thirteen,
+          registrationOpen: true,
+          registrationDeadline: "2026-12-11",
+        },
+      })
+    ),
+  [
+    "<strong>3</strong> of 6 registered",
+    // Named, because "who registered" is a question about people.
+    "Evelyn, Crys, Sofia",
+    "Marcio, Paulo, Eni",
+    "Still to register (3)",
+    // And the ones nobody has written to yet.
+    "1 person hasn't been emailed yet",
+  ]
+);
+
+check(
+  "and copes with an exchange nobody has joined",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(Harness, {
+        step: 5,
+        Component: ManageStep,
+        extra: {
+          roster: [
+            { id: "a", name: "Crys", email: "c@example.com", status: "Invited" },
+          ],
+          registrationOpen: false,
+          registrationDeadline: "2026-12-11",
+        },
+      })
+    ),
+  [
+    // The count sits in its own element, so the number and the rest
+    // of the sentence are not one string in the markup.
+    "<strong>0</strong> of 1 registered",
+    "Nobody yet.",
+    "Registration has closed.",
+  ]
+);
+
 // The organizer's one lever over messaging. Off for everybody or not
 // at all: a per-person mute would single somebody out, and the
 // organizer is the only person who can see every pairing.

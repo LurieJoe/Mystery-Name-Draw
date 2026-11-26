@@ -1654,3 +1654,64 @@
 
   background: var(--accent-bg);
 }
+
+/* -------------------------------------------------------------- */
+/* Who is in, answered on arrival.                                */
+/*                                                                */
+/* First thing on the manage screen, which is where the           */
+/* management link now lands, because "who has registered" is     */
+/* what an organizer comes back to find out.                      */
+/* -------------------------------------------------------------- */
+
+.registration-summary {
+  margin: 1.25rem 0 2rem;
+  padding: 1.5rem;
+
+  border: 1px solid var(--border);
+  border-left: 4px solid #4f46e5;
+  border-radius: 14px;
+
+  background: var(--bg);
+}
+
+.summary-headline {
+  margin: 0 0 0.35rem;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+
+.summary-headline strong {
+  font-size: 2.1rem;
+  color: #4f46e5;
+}
+
+.summary-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.summary-lists h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.summary-lists p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .registration-summary {
+    padding: 1.1rem;
+  }
+
+  .summary-headline {
+    font-size: 1.35rem;
+  }
+
+  .summary-headline strong {
+    font-size: 1.8rem;
+  }
+}

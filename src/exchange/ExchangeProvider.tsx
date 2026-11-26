@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import { MANAGE_STEP } from "./types";
 import { matchManageToken, navigate, usePath } from "../router";
 import { ExchangeContext } from "./context";
 import { useExchange } from "./useExchange";
@@ -30,6 +31,19 @@ export function ExchangeProvider({ children }: { children: ReactNode }) {
     void exchange.restoreExchange(tokenFromLink ?? undefined).then((ok) => {
       if (!tokenFromLink) {
         return;
+      }
+
+      /*
+       * Straight to the manage screen, not to step one of the wizard.
+       *
+       * The management link is how an organizer comes back to an
+       * exchange that already exists, and what they come back for is
+       * almost always "who has registered". Landing on the settings
+       * form meant walking the whole wizard - Continue, Save Changes,
+       * Invite Participants - and scrolling each screen to find out.
+       */
+      if (ok) {
+        exchange.setCurrentStep(MANAGE_STEP);
       }
 
       // Off the address bar either way. It worked, and this browser

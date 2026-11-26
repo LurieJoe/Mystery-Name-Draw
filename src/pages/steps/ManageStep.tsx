@@ -1,5 +1,6 @@
 import { useState } from "react";
 import MessagingSetting from "./MessagingSetting";
+import RegistrationSummary from "./RegistrationSummary";
 import OpenJoinSetting from "./OpenJoinSetting";
 import SendInvitations from "./SendInvitations";
 import { useExchangeContext } from "../../exchange/context";
@@ -27,6 +28,8 @@ export default function ManageStep() {
         </div>
 
         <h2>Manage Exchange</h2>
+
+        <RegistrationSummary />
 
         <p className="step-description">
         Manage participant restrictions, registration settings, and draw options for this exchange.

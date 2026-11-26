@@ -51,6 +51,12 @@ export type Restriction = {
 // restrictions naming them survive toggling "Include me" off and on.
 export const ORGANIZER_ID = "organizer";
 
+/**
+ * Where the management link lands: the screen about an exchange that
+ * already exists, rather than the form that creates one.
+ */
+export const MANAGE_STEP = 5;
+
 export const INVITE_PENDING = "Invite Pending";
 export const INVITED = "Invited";
 export const REGISTERED = "Registered";
