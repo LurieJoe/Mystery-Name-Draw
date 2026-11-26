@@ -1463,14 +1463,19 @@
 /* sends real email to real people.                               */
 /* -------------------------------------------------------------- */
 
+/* Was a tinted panel with a soft border, which reads as a tip rather
+   than as something to do - and tips get skimmed past. The surface is
+   plain now and the button carries the weight, because the button is
+   the point of the whole panel. */
 .send-invitations {
-  margin: 1.5rem 0;
-  padding: 1.25rem 1.5rem;
+  margin: 1.75rem 0;
+  padding: 1.5rem;
 
-  border: 1px solid var(--accent-border);
+  border: 1px solid var(--border);
+  border-left: 4px solid #4f46e5;
   border-radius: 14px;
 
-  background: var(--accent-bg);
+  background: var(--bg);
 }
 
 .send-invitations h3 {
@@ -1482,7 +1487,15 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   align-items: center;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
+}
+
+/* The one action on this panel, sized to say so. */
+.send-invitations .invitation-actions > .primary-button {
+  min-width: 16rem;
+  padding: 1.05rem 2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
 }
 
 .invitation-confirm {
@@ -1513,6 +1526,11 @@
   .invitation-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .send-invitations .invitation-actions > .primary-button {
+    min-width: 0;
+    width: 100%;
   }
 }
 
