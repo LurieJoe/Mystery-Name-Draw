@@ -95,6 +95,10 @@ const STEPS = [
       "Step 3 of 3",
       "/#/event/",
       "Let anyone with the link join",
+      // The tips are split by who can act on them.
+      "Yours to decide",
+      "What everyone else is told",
+      "You don't have to pass these on",
     ],
     // The old label promised an inviting feature that never existed.
     ["Allow participants to invite others"],
@@ -773,9 +777,20 @@ check(
     "Teo Vasquez",
     "Anything with chili in it",
     "Allergic to shellfish",
+    // The shopping tips, which used to sit on the organizer's
+    // confirmation screen where the people they were written for
+    // never saw them.
+    "Go by what they wrote above",
+    "Stay within the budget",
+    "have fun",
   ],
-  // The page must not still claim the name arrives by email.
-  ["emailed the one name"]
+  [
+    // The page must not still claim the name arrives by email.
+    "emailed the one name",
+    // Nor nudge somebody to write a wishlist before a draw that has
+    // already happened.
+    "whoever draws you has only this to go on",
+  ]
 );
 
 check(
@@ -808,6 +823,23 @@ const invitedView = {
   ...registrationView,
   me: { ...registrationView.me, status: "Invited" },
 };
+
+check(
+  "before the draw, the nudge is about the wishlist, not shopping",
+  () =>
+    renderToStaticMarkup(
+      React.createElement(RegisteredView, {
+        view: registrationView,
+        onSave: () => {},
+        onToggleRestriction: () => {},
+        onSetReminders: () => {},
+        onWithdraw: () => {},
+      })
+    ),
+  ["whoever draws you has only this to go on"],
+  // Nothing to shop for yet, so no shopping advice.
+  ["Stay within the budget", "Go by what they wrote above"]
+);
 
 check(
   "somebody who has not registered yet is told so",

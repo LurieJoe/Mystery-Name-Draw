@@ -399,3 +399,22 @@
     min-width: 0;
   }
 }
+
+/* The tips that only make sense once there is a name to shop for.
+   Inside the assignment block, under the wishlist they refer to. */
+.assignment .shopping-tips {
+  margin: 1.25rem 0 0;
+  padding: 1.1rem 1.25rem;
+  list-style: none;
+
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #ddd6fe;
+
+  display: grid;
+  gap: 0.6rem;
+}
+
+.assignment .shopping-tips li {
+  line-height: 1.5;
+}

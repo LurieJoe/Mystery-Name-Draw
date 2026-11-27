@@ -101,34 +101,59 @@ export default function CreatedStep() {
 
     <div className="tips-panel">
       <div className="tips-text">
-    <h3>Tips for a Successful Gift Exchange</h3>
+    {/* Split, because this list mixed two jobs. Half of it was
+        advice the organizer can act on; the other half was advice
+        for people who were never going to see this screen. Those
+        now reach them where they can act on them: on their own page
+        when they register, and again when the draw hands them a
+        name. */}
+    <h3>Yours to decide</h3>
 
     <div className="tips-grid">
 
     <div className="tip-item">
-    🎁 Stay within the agreed exchange budget.
+    🎲 Whether this is a traditional exchange or a Yankee Swap.
     </div>
 
     <div className="tip-item">
-    📝 Complete wishlists before the draw.
+    🎁 A budget everyone's comfortable with, said out loud.
     </div>
 
     <div className="tip-item">
-    🎯 Use interests and preferences to choose thoughtful gifts.
+    ⏳ Enough shopping time between the draw and the day itself.
     </div>
 
     <div className="tip-item">
-    🎲 Decide whether this is a traditional exchange or a Yankee Swap event.
+    📝 A nudge to anyone who hasn't written a wishlist before the draw.
+    </div>
+
+    </div>
+
+    <h3>What everyone else is told</h3>
+
+    <p className="helper-text">
+      You don't have to pass these on. Each person sees them on their
+      own page: the first when they register, the rest when the draw
+      gives them a name.
+    </p>
+
+    <div className="tips-grid">
+
+    <div className="tip-item">
+    📝 Write a wishlist with enough detail to shop from.
     </div>
 
     <div className="tip-item">
-    ⏳ Give participants enough shopping time after the draw date.
+    🎯 Read their wishlist and what they'd rather not receive.
+    </div>
+
+    <div className="tip-item">
+    🎁 Stay within the budget.
     </div>
 
     <div className="tip-item">
     🎉 Most importantly... have fun!
     </div>
-
     </div>
       </div>
 

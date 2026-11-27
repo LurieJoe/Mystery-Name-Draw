@@ -230,6 +230,32 @@ export default function RegisteredView({
                 They don't know it's you, and there's no way for them
                 to find out.
               </p>
+
+              {/* Half of these used to live on the organizer's
+                  confirmation screen, where the people they were
+                  written for never saw them. This is the moment they
+                  are about to act on. */}
+              <ul className="shopping-tips">
+                <li>
+                  🎯 Go by what they wrote above rather than what you'd
+                  want yourself.
+                </li>
+                <li>
+                  🎁 Stay within the budget:{" "}
+                  {giftBudgetLabel({
+                    giftBudget: exchange.giftBudget ?? "",
+                    giftBudgetNote: exchange.giftBudgetNote,
+                    currency: exchange.currency,
+                    noGiftLimit: exchange.noGiftLimit,
+                  })}
+                  .
+                </li>
+                <li>
+                  💬 Stuck? Ask them, further down this page. They'll
+                  never know it was you.
+                </li>
+                <li>🎉 Most importantly... have fun!</li>
+              </ul>
             </>
           ) : (
             <>
@@ -273,6 +299,13 @@ export default function RegisteredView({
       )}
 
       <h2>Your wishlist and preferences</h2>
+      {!exchange.drawn && (
+        <p className="helper-text">
+          📝 Worth doing before{" "}
+          {formatDate(exchange.drawDate)}: whoever draws you has only
+          this to go on.
+        </p>
+      )}
       <p>
         Only the person who draws your name sees these. You won't
         know who that is, and they have no way to tell you. Change
